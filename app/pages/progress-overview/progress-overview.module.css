@@ -1,0 +1,39 @@
+.wrapper {
+  padding: 1rem;
+}
+
+.section {
+  margin-bottom: 2rem;
+}
+
+.chartContainer {
+  margin-top: 0.5rem;
+}
+
+h2 {
+  font-size: 1.2rem;
+  margin-bottom: 0.5rem;
+  color: var(--text-color-hard);
+}
+
+.streakRow {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.streakPill {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid var(--border-color);
+  transition: background-color 0.3s ease;
+}
+
+.streakOn {
+  background-color: var(--primary-accent);
+}
+
+.streakOff {
+  background-color: transparent;
+}

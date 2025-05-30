@@ -1,0 +1,51 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  color: var(--text-color-hard);
+  transition-property: color;
+  transition-duration: 0.2s;
+  transition-timing-function: ease-in-out;
+}
+
+.main {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.bottomNav {
+  display: flex;
+  border-top: 1px solid var(--border-color);
+  transition-property: border-color;
+  transition-duration: 0.2s;
+  transition-timing-function: ease-in-out;
+  height: 43px;
+}
+
+.navLink {
+  background: none;
+  border: none;
+  flex: 1;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.navLink:active {
+  background: var(--button-active-color);
+}
+
+.icon {
+  font-size: 1.5rem;
+  color: var(--icon-color);
+  transition-property: color;
+  transition-duration: 0.1s;
+  transition-timing-function: ease-in-out;
+  display: block;
+  text-decoration: none;
+  opacity: 0.4;
+}
+
+.navLink:global(.active) .icon {
+  opacity: 1;
+}
