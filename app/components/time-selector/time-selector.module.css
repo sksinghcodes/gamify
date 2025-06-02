@@ -1,0 +1,93 @@
+.timeDisplay {
+  font-size: 1rem;
+}
+
+.timeSelectWrap {
+  position: fixed;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  backdrop-filter: blur(20px);
+  padding-bottom: 6rem;
+}
+
+.timeSelect {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+  padding: 1rem;
+}
+
+.hourSelect,
+.minuteSelect {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.hourSelect,
+.minuteSelect,
+.ampmSelect {
+  border: 0.5px solid var(--border-color);
+}
+
+.hourSelect > button,
+.minuteSelect > button,
+.ampmSelect > button {
+  width: 16.66%;
+  padding: 1rem 0;
+  border: 0.5px solid var(--border-color);
+  background-color: transparent;
+}
+
+.ampmSelect > button {
+  padding: 1rem;
+  width: 50%;
+}
+
+.ampmSelect {
+  margin-top: 0.5rem;
+}
+
+.label {
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+.specificMinuteSelect > button {
+  width: 20%;
+}
+
+.specificMinuteWrap {
+  height: 50.65px;
+}
+
+.active.active {
+  background-color: var(--scorable-bg-color);
+}
+
+.timePreview {
+  text-align: center;
+  font-weight: 500;
+  font-size: 2rem;
+  letter-spacing: 2px;
+}
+
+.fab {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  background-color: var(--primary-action-color);
+  color: #fff;
+  cursor: pointer;
+  font-weight: 100;
+  font-size: 2rem;
+  border: 1px solid var(--primary-action-color);
+}

@@ -52,12 +52,9 @@ export interface RecurrenceMonthly {
 export interface RecurrenceYearly {
   type: RecurrenceEnum.YEARLY;
   monthAndDates: {
-    /** Month index (0 = Jan, 11 = Dec) */
-    month: number;
-    /** Day of the month (1-31) */
-    date: number;
-  }[];
-  // TODO: Handle 29, 30 and 31 dates
+    [month in 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11]?: number[];
+  };
+  // TODO: Handle 29 date
 }
 
 export interface TaskReqBodyIF {
@@ -77,4 +74,14 @@ export interface TaskIF extends TaskReqBodyIF {
   id: string;
   score: null | number;
   isScorable: boolean;
+}
+
+export interface initialRecurrenceIF {
+  DAILY: RecurrenceDaily;
+  WEEKLY: RecurrenceWeekly;
+  MONTHLY: RecurrenceMonthly;
+  YEARLY: RecurrenceYearly;
+  NEVER: RemoveNever;
+  AFTER_N_UNIT: RemoveAfterNUnit;
+  ON_DATE: RemoveOnDate;
 }

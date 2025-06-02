@@ -4,6 +4,8 @@ import {
   DurationEnum,
   RecurrenceEnum,
   RemoveTypeEnum,
+  type initialRecurrenceIF,
+  type TaskReqBodyIF,
 } from './types/task-types';
 
 export const MONTHS = [
@@ -21,6 +23,8 @@ export const MONTHS = [
   'December',
 ];
 
+export const MONTHS_3_LETTER = MONTHS.map((month) => month.slice(0, 3));
+
 export const WEEKS = [
   'Sunday',
   'Monday',
@@ -30,6 +34,20 @@ export const WEEKS = [
   'Friday',
   'Saturday',
 ];
+
+export const WEEKS_3_LETTER = WEEKS.map((week) => week.slice(0, 3));
+
+export const WEEKS_1_LETTER = WEEKS.map((week) => week.slice(0, 1));
+
+export const DATES = Array.from({ length: 31 }, (_, i) => i + 1);
+
+export const HOURS = Array.from({ length: 12 }, (_, i) =>
+  String(i + 1).padStart(2, '0')
+);
+
+export const MINUTES = Array.from({ length: 12 }, (_, i) =>
+  String(((i + 1) * 5) % 60).padStart(2, '0')
+);
 
 export const ROUTES: RoutesIF = {
   TASK_LIST: {
@@ -124,22 +142,69 @@ export const API_ENDPOINTS = {
 };
 
 export const DURATION_UNIT = {
-  [DurationEnum.DAY]: DurationEnum.DAY as DurationEnum.DAY,
-  [DurationEnum.WEEK]: DurationEnum.WEEK as DurationEnum.WEEK,
-  [DurationEnum.MONTH]: DurationEnum.MONTH as DurationEnum.MONTH,
-  [DurationEnum.YEAR]: DurationEnum.YEAR as DurationEnum.YEAR,
+  DAY: DurationEnum.DAY as DurationEnum.DAY,
+  WEEK: DurationEnum.WEEK as DurationEnum.WEEK,
+  MONTH: DurationEnum.MONTH as DurationEnum.MONTH,
+  YEAR: DurationEnum.YEAR as DurationEnum.YEAR,
 };
 
 export const REMOVE_TYPE = {
-  [RemoveTypeEnum.NEVER]: RemoveTypeEnum.NEVER as RemoveTypeEnum.NEVER,
-  [RemoveTypeEnum.AFTER_N_UNIT]:
-    RemoveTypeEnum.AFTER_N_UNIT as RemoveTypeEnum.AFTER_N_UNIT,
-  [RemoveTypeEnum.ON_DATE]: RemoveTypeEnum.ON_DATE as RemoveTypeEnum.ON_DATE,
+  NEVER: RemoveTypeEnum.NEVER as RemoveTypeEnum.NEVER,
+  AFTER_N_UNIT: RemoveTypeEnum.AFTER_N_UNIT as RemoveTypeEnum.AFTER_N_UNIT,
+  ON_DATE: RemoveTypeEnum.ON_DATE as RemoveTypeEnum.ON_DATE,
 };
 
 export const RECURRENCE = {
-  [RecurrenceEnum.DAILY]: RecurrenceEnum.DAILY as RecurrenceEnum.DAILY,
-  [RecurrenceEnum.WEEKLY]: RecurrenceEnum.WEEKLY as RecurrenceEnum.WEEKLY,
-  [RecurrenceEnum.MONTHLY]: RecurrenceEnum.MONTHLY as RecurrenceEnum.MONTHLY,
-  [RecurrenceEnum.YEARLY]: RecurrenceEnum.YEARLY as RecurrenceEnum.YEARLY,
+  DAILY: RecurrenceEnum.DAILY as RecurrenceEnum.DAILY,
+  WEEKLY: RecurrenceEnum.WEEKLY as RecurrenceEnum.WEEKLY,
+  MONTHLY: RecurrenceEnum.MONTHLY as RecurrenceEnum.MONTHLY,
+  YEARLY: RecurrenceEnum.YEARLY as RecurrenceEnum.YEARLY,
+};
+
+export const INITIAL_TASK: TaskReqBodyIF = {
+  name: '',
+  description: '',
+  startTime: '',
+  endTime: '',
+  howOften: {
+    type: RECURRENCE.DAILY,
+  },
+  removeIt: {
+    type: REMOVE_TYPE.NEVER,
+  },
+};
+
+export const INITIAL_RECURRENCE_AND_REMOVE: initialRecurrenceIF = {
+  DAILY: {
+    type: RECURRENCE.DAILY,
+  },
+  WEEKLY: {
+    type: RECURRENCE.WEEKLY,
+    weekDays: [],
+  },
+  MONTHLY: {
+    type: RECURRENCE.MONTHLY,
+    dates: [],
+  },
+  YEARLY: {
+    type: RECURRENCE.YEARLY,
+    monthAndDates: {},
+  },
+  NEVER: {
+    type: REMOVE_TYPE.NEVER,
+  },
+  AFTER_N_UNIT: {
+    type: REMOVE_TYPE.AFTER_N_UNIT,
+    unit: DURATION_UNIT.DAY,
+    nValue: 5,
+  },
+  ON_DATE: {
+    type: REMOVE_TYPE.ON_DATE,
+    dateEpoch: (() => {
+      const date = new Date();
+      date.setDate(date.getDate() + 5);
+      date.setHours(0, 0, 0, 0);
+      return date.getTime();
+    })(),
+  },
 };

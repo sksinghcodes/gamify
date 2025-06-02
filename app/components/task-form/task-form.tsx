@@ -1,173 +1,197 @@
-import { DURATION_UNIT, RECURRENCE, REMOVE_TYPE } from '../../constants';
-import type { TaskIF } from '../../types/task-types';
+import { useState } from 'react';
+import {
+  DATES,
+  INITIAL_RECURRENCE_AND_REMOVE,
+  INITIAL_TASK,
+  RECURRENCE,
+  REMOVE_TYPE,
+  WEEKS_3_LETTER,
+} from '../../constants';
+import type {
+  initialRecurrenceIF,
+  RecurrenceMonthly,
+  RecurrenceWeekly,
+  TaskReqBodyIF,
+} from '../../types/task-types';
 import styles from './task-form.module.css';
+import TimeSelector, {
+  type TimeSelectorOnChange,
+} from '../time-selector/time-selector';
 
 const TaskForm: React.FC<{ isEditMode: boolean }> = ({ isEditMode }) => {
-  const task1: TaskIF = {
-    id: '1',
-    name: 'my task name',
-    description: 'my task description',
-    startTime: '10:00',
-    endTime: '11:00',
-    howOften: {
-      type: RECURRENCE.DAILY,
-    },
-    removeIt: {
-      type: REMOVE_TYPE.NEVER,
-    },
-    isScorable: false,
-    score: null,
+  const [task, setTask] = useState<TaskReqBodyIF>(INITIAL_TASK);
+
+  const handleChange: React.ChangeEventHandler<
+    HTMLInputElement | HTMLTextAreaElement
+  > = (e) => {
+    const { name, value } = e.target;
+    setTask((pre) => ({
+      ...pre,
+      [name]:
+        name === 'howOften' || name === 'removeIt'
+          ? INITIAL_RECURRENCE_AND_REMOVE[value as keyof initialRecurrenceIF]
+          : value,
+    }));
   };
 
-  const task2: TaskIF = {
-    id: '2',
-    name: 'my task name',
-    description: 'my task description',
-    startTime: '10:00',
-    endTime: '11:00',
-    howOften: {
-      type: RECURRENCE.WEEKLY,
-      weekDays: [1, 2, 4, 5],
-    },
-    removeIt: {
-      type: REMOVE_TYPE.AFTER_N_UNIT,
-      unit: DURATION_UNIT.DAY,
-      nValue: 5,
-    },
-    isScorable: true,
-    score: null,
+  const handleTimeChange: TimeSelectorOnChange = (e) => {
+    const { name, value } = e;
+    setTask((pre) => ({
+      ...pre,
+      [name]: value,
+    }));
   };
 
-  const task3: TaskIF = {
-    id: '3',
-    name: 'my task name',
-    description: 'my task description',
-    startTime: '10:00',
-    endTime: '11:00',
-    howOften: {
-      type: RECURRENCE.MONTHLY,
-      dates: [1, 29, 30, 31],
-    },
-    removeIt: {
-      type: REMOVE_TYPE.ON_DATE,
-      dateEpoch: 1748553736467,
-    },
-    isScorable: true,
-    score: 30,
+  const handleWeekSelect: React.ChangeEventHandler<HTMLInputElement> = (e) => {
+    const { value, checked } = e.target;
+    const num = +value;
+    const prev = task.howOften as RecurrenceWeekly;
+    const newWeekDays = checked
+      ? [...prev.weekDays, num].sort()
+      : prev.weekDays.filter((day) => day !== num);
+
+    setTask((pre) => ({
+      ...pre,
+      howOften: { ...prev, weekDays: newWeekDays },
+    }));
   };
 
-  const task4: TaskIF = {
-    id: '3',
-    name: 'my task name',
-    description: 'my task description',
-    startTime: '10:00',
-    endTime: '11:00',
-    howOften: {
-      type: RECURRENCE.YEARLY,
-      monthAndDates: [
-        {
-          month: 0,
-          date: 31,
-        },
-        {
-          month: 1,
-          date: 14,
-        },
-        {
-          month: 1,
-          date: 28,
-        },
-      ],
-    },
-    removeIt: {
-      type: REMOVE_TYPE.ON_DATE,
-      dateEpoch: 1748553736467,
-    },
-    isScorable: true,
-    score: 30,
-  };
+  const handleMonthDatesSelect: React.ChangeEventHandler<HTMLInputElement> = (
+    e
+  ) => {
+    const { value, checked } = e.target;
+    const num = +value;
+    const prev = task.howOften as RecurrenceMonthly;
+    const newDates = checked
+      ? [...prev.dates, num].sort()
+      : prev.dates.filter((date) => date !== num);
 
-  console.log(isEditMode);
-  console.log(task1);
-  console.log(task2);
-  console.log(task3);
-  console.log(task4);
+    setTask((pre) => ({
+      ...pre,
+      howOften: { ...prev, dates: newDates },
+    }));
+  };
 
   return (
-    <div className={styles.taskForm}>
-      <div>
-        <label htmlFor="taskName" className={styles.label}>
-          Name
-        </label>
-        <input type="text" placeholder="Task Name" id="taskName" />
+    <div className={styles.taskFormWrapper}>
+      <div className={styles.formGroup}>
+        <label htmlFor="taskName">Name</label>
+        <input
+          type="text"
+          id="taskName"
+          name="name"
+          placeholder="eg: Go to gym"
+          value={task.name}
+          onChange={handleChange}
+        />
       </div>
 
-      <div>
-        <label htmlFor="desciption" className={styles.label}>
-          Description
-        </label>
-        <textarea placeholder="Task Description" id="desciption" />
+      <div className={styles.formGroup}>
+        <label htmlFor="description">Description</label>
+        <textarea
+          id="description"
+          name="description"
+          placeholder="Describe the task... (Optional)"
+          value={task.description}
+          onChange={handleChange}
+        />
       </div>
 
-      <div>
-        <label htmlFor="startTime" className={styles.label}>
-          From
-        </label>
-        <input type="time" id="startTime" />
+      <div className={styles.timeRow}>
+        <div className={styles.formGroup}>
+          <label>From</label>
+          <TimeSelector
+            value={task.startTime}
+            onChange={handleTimeChange}
+            name="startTime"
+          />
+        </div>
+
+        <div className={styles.formGroup}>
+          <label>To</label>
+          <TimeSelector
+            value={task.endTime}
+            onChange={handleTimeChange}
+            name="endTime"
+          />
+        </div>
       </div>
 
-      <div>
-        <label htmlFor="endTime" className={styles.label}>
-          To
-        </label>
-        <input type="time" id="endTime" />
+      <div className={styles.formGroup}>
+        <label className={styles.subHeading}>Frequency</label>
+        <div className={styles.radioRow}>
+          {Object.values(RECURRENCE).map((freq) => (
+            <label key={freq}>
+              <input
+                type="radio"
+                name="howOften"
+                value={freq}
+                checked={task.howOften.type === freq}
+                onChange={handleChange}
+              />
+              {freq}
+            </label>
+          ))}
+        </div>
       </div>
 
-      <div>
-        <span className={styles.label}>How Often</span>
-        <label>
-          <input type="radio" name="howOften" value={RECURRENCE.DAILY} />
-          <span>Daily</span>
-        </label>
-        <label>
-          <input type="radio" name="howOften" value={RECURRENCE.WEEKLY} />
-          <span>Weekly</span>
-        </label>
-        <label>
-          <input type="radio" name="howOften" value={RECURRENCE.MONTHLY} />
-          <span>Monthly</span>
-        </label>
-        <label>
-          <input type="radio" name="howOften" value={RECURRENCE.YEARLY} />
-          <span>Yearly</span>
-        </label>
-      </div>
+      {task.howOften.type === RECURRENCE.WEEKLY && (
+        <div className={styles.weekChips}>
+          {WEEKS_3_LETTER.map((week, i) => (
+            <label key={week} className={styles.chip}>
+              <input
+                type="checkbox"
+                value={i}
+                checked={(task.howOften as RecurrenceWeekly).weekDays.includes(
+                  i
+                )}
+                onChange={handleWeekSelect}
+              />
+              {week}
+            </label>
+          ))}
+        </div>
+      )}
 
-      <div>
-        <span className={styles.label}>
+      {task.howOften.type === RECURRENCE.MONTHLY && (
+        <div className={styles.calendarGrid}>
+          {DATES.map((date) => (
+            <label key={date}>
+              <input
+                type="checkbox"
+                value={date}
+                checked={(task.howOften as RecurrenceMonthly).dates.includes(
+                  date
+                )}
+                onChange={handleMonthDatesSelect}
+              />
+              {date}
+            </label>
+          ))}
+        </div>
+      )}
+
+      <div className={styles.formGroup}>
+        <label className={styles.subHeading}>
           When to automatically remove this task?
-        </span>
-        <div>
-          <label>
-            <input type="radio" name="removeIt" value={REMOVE_TYPE.NEVER} />
-            <span>Don't remove it automatically</span>
-          </label>
-        </div>
-        <div>
-          <label>
-            <input
-              type="radio"
-              name="removeIt"
-              value={REMOVE_TYPE.AFTER_N_UNIT}
-            />
-            <span>Remove it after __ duration</span>
-          </label>
-        </div>
-        <div>
-          <label>
-            <input type="radio" name="removeIt" value={REMOVE_TYPE.ON_DATE} />
-            <span>Remove in after date</span>
-          </label>
+        </label>
+        <div className={styles.radioColumn}>
+          {Object.values(REMOVE_TYPE).map((type) => (
+            <label key={type}>
+              <input
+                type="radio"
+                name="removeIt"
+                value={type}
+                checked={task.removeIt.type === type}
+                onChange={handleChange}
+              />
+              {type === REMOVE_TYPE.NEVER
+                ? "Don't remove it automatically"
+                : type === REMOVE_TYPE.AFTER_N_UNIT
+                ? 'Remove it after a duration'
+                : 'Remove it after a date'}
+            </label>
+          ))}
         </div>
       </div>
     </div>
