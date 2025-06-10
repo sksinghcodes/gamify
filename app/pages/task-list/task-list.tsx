@@ -107,7 +107,9 @@ const TaskList = () => {
                   </div>
                 </button>
                 <button
-                  className={`${styles.scoreBtn} ${styles[getScoreBtnClass(task)]}`}
+                  className={`${styles.scoreBtn} ${
+                    styles[getScoreBtnClass(task)]
+                  }`}
                   disabled={task.isScorable}
                 >
                   {task.score === null ? '–' : `${task.score}%`}
@@ -120,7 +122,7 @@ const TaskList = () => {
 
       <button
         className={`${styles.fab} material-symbols-outlined`}
-        onClick={() => navigate(ROUTES.CREATE_TASK.path)}
+        onClick={() => navigate(`${ROUTES.CREATE_TASK.path}?step=1`)}
       >
         add
       </button>
