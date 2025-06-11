@@ -18,6 +18,11 @@ export enum DurationEnum {
   YEAR = 'YEAR',
 }
 
+export enum InvalidDateStrategy {
+  MOVE_TO_LAST_VALID_DATE = 'MOVE_TO_LAST_VALID_DATE',
+  SKIP = 'SKIP',
+}
+
 export interface RemoveNever {
   type: RemoveTypeEnum.NEVER;
 }
@@ -44,17 +49,27 @@ export interface RecurrenceWeekly {
 
 export interface RecurrenceMonthly {
   type: RecurrenceEnum.MONTHLY;
-  /** Day of the month (1-31) */
+  /** Dates selected: 1 to 31 */
   dates: number[];
-  // TODO: Handle 29, 30 and 31 dates
+  /**
+   * Strategy for handling 29, 30, or 31 when a month doesn’t include them
+   */
+  invalidDateStrategy: InvalidDateStrategy;
 }
 
 export interface RecurrenceYearly {
   type: RecurrenceEnum.YEARLY;
+  /**
+   * Object where key is month (0 = Jan) and value is array of selected dates
+   */
   monthAndDates: {
     [month in 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11]?: number[];
   };
-  // TODO: Handle 29 date
+  /**
+   * Strategy for handling Feb 29 in non-leap years
+   * Only relevant if Feb (1) contains 29
+   */
+  feb29Strategy: InvalidDateStrategy;
 }
 
 export interface TaskReqBodyIF {
@@ -62,7 +77,7 @@ export interface TaskReqBodyIF {
   description: string;
   startTime: string;
   endTime: string;
-  howOften:
+  reccurrence:
     | RecurrenceDaily
     | RecurrenceWeekly
     | RecurrenceMonthly
@@ -76,7 +91,7 @@ export interface TaskIF extends TaskReqBodyIF {
   isScorable: boolean;
 }
 
-export interface initialRecurrenceIF {
+export interface InitialRecurrenceIF {
   DAILY: RecurrenceDaily;
   WEEKLY: RecurrenceWeekly;
   MONTHLY: RecurrenceMonthly;

@@ -2,9 +2,10 @@ import type { RoutesIF } from './types/common-types';
 import { HeaderType, RoutesEnum } from './types/common-types';
 import {
   DurationEnum,
+  InvalidDateStrategy,
   RecurrenceEnum,
   RemoveTypeEnum,
-  type initialRecurrenceIF,
+  type InitialRecurrenceIF,
   type TaskReqBodyIF,
 } from './types/task-types';
 
@@ -166,7 +167,7 @@ export const INITIAL_TASK: TaskReqBodyIF = {
   description: '',
   startTime: '',
   endTime: '',
-  howOften: {
+  reccurrence: {
     type: RECURRENCE.DAILY,
   },
   removeIt: {
@@ -174,7 +175,7 @@ export const INITIAL_TASK: TaskReqBodyIF = {
   },
 };
 
-export const INITIAL_RECURRENCE_AND_REMOVE: initialRecurrenceIF = {
+export const INITIAL_RECURRENCE_AND_REMOVE: InitialRecurrenceIF = {
   DAILY: {
     type: RECURRENCE.DAILY,
   },
@@ -185,10 +186,12 @@ export const INITIAL_RECURRENCE_AND_REMOVE: initialRecurrenceIF = {
   MONTHLY: {
     type: RECURRENCE.MONTHLY,
     dates: [],
+    invalidDateStrategy: InvalidDateStrategy.MOVE_TO_LAST_VALID_DATE,
   },
   YEARLY: {
     type: RECURRENCE.YEARLY,
     monthAndDates: {},
+    feb29Strategy: InvalidDateStrategy.MOVE_TO_LAST_VALID_DATE,
   },
   NEVER: {
     type: REMOVE_TYPE.NEVER,

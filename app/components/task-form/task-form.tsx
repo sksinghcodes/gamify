@@ -8,7 +8,7 @@ import {
   WEEKS_3_LETTER,
 } from '../../constants';
 import type {
-  initialRecurrenceIF,
+  InitialRecurrenceIF,
   RecurrenceMonthly,
   RecurrenceWeekly,
   TaskReqBodyIF,
@@ -17,11 +17,14 @@ import styles from './task-form.module.css';
 import TimeSelector, {
   type TimeSelectorOnChange,
 } from '../time-selector/time-selector';
-import { useLocation, useSearchParams } from 'react-router';
+import { useSearchParams } from 'react-router';
+import { capitalize } from '~/utils/string';
+import WeekdaySelector from '../weekday-selector/weekday-selector';
 
 const TaskForm: React.FC<{ isEditMode: boolean }> = ({ isEditMode }) => {
   const [task, setTask] = useState<TaskReqBodyIF>(INITIAL_TASK);
   const [searchParams, setSearchParams] = useSearchParams();
+  const [openWeekSelector, setOpenWeekSelector] = useState(false);
 
   const step = +(searchParams.get('step') || 1);
 
@@ -29,11 +32,12 @@ const TaskForm: React.FC<{ isEditMode: boolean }> = ({ isEditMode }) => {
     HTMLInputElement | HTMLTextAreaElement
   > = (e) => {
     const { name, value } = e.target;
+
     setTask((pre) => ({
       ...pre,
       [name]:
-        name === 'howOften' || name === 'removeIt'
-          ? INITIAL_RECURRENCE_AND_REMOVE[value as keyof initialRecurrenceIF]
+        name === 'reccurrence' || name === 'removeIt'
+          ? INITIAL_RECURRENCE_AND_REMOVE[value as keyof InitialRecurrenceIF]
           : value,
     }));
   };
@@ -46,33 +50,19 @@ const TaskForm: React.FC<{ isEditMode: boolean }> = ({ isEditMode }) => {
     }));
   };
 
-  const handleWeekSelect: React.ChangeEventHandler<HTMLInputElement> = (e) => {
-    const { value, checked } = e.target;
-    const num = +value;
-    const prev = task.howOften as RecurrenceWeekly;
-    const newWeekDays = checked
-      ? [...prev.weekDays, num].sort()
-      : prev.weekDays.filter((day) => day !== num);
-
-    setTask((pre) => ({
-      ...pre,
-      howOften: { ...prev, weekDays: newWeekDays },
-    }));
-  };
-
   const handleMonthDatesSelect: React.ChangeEventHandler<HTMLInputElement> = (
     e
   ) => {
     const { value, checked } = e.target;
     const num = +value;
-    const prev = task.howOften as RecurrenceMonthly;
+    const prev = task.reccurrence as RecurrenceMonthly;
     const newDates = checked
       ? [...prev.dates, num].sort()
       : prev.dates.filter((date) => date !== num);
 
     setTask((pre) => ({
       ...pre,
-      howOften: { ...prev, dates: newDates },
+      reccurrence: { ...prev, dates: newDates },
     }));
   };
 
@@ -81,7 +71,9 @@ const TaskForm: React.FC<{ isEditMode: boolean }> = ({ isEditMode }) => {
       {step === 1 && (
         <>
           <div className={styles.formGroup}>
-            <label htmlFor="taskName">Name</label>
+            <label htmlFor="taskName" className={styles.label}>
+              Name
+            </label>
             <input
               type="text"
               id="taskName"
@@ -93,7 +85,9 @@ const TaskForm: React.FC<{ isEditMode: boolean }> = ({ isEditMode }) => {
           </div>
 
           <div className={styles.formGroup}>
-            <label htmlFor="description">Description</label>
+            <label htmlFor="description" className={styles.label}>
+              Description
+            </label>
             <textarea
               id="description"
               name="description"
@@ -105,7 +99,7 @@ const TaskForm: React.FC<{ isEditMode: boolean }> = ({ isEditMode }) => {
 
           <div className={styles.timeRow}>
             <div className={styles.formGroup}>
-              <span>From</span>
+              <span className={styles.label}>From time</span>
               <TimeSelector
                 value={task.startTime}
                 onChange={handleTimeChange}
@@ -114,7 +108,7 @@ const TaskForm: React.FC<{ isEditMode: boolean }> = ({ isEditMode }) => {
             </div>
 
             <div className={styles.formGroup}>
-              <span>To</span>
+              <span className={styles.label}>To time</span>
               <TimeSelector
                 value={task.endTime}
                 onChange={handleTimeChange}
@@ -128,42 +122,45 @@ const TaskForm: React.FC<{ isEditMode: boolean }> = ({ isEditMode }) => {
       {step === 2 && (
         <>
           <div className={styles.formGroup}>
-            <label className={styles.subHeading}>Frequency</label>
+            <span className={styles.label}>Frequency</span>
             <div className={styles.radioRow}>
               {Object.values(RECURRENCE).map((freq) => (
-                <label key={freq}>
+                <label
+                  key={freq}
+                  className={styles.radio}
+                  onClick={
+                    freq === RECURRENCE.WEEKLY
+                      ? () => setOpenWeekSelector(true)
+                      : undefined
+                  }
+                >
                   <input
                     type="radio"
-                    name="howOften"
+                    name="reccurrence"
                     value={freq}
-                    checked={task.howOften.type === freq}
+                    checked={task.reccurrence.type === freq}
                     onChange={handleChange}
+                    className={styles.radioInput}
                   />
-                  {freq}
+                  <span className={styles.radioLabel}>{capitalize(freq)}</span>
                 </label>
               ))}
             </div>
           </div>
 
-          {task.howOften.type === RECURRENCE.WEEKLY && (
-            <div className={styles.weekChips}>
-              {WEEKS_3_LETTER.map((week, i) => (
-                <label key={week} className={styles.chip}>
-                  <input
-                    type="checkbox"
-                    value={i}
-                    checked={(
-                      task.howOften as RecurrenceWeekly
-                    ).weekDays.includes(i)}
-                    onChange={handleWeekSelect}
-                  />
-                  {week}
-                </label>
-              ))}
-            </div>
-          )}
+          <WeekdaySelector
+            value={(task.reccurrence as RecurrenceWeekly).weekDays}
+            onChange={(days) =>
+              setTask((pre) => ({
+                ...pre,
+                reccurrence: { ...pre.reccurrence, weekDays: days },
+              }))
+            }
+            open={openWeekSelector}
+            setOpen={setOpenWeekSelector}
+          />
 
-          {task.howOften.type === RECURRENCE.MONTHLY && (
+          {task.reccurrence.type === RECURRENCE.MONTHLY && (
             <div className={styles.calendarGrid}>
               {DATES.map((date) => (
                 <label key={date}>
@@ -171,7 +168,7 @@ const TaskForm: React.FC<{ isEditMode: boolean }> = ({ isEditMode }) => {
                     type="checkbox"
                     value={date}
                     checked={(
-                      task.howOften as RecurrenceMonthly
+                      task.reccurrence as RecurrenceMonthly
                     ).dates.includes(date)}
                     onChange={handleMonthDatesSelect}
                   />
@@ -186,9 +183,9 @@ const TaskForm: React.FC<{ isEditMode: boolean }> = ({ isEditMode }) => {
       {step === 3 && (
         <>
           <div className={styles.formGroup}>
-            <label className={styles.subHeading}>
+            <span className={styles.label}>
               When to automatically remove this task?
-            </label>
+            </span>
             <div className={styles.radioColumn}>
               {Object.values(REMOVE_TYPE).map((type) => (
                 <label key={type}>
