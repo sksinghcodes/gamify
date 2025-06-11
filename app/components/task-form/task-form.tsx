@@ -149,7 +149,7 @@ const TaskForm: React.FC<{ isEditMode: boolean }> = ({ isEditMode }) => {
           </div>
 
           <WeekdaySelector
-            value={(task.reccurrence as RecurrenceWeekly).weekDays}
+            value={(task.reccurrence as RecurrenceWeekly).weekDays || []}
             onChange={(days) =>
               setTask((pre) => ({
                 ...pre,
@@ -159,6 +159,15 @@ const TaskForm: React.FC<{ isEditMode: boolean }> = ({ isEditMode }) => {
             open={openWeekSelector}
             setOpen={setOpenWeekSelector}
           />
+
+          {(task.reccurrence as RecurrenceWeekly)?.weekDays?.length && (
+            <div className={styles.selectedWeekdays}>
+              Selected days:{' '}
+              {(task.reccurrence as RecurrenceWeekly)?.weekDays
+                ?.map((day) => WEEKS_3_LETTER[day])
+                .join(', ')}
+            </div>
+          )}
 
           {task.reccurrence.type === RECURRENCE.MONTHLY && (
             <div className={styles.calendarGrid}>
