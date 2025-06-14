@@ -10,6 +10,7 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import styles from './progress-overview.module.css';
+import { ROUTES } from '~/constants';
 
 const xpData = [
   { date: 'May 1', xp: 30 },
@@ -28,6 +29,10 @@ const completionData = [
 ];
 
 const streaks = [true, true, false, true, true, true, false];
+
+export const meta = () => {
+  return [{ title: ROUTES.PROGRESS_OVERVIEW.title }];
+};
 
 const ProgressOverview = () => {
   return (

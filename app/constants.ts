@@ -162,6 +162,12 @@ export const RECURRENCE = {
   YEARLY: RecurrenceEnum.YEARLY as RecurrenceEnum.YEARLY,
 };
 
+export const INVALID_DATE_STRATEGY = {
+  LAST_VALID: 'LAST_VALID' as InvalidDateStrategy.LAST_VALID,
+  SKIP: 'SKIP' as InvalidDateStrategy.SKIP,
+  NONE: '' as InvalidDateStrategy.NONE,
+};
+
 export const INITIAL_TASK: TaskReqBodyIF = {
   name: '',
   description: '',
@@ -186,12 +192,12 @@ export const INITIAL_RECURRENCE_AND_REMOVE: InitialRecurrenceIF = {
   MONTHLY: {
     type: RECURRENCE.MONTHLY,
     dates: [],
-    invalidDateStrategy: InvalidDateStrategy.MOVE_TO_LAST_VALID_DATE,
+    invalidDateStrategy: INVALID_DATE_STRATEGY.NONE,
   },
   YEARLY: {
     type: RECURRENCE.YEARLY,
     monthAndDates: {},
-    feb29Strategy: InvalidDateStrategy.MOVE_TO_LAST_VALID_DATE,
+    feb29Strategy: INVALID_DATE_STRATEGY.NONE,
   },
   NEVER: {
     type: REMOVE_TYPE.NEVER,

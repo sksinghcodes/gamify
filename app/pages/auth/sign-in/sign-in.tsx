@@ -18,9 +18,9 @@ const {
   RESET_PASSWORD: { path: RESET_PASSWORD },
 } = ROUTES;
 
-export function meta() {
-  return [{ title: 'Sign In' }];
-}
+export const meta = () => {
+  return [{ title: ROUTES.SIGN_IN.title }];
+};
 
 const SignIn = () => {
   const context = useContext(Context);

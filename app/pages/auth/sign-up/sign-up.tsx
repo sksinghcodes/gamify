@@ -14,9 +14,9 @@ import SpinnerButton from '../../../components/spinner-button/spinner-button';
 import styles from '../auth.module.css';
 import { API_ENDPOINTS, ROUTES } from '../../../constants';
 
-export function meta() {
-  return [{ title: 'Sign Up' }];
-}
+export const meta = () => {
+  return [{ title: ROUTES.SIGN_UP.title }];
+};
 
 const SignUp = () => {
   const navigate = useNavigate();

@@ -20,11 +20,13 @@ import TimeSelector, {
 import { useSearchParams } from 'react-router';
 import { capitalize } from '~/utils/string';
 import WeekdaySelector from '../weekday-selector/weekday-selector';
+import MonthlyDatesSelector from '../monthly-dates-selector/monthly-dates-selector';
 
 const TaskForm: React.FC<{ isEditMode: boolean }> = ({ isEditMode }) => {
   const [task, setTask] = useState<TaskReqBodyIF>(INITIAL_TASK);
   const [searchParams, setSearchParams] = useSearchParams();
   const [openWeekSelector, setOpenWeekSelector] = useState(false);
+  const [openMonthSelector, setOpenMonthSelector] = useState(false);
 
   const step = +(searchParams.get('step') || 1);
 
@@ -131,6 +133,8 @@ const TaskForm: React.FC<{ isEditMode: boolean }> = ({ isEditMode }) => {
                   onClick={
                     freq === RECURRENCE.WEEKLY
                       ? () => setOpenWeekSelector(true)
+                      : freq === RECURRENCE.MONTHLY
+                      ? () => setOpenMonthSelector(true)
                       : undefined
                   }
                 >
@@ -148,17 +152,33 @@ const TaskForm: React.FC<{ isEditMode: boolean }> = ({ isEditMode }) => {
             </div>
           </div>
 
-          <WeekdaySelector
-            value={(task.reccurrence as RecurrenceWeekly).weekDays || []}
-            onChange={(days) =>
-              setTask((pre) => ({
-                ...pre,
-                reccurrence: { ...pre.reccurrence, weekDays: days },
-              }))
-            }
-            open={openWeekSelector}
-            setOpen={setOpenWeekSelector}
-          />
+          {task.reccurrence.type === RECURRENCE.WEEKLY && (
+            <WeekdaySelector
+              value={(task.reccurrence as RecurrenceWeekly).weekDays || []}
+              onChange={(weekDays) =>
+                setTask((pre) => ({
+                  ...pre,
+                  reccurrence: { ...pre.reccurrence, weekDays },
+                }))
+              }
+              open={openWeekSelector}
+              setOpen={setOpenWeekSelector}
+            />
+          )}
+
+          {task.reccurrence.type === RECURRENCE.MONTHLY && (
+            <MonthlyDatesSelector
+              value={task.reccurrence}
+              onChange={(reccurrence) =>
+                setTask((pre) => ({
+                  ...pre,
+                  reccurrence,
+                }))
+              }
+              open={openMonthSelector}
+              setOpen={setOpenMonthSelector}
+            />
+          )}
 
           {(task.reccurrence as RecurrenceWeekly)?.weekDays?.length && (
             <div className={styles.selectedWeekdays}>
@@ -166,24 +186,6 @@ const TaskForm: React.FC<{ isEditMode: boolean }> = ({ isEditMode }) => {
               {(task.reccurrence as RecurrenceWeekly)?.weekDays
                 ?.map((day) => WEEKS_3_LETTER[day])
                 .join(', ')}
-            </div>
-          )}
-
-          {task.reccurrence.type === RECURRENCE.MONTHLY && (
-            <div className={styles.calendarGrid}>
-              {DATES.map((date) => (
-                <label key={date}>
-                  <input
-                    type="checkbox"
-                    value={date}
-                    checked={(
-                      task.reccurrence as RecurrenceMonthly
-                    ).dates.includes(date)}
-                    onChange={handleMonthDatesSelect}
-                  />
-                  {date}
-                </label>
-              ))}
             </div>
           )}
         </>

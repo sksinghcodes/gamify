@@ -19,7 +19,8 @@ export enum DurationEnum {
 }
 
 export enum InvalidDateStrategy {
-  MOVE_TO_LAST_VALID_DATE = 'MOVE_TO_LAST_VALID_DATE',
+  NONE = '',
+  LAST_VALID = 'LAST_VALID',
   SKIP = 'SKIP',
 }
 

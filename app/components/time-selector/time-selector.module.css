@@ -14,7 +14,7 @@
   top: 0;
   left: 0;
   backdrop-filter: blur(20px);
-  padding-bottom: 6rem;
+  padding-bottom: 5rem;
   z-index: 9;
 }
 
@@ -42,13 +42,13 @@
 .minuteSelect > button,
 .ampmSelect > button {
   width: 16.66%;
-  padding: 1rem 0;
+  aspect-ratio: 1;
   border: 0.5px solid var(--border-color);
   background-color: transparent;
 }
 
 .ampmSelect > button {
-  padding: 1rem;
+  aspect-ratio: 3.0016;
   width: 50%;
 }
 
@@ -63,6 +63,7 @@
 
 .specificMinuteSelect > button {
   width: 20%;
+  aspect-ratio: 1.2;
 }
 
 .specificMinuteWrap {

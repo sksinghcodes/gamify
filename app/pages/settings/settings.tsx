@@ -1,6 +1,11 @@
 import { useContext } from 'react';
 import styles from './settings.module.css';
 import { Context } from '../../context-provider';
+import { ROUTES } from '~/constants';
+
+export const meta = () => {
+  return [{ title: ROUTES.SETTINGS.title }];
+};
 
 const Settings = () => {
   const { signOut, isSigningOut } = useContext(Context);

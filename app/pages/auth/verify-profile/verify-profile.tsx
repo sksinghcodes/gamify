@@ -12,9 +12,9 @@ const {
   TASK_LIST: { path: TASK_LIST },
 } = ROUTES;
 
-export function meta() {
-  return [{ title: 'Verify Profile' }];
-}
+export const meta = () => {
+  return [{ title: ROUTES.VERIFY_PROFILE.title }];
+};
 
 const VerifyProfile = () => {
   const [code, setCode] = useState('');

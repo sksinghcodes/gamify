@@ -3,9 +3,10 @@ import styles from './task-list.module.css';
 import { ROUTES } from '../../constants';
 import { useNavigate } from 'react-router';
 
-export function meta() {
+export const meta = () => {
   return [{ title: ROUTES.TASK_LIST.title }];
-}
+};
+
 const TaskList = () => {
   const navigate = useNavigate();
 

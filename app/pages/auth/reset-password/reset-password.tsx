@@ -13,9 +13,9 @@ import SuccessText from '../../../components/success-text/success-text';
 import styles from '../auth.module.css';
 import { API_ENDPOINTS, ROUTES } from '../../../constants';
 
-export function meta() {
-  return [{ title: 'Reset Password' }];
-}
+export const meta = () => {
+  return [{ title: ROUTES.RESET_PASSWORD.title }];
+};
 
 const ResetPassword = () => {
   const [email, setEmail] = useState('');
