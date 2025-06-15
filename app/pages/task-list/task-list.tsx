@@ -1,6 +1,6 @@
 import { Fragment } from 'react';
 import styles from './task-list.module.css';
-import { ROUTES } from '../../constants';
+import { ROUTES } from '~/constants';
 import { useNavigate } from 'react-router';
 
 export const meta = () => {

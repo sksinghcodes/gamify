@@ -51,7 +51,7 @@ const TimeSelectorModal: React.FC<TimeSelectorModalProps> = ({
       if (key === 'minute') minute = value;
       if (key === 'period') period = value;
 
-      if (!hour) hour = '01';
+      if (!hour) hour = '12';
       if (!minute) minute = '00';
       if (!period) period = 'AM';
 

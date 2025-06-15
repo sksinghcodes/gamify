@@ -1,5 +1,5 @@
 import { useContext } from 'react';
-import { Context } from '../../context-provider';
+import { Context } from '~/context-provider';
 import styles from './loading-screen.module.css';
 
 const LoadingScreen = () => {

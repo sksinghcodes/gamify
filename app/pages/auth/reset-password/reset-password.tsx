@@ -1,17 +1,17 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router';
-import api from '../../../api';
+import api from '~/api';
 import type {
   ResetPasswordDataIF,
   ResetPasswordValidationIF,
   ResetPasswordValidationRulesIF,
-} from '../../../types/auth-types';
-import { validationFunctions } from '../../../utils/validation';
-import ErrorText from '../../../components/error-text/error-text';
-import SpinnerButton from '../../../components/spinner-button/spinner-button';
-import SuccessText from '../../../components/success-text/success-text';
+} from '~/types/auth-types';
+import { validationFunctions } from '~/utils/validation';
+import ErrorText from '~/components/error-text/error-text';
+import SpinnerButton from '~/components/spinner-button/spinner-button';
+import SuccessText from '~/components/success-text/success-text';
 import styles from '../auth.module.css';
-import { API_ENDPOINTS, ROUTES } from '../../../constants';
+import { API_ENDPOINTS, ROUTES } from '~/constants';
 
 export const meta = () => {
   return [{ title: ROUTES.RESET_PASSWORD.title }];

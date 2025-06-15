@@ -1,6 +1,6 @@
 import { useContext } from 'react';
 import styles from './theme-selector.module.css';
-import { Context } from '../../context-provider';
+import { Context } from '~/context-provider';
 
 const ThemeSelector = () => {
   const { isDarkMode, setIsDarkMode } = useContext(Context);

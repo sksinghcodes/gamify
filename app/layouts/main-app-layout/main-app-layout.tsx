@@ -1,9 +1,9 @@
 import { useContext } from 'react';
 import styles from './main-app-layout.module.css';
-import { Context } from '../../context-provider';
+import { Context } from '~/context-provider';
 import { Navigate, NavLink, Outlet, useLocation } from 'react-router';
-import { BOTTOM_NAV_TABS, ROUTES, ROUTES_BY_PATH } from '../../constants';
-import Header from '../../components/header/header';
+import { BOTTOM_NAV_TABS, ROUTES, ROUTES_BY_PATH } from '~/constants';
+import Header from '~/components/header/header';
 
 const MainAppLayout = () => {
   const context = useContext(Context);

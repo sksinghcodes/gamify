@@ -1,15 +1,15 @@
-import ThemeSelector from '../theme-selector/theme-selector';
+import ThemeSelector from '~/components/theme-selector/theme-selector';
 import styles from './header.module.css';
 import { useNavigate } from 'react-router';
-import { ROUTES_BY_PATH } from '../../constants';
+import { ROUTES_BY_PATH } from '~/constants';
 import {
   getDateString,
   getRelativeDayLabel,
   getTodayEpoch,
-} from '../../utils/date';
+} from '~/utils/date';
 import { useState } from 'react';
 
-import { HeaderType } from '../../types/common-types';
+import { HeaderType } from '~/types/common-types';
 
 const Header = () => {
   const navigate = useNavigate();

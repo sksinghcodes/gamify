@@ -6,21 +6,21 @@ import {
   RECURRENCE,
   REMOVE_TYPE,
   WEEKS_3_LETTER,
-} from '../../constants';
+} from '~/constants';
 import type {
   InitialRecurrenceIF,
   RecurrenceMonthly,
   RecurrenceWeekly,
   TaskReqBodyIF,
-} from '../../types/task-types';
+} from '~/types/task-types';
 import styles from './task-form.module.css';
 import TimeSelector, {
   type TimeSelectorOnChange,
-} from '../time-selector/time-selector';
+} from '~/components/time-selector/time-selector';
 import { useSearchParams } from 'react-router';
 import { capitalize } from '~/utils/string';
-import WeekdaySelector from '../weekday-selector/weekday-selector';
-import MonthlyDatesSelector from '../monthly-dates-selector/monthly-dates-selector';
+import WeekdaySelector from '~/components/weekday-selector/weekday-selector';
+import MonthlyDatesSelector from '~/components/monthly-dates-selector/monthly-dates-selector';
 
 const TaskForm: React.FC<{ isEditMode: boolean }> = ({ isEditMode }) => {
   const [task, setTask] = useState<TaskReqBodyIF>(INITIAL_TASK);

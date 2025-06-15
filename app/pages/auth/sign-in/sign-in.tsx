@@ -1,17 +1,17 @@
 import { useState, useContext, useEffect } from 'react';
-import { Context } from '../../../context-provider';
-import api from '../../../api';
+import { Context } from '~/context-provider';
+import api from '~/api';
 import type {
   SignInDataIF,
   SignInValidationIF,
   SignInValidationRulesIF,
-} from '../../../types/auth-types';
-import ErrorText from '../../../components/error-text/error-text';
-import { validationFunctions } from '../../../utils/validation';
+} from '~/types/auth-types';
+import ErrorText from '~/components/error-text/error-text';
+import { validationFunctions } from '~/utils/validation';
 import { Link, useNavigate } from 'react-router';
-import SpinnerButton from '../../../components/spinner-button/spinner-button';
+import SpinnerButton from '~/components/spinner-button/spinner-button';
 import styles from '../auth.module.css';
-import { API_ENDPOINTS, ROUTES } from '../../../constants';
+import { API_ENDPOINTS, ROUTES } from '~/constants';
 
 const {
   VERIFY_PROFILE: { path: VERIFY_PROFILE },

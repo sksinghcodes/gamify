@@ -1,9 +1,9 @@
 import { Navigate, NavLink, Outlet, useLocation } from 'react-router';
-import ThemeSelector from '../../components/theme-selector/theme-selector';
+import ThemeSelector from '~/components/theme-selector/theme-selector';
 import styles from './auth-layout.module.css';
 import { useContext } from 'react';
-import { Context } from '../../context-provider';
-import { ROUTES } from '../../constants';
+import { Context } from '~/context-provider';
+import { ROUTES } from '~/constants';
 
 const {
   SIGN_IN: { path: SIGN_IN },

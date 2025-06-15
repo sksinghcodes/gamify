@@ -1,6 +1,6 @@
 import { useContext } from 'react';
 import styles from './profile.module.css';
-import { Context } from '../../context-provider';
+import { Context } from '~/context-provider';
 import { ROUTES } from '~/constants';
 
 export const meta = () => {

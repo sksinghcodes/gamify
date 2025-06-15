@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import api from '../../../api';
+import api from '~/api';
 import { useNavigate } from 'react-router';
 import type {
   AvailabilityIF,
@@ -7,12 +7,12 @@ import type {
   SignUpValidationIF,
   ValidationRuleIF,
   SignUpValidationRulesIF,
-} from '../../../types/auth-types';
-import { validationFunctions } from '../../../utils/validation';
-import ErrorText from '../../../components/error-text/error-text';
-import SpinnerButton from '../../../components/spinner-button/spinner-button';
+} from '~/types/auth-types';
+import { validationFunctions } from '~/utils/validation';
+import ErrorText from '~/components/error-text/error-text';
+import SpinnerButton from '~/components/spinner-button/spinner-button';
 import styles from '../auth.module.css';
-import { API_ENDPOINTS, ROUTES } from '../../../constants';
+import { API_ENDPOINTS, ROUTES } from '~/constants';
 
 export const meta = () => {
   return [{ title: ROUTES.SIGN_UP.title }];

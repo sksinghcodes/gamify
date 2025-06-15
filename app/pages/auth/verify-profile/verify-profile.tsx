@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { Link, Navigate, useLocation } from 'react-router';
-import api from '../../../api';
-import ErrorText from '../../../components/error-text/error-text';
-import SpinnerButton from '../../../components/spinner-button/spinner-button';
-import SuccessText from '../../../components/success-text/success-text';
+import api from '~/api';
+import ErrorText from '~/components/error-text/error-text';
+import SpinnerButton from '~/components/spinner-button/spinner-button';
+import SuccessText from '~/components/success-text/success-text';
 import styles from '../auth.module.css';
-import { API_ENDPOINTS, ROUTES } from '../../../constants';
+import { API_ENDPOINTS, ROUTES } from '~/constants';
 
 const {
   SIGN_IN: { path: SIGN_IN },
