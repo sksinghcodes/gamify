@@ -21,12 +21,14 @@ import { useSearchParams } from 'react-router';
 import { capitalize } from '~/utils/string';
 import WeekdaySelector from '~/components/weekday-selector/weekday-selector';
 import MonthlyDatesSelector from '~/components/monthly-dates-selector/monthly-dates-selector';
+import YearlyDateSelector from '../yearly-date-selector/yearly-date-selector';
 
 const TaskForm: React.FC<{ isEditMode: boolean }> = ({ isEditMode }) => {
   const [task, setTask] = useState<TaskReqBodyIF>(INITIAL_TASK);
   const [searchParams, setSearchParams] = useSearchParams();
   const [openWeekSelector, setOpenWeekSelector] = useState(false);
   const [openMonthSelector, setOpenMonthSelector] = useState(false);
+  const [openYearSelector, setOpenYearSelector] = useState(true);
 
   const step = +(searchParams.get('step') || 1);
 
@@ -135,6 +137,8 @@ const TaskForm: React.FC<{ isEditMode: boolean }> = ({ isEditMode }) => {
                       ? () => setOpenWeekSelector(true)
                       : freq === RECURRENCE.MONTHLY
                       ? () => setOpenMonthSelector(true)
+                      : freq === RECURRENCE.YEARLY
+                      ? () => setOpenYearSelector(true)
                       : undefined
                   }
                 >
@@ -152,7 +156,7 @@ const TaskForm: React.FC<{ isEditMode: boolean }> = ({ isEditMode }) => {
             </div>
           </div>
 
-          {task.reccurrence.type === RECURRENCE.WEEKLY && (
+          {task.reccurrence.type === RECURRENCE.WEEKLY ? (
             <WeekdaySelector
               value={(task.reccurrence as RecurrenceWeekly).weekDays || []}
               onChange={(weekDays) =>
@@ -164,9 +168,7 @@ const TaskForm: React.FC<{ isEditMode: boolean }> = ({ isEditMode }) => {
               open={openWeekSelector}
               setOpen={setOpenWeekSelector}
             />
-          )}
-
-          {task.reccurrence.type === RECURRENCE.MONTHLY && (
+          ) : task.reccurrence.type === RECURRENCE.MONTHLY ? (
             <MonthlyDatesSelector
               value={task.reccurrence}
               onChange={(reccurrence) =>
@@ -178,7 +180,19 @@ const TaskForm: React.FC<{ isEditMode: boolean }> = ({ isEditMode }) => {
               open={openMonthSelector}
               setOpen={setOpenMonthSelector}
             />
-          )}
+          ) : task.reccurrence.type === RECURRENCE.YEARLY ? (
+            <YearlyDateSelector
+              open={openYearSelector}
+              setOpen={setOpenYearSelector}
+              value={task.reccurrence}
+              onChange={(reccurrence) =>
+                setTask((pre) => ({
+                  ...pre,
+                  reccurrence,
+                }))
+              }
+            />
+          ) : null}
 
           {(task.reccurrence as RecurrenceWeekly)?.weekDays?.length && (
             <div className={styles.selectedWeekdays}>

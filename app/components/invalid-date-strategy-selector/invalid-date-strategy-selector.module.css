@@ -1,0 +1,28 @@
+.hide {
+  visibility: hidden;
+}
+
+.infoIcon {
+  vertical-align: middle;
+  color: var(--primary-accent);
+  font-weight: 300;
+  display: inline-block;
+  margin-left: 0.2rem;
+}
+
+.optionWrap {
+  margin-top: 0.5rem;
+  display: flex;
+}
+
+.option {
+  color: var(--text-color-soft);
+  border: 1px solid var(--border-color);
+  padding: 0.5rem 0.75rem;
+  border-radius: 2rem;
+}
+
+.option.active {
+  color: var(--primary-accent);
+  border: 1px solid var(--primary-accent);
+}

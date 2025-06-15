@@ -58,14 +58,16 @@ export interface RecurrenceMonthly {
   invalidDateStrategy: InvalidDateStrategy;
 }
 
+export type MonthAndDates = {
+  [month in 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11]?: number[];
+};
+
 export interface RecurrenceYearly {
   type: RecurrenceEnum.YEARLY;
   /**
    * Object where key is month (0 = Jan) and value is array of selected dates
    */
-  monthAndDates: {
-    [month in 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11]?: number[];
-  };
+  monthAndDates: MonthAndDates;
   /**
    * Strategy for handling Feb 29 in non-leap years
    * Only relevant if Feb (1) contains 29

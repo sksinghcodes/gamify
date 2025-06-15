@@ -5,7 +5,9 @@ import {
   type InvalidDateStrategy,
   type RecurrenceMonthly,
 } from '~/types/task-types';
-import Modal from '../modal/modal';
+import Modal from '~/components/modal/modal';
+import InvalidDateStrategySelector from '../invalid-date-strategy-selector/invalid-date-strategy-selector';
+import StrategyInfo from '../stratefy-info/stratefy-info';
 
 interface MonthlyDatesSelectorProps {
   value: RecurrenceMonthly;
@@ -70,45 +72,12 @@ const MonthlyDatesSelectorModal: React.FC<MonthlyDatesSelectorModalProps> = ({
               </button>
             ))}
           </div>
-          <div className={showQuestion ? '' : styles.hide}>
-            <div>
-              <span>Select missing date strategy</span>
-              <span
-                onClick={() => setShowModal(true)}
-                className={`${styles.infoIcon} material-symbols-outlined`}
-              >
-                info
-              </span>
-            </div>
-            <div className={styles.optionWrap}>
-              <div
-                className={`${styles.option} ${
-                  innerInvalidDateStrategy === INVALID_DATE_STRATEGY.SKIP
-                    ? styles.active
-                    : ''
-                }`}
-                onClick={() =>
-                  setInnerInvalidDateStrategy(INVALID_DATE_STRATEGY.SKIP)
-                }
-              >
-                Skip month
-              </div>
-            </div>
-            <div className={styles.optionWrap}>
-              <div
-                className={`${styles.option} ${
-                  innerInvalidDateStrategy === INVALID_DATE_STRATEGY.LAST_VALID
-                    ? styles.active
-                    : ''
-                }`}
-                onClick={() =>
-                  setInnerInvalidDateStrategy(INVALID_DATE_STRATEGY.LAST_VALID)
-                }
-              >
-                Move to last date
-              </div>
-            </div>
-          </div>
+          <InvalidDateStrategySelector
+            show={showQuestion}
+            value={innerInvalidDateStrategy}
+            onChange={setInnerInvalidDateStrategy}
+            onInfoIconClick={() => setShowModal(true)}
+          />
         </div>
         <button
           className={`${styles.fab} material-symbols-outlined`}
@@ -126,61 +95,7 @@ const MonthlyDatesSelectorModal: React.FC<MonthlyDatesSelectorModalProps> = ({
           title="Missing date strategy"
           open={showModal}
           onClose={() => setShowModal(false)}
-          body={
-            <div className={styles.container}>
-              <section className={styles.section}>
-                <h3 className={styles.subheading}>Why this matters</h3>
-                <p className={styles.paragraph}>
-                  Not all months have every date:
-                </p>
-                <ul className={styles.list}>
-                  <li>
-                    February has only 28 days in non-leap years and 29 days in
-                    leap years.
-                  </li>
-                  <li>
-                    April, June, September, and November have only 30 days.
-                  </li>
-                </ul>
-              </section>
-
-              <section className={styles.section}>
-                <h3 className={styles.subheading}>What are your options?</h3>
-                <div className={styles.optionDes}>
-                  <strong>Skip the month</strong>
-                  <p className={styles.optionDescription}>
-                    The event will not occur in months that don't include the
-                    selected date.
-                  </p>
-                </div>
-                <div className={styles.optionDes}>
-                  <strong>Move to last valid date</strong>
-                  <p className={styles.optionDescription}>
-                    The event automatically shifts to the closest valid date
-                    that month (e.g. 30 → 28 in February).
-                  </p>
-                </div>
-              </section>
-
-              <section className={styles.section}>
-                <h3 className={styles.subheading}>Example</h3>
-                <p className={styles.paragraph}>
-                  If you select <strong>30</strong> and the current month is{' '}
-                  <strong>February</strong>:
-                </p>
-                <ul className={styles.list}>
-                  <li>
-                    <strong>Skip the month:</strong> The event will not occur in
-                    February.
-                  </li>
-                  <li>
-                    <strong>Move to last valid date:</strong> The event will
-                    happen on February 28 (or 29 in a leap year).
-                  </li>
-                </ul>
-              </section>
-            </div>
-          }
+          body={<StrategyInfo for29thFebOnly={false} />}
         />
       </div>
     </>

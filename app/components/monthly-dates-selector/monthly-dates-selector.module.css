@@ -43,27 +43,6 @@
   font-weight: 600;
 }
 
-.optionWrap {
-  margin-top: 0.5rem;
-  display: flex;
-}
-
-.option {
-  color: var(--text-color-soft);
-  border: 1px solid var(--border-color);
-  padding: 0.5rem 0.75rem;
-  border-radius: 2rem;
-}
-
-.option.active {
-  color: var(--primary-accent);
-  border: 1px solid var(--primary-accent);
-}
-
-.hide {
-  visibility: hidden;
-}
-
 .fab {
   position: fixed;
   bottom: 2rem;
@@ -77,53 +56,4 @@
   font-weight: 100;
   font-size: 2rem;
   border: 1px solid var(--primary-action-color);
-}
-
-.container {
-  padding: 1rem;
-  color: var(--text-color-soft);
-  background-color: var(--secondary-background);
-  font-size: 0.95rem;
-  line-height: 1.6;
-}
-
-.subheading {
-  font-size: 1rem;
-  color: var(--text-color-hard);
-  font-weight: 500;
-  margin-bottom: 0.5rem;
-}
-
-.section {
-  margin-bottom: 1.75rem;
-}
-
-.paragraph {
-  margin-bottom: 0.5rem;
-}
-
-.list {
-  padding-left: 1.25rem;
-  margin: 0.5rem 0;
-}
-
-.list li {
-  margin-bottom: 0.25rem;
-}
-
-.optionDes {
-  margin-bottom: 1rem;
-}
-
-.optionDescription {
-  margin-top: 0.25rem;
-  font-size: 0.95rem;
-}
-
-.infoIcon {
-  vertical-align: middle;
-  color: var(--primary-accent);
-  font-weight: 300;
-  display: inline-block;
-  margin-left: 0.2rem;
 }
