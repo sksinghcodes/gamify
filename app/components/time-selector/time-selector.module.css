@@ -81,6 +81,10 @@
   letter-spacing: 2px;
 }
 
+.placeholder {
+  color: var(--placeholder-color);
+}
+
 .fab {
   position: fixed;
   bottom: 2rem;

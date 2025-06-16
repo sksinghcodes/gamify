@@ -168,6 +168,12 @@ export const INVALID_DATE_STRATEGY = {
   NONE: '' as InvalidDateStrategy.NONE,
 };
 
+export const INVALID_DATE_STRATEGY_LABELS = {
+  [InvalidDateStrategy.LAST_VALID]: 'Skip month',
+  [InvalidDateStrategy.SKIP]: 'Move to last date',
+  [InvalidDateStrategy.NONE]: '',
+};
+
 export const INITIAL_TASK: TaskReqBodyIF = {
   name: '',
   description: '',

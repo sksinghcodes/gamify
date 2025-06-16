@@ -152,7 +152,9 @@ const TimeSelector: React.FC<TimeSelectorProps> = ({
     <>
       <div
         {...timeDisplayProps}
-        className={`${styles.timeDisplay} ${timeDisplayProps?.className || ''}`}
+        className={`${styles.timeDisplay} ${
+          hour12Format === '00:00 AM' ? styles.placeholder : ''
+        } ${timeDisplayProps?.className || ''}`}
         onClick={(e) => {
           setShowModal(!showModal);
           if (timeDisplayProps?.onClick) {

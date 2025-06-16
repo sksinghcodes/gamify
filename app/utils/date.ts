@@ -44,12 +44,12 @@ export const to12HourFormat: (time24: string) => string = (time24) => {
   }
 
   let hour = hourStr ? parseInt(hourStr, 10) : NaN;
-  const minute = minuteStr ? minuteStr.padStart(2, '0') : '__';
-  const suffix = hourStr ? (hour >= 12 ? 'PM' : 'AM') : '__';
+  const minute = minuteStr ? minuteStr.padStart(2, '0') : '00';
+  const suffix = hourStr ? (hour >= 12 ? 'PM' : 'AM') : 'AM';
 
   hour = hour % 12 || 12;
 
-  const hourStrFinal = hourStr ? hour.toString().padStart(2, '0') : '__';
+  const hourStrFinal = hourStr ? hour.toString().padStart(2, '0') : '00';
 
   return `${hourStrFinal}:${minute} ${suffix}`;
 };

@@ -1,6 +1,9 @@
 import type { InvalidDateStrategy } from '~/types/task-types';
 import styles from './invalid-date-strategy-selector.module.css';
-import { INVALID_DATE_STRATEGY } from '~/constants';
+import {
+  INVALID_DATE_STRATEGY,
+  INVALID_DATE_STRATEGY_LABELS,
+} from '~/constants';
 
 interface InvalidDateStrategySelectorProps {
   show: boolean;
@@ -30,7 +33,7 @@ const InvalidDateStrategySelector: React.FC<
           }`}
           onClick={() => onChange(INVALID_DATE_STRATEGY.SKIP)}
         >
-          Skip month
+          {INVALID_DATE_STRATEGY_LABELS[INVALID_DATE_STRATEGY.SKIP]}
         </div>
       </div>
       <div className={styles.optionWrap}>
@@ -40,7 +43,7 @@ const InvalidDateStrategySelector: React.FC<
           }`}
           onClick={() => onChange(INVALID_DATE_STRATEGY.LAST_VALID)}
         >
-          Move to last date
+          {INVALID_DATE_STRATEGY_LABELS[INVALID_DATE_STRATEGY.LAST_VALID]}
         </div>
       </div>
     </div>

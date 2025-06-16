@@ -12,13 +12,12 @@
   margin-bottom: 1.25rem;
 }
 
-.formGroup .label {
+.label {
   margin-bottom: 0.5rem;
   font-weight: 500;
 }
 
 input[type='text'],
-input[type='time'],
 textarea {
   padding: 0.5rem 0.75rem;
   font-size: 1rem;
@@ -26,6 +25,11 @@ textarea {
   border-radius: 4px;
   background-color: var(--bg-input);
   color: var(--text-primary);
+}
+
+input[type='text']::placeholder,
+textarea::placeholder {
+  color: var(--placeholder-color);
 }
 
 textarea {
@@ -122,4 +126,8 @@ textarea {
 .radioInput:checked + .radioLabel {
   border: 1px solid var(--primary-accent);
   color: var(--primary-accent);
+}
+
+.value {
+  margin-bottom: 0.75rem;
 }

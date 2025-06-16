@@ -3,14 +3,17 @@ import {
   DATES,
   INITIAL_RECURRENCE_AND_REMOVE,
   INITIAL_TASK,
+  INVALID_DATE_STRATEGY_LABELS,
+  MONTHS_3_LETTER,
   RECURRENCE,
   REMOVE_TYPE,
-  WEEKS_3_LETTER,
+  WEEKS,
 } from '~/constants';
 import type {
   InitialRecurrenceIF,
-  RecurrenceMonthly,
+  MonthAndDates,
   RecurrenceWeekly,
+  RecurrenceYearly,
   TaskReqBodyIF,
 } from '~/types/task-types';
 import styles from './task-form.module.css';
@@ -22,6 +25,7 @@ import { capitalize } from '~/utils/string';
 import WeekdaySelector from '~/components/weekday-selector/weekday-selector';
 import MonthlyDatesSelector from '~/components/monthly-dates-selector/monthly-dates-selector';
 import YearlyDateSelector from '../yearly-date-selector/yearly-date-selector';
+import DateSelector from '../date-selector/date-selector';
 
 const TaskForm: React.FC<{ isEditMode: boolean }> = ({ isEditMode }) => {
   const [task, setTask] = useState<TaskReqBodyIF>(INITIAL_TASK);
@@ -51,22 +55,6 @@ const TaskForm: React.FC<{ isEditMode: boolean }> = ({ isEditMode }) => {
     setTask((pre) => ({
       ...pre,
       [name]: value,
-    }));
-  };
-
-  const handleMonthDatesSelect: React.ChangeEventHandler<HTMLInputElement> = (
-    e
-  ) => {
-    const { value, checked } = e.target;
-    const num = +value;
-    const prev = task.reccurrence as RecurrenceMonthly;
-    const newDates = checked
-      ? [...prev.dates, num].sort()
-      : prev.dates.filter((date) => date !== num);
-
-    setTask((pre) => ({
-      ...pre,
-      reccurrence: { ...prev, dates: newDates },
     }));
   };
 
@@ -120,6 +108,12 @@ const TaskForm: React.FC<{ isEditMode: boolean }> = ({ isEditMode }) => {
               />
             </div>
           </div>
+          <DateSelector
+            value={new Date().getTime()}
+            onChange={() => {}}
+            open={true}
+            setOpen={() => {}}
+          />
         </>
       )}
 
@@ -157,51 +151,109 @@ const TaskForm: React.FC<{ isEditMode: boolean }> = ({ isEditMode }) => {
           </div>
 
           {task.reccurrence.type === RECURRENCE.WEEKLY ? (
-            <WeekdaySelector
-              value={(task.reccurrence as RecurrenceWeekly).weekDays || []}
-              onChange={(weekDays) =>
-                setTask((pre) => ({
-                  ...pre,
-                  reccurrence: { ...pre.reccurrence, weekDays },
-                }))
-              }
-              open={openWeekSelector}
-              setOpen={setOpenWeekSelector}
-            />
+            <>
+              <WeekdaySelector
+                value={task.reccurrence.weekDays || []}
+                onChange={(weekDays) =>
+                  setTask((pre) => ({
+                    ...pre,
+                    reccurrence: { ...pre.reccurrence, weekDays },
+                  }))
+                }
+                open={openWeekSelector}
+                setOpen={setOpenWeekSelector}
+              />
+              {!!task.reccurrence.weekDays.length && (
+                <div className={styles.selectedWeekdays}>
+                  <div className={styles.label}>Selected days:</div>
+                  <div>
+                    {task.reccurrence.weekDays
+                      ?.map((day) => WEEKS[day])
+                      .join(', ')}
+                  </div>
+                </div>
+              )}
+            </>
           ) : task.reccurrence.type === RECURRENCE.MONTHLY ? (
-            <MonthlyDatesSelector
-              value={task.reccurrence}
-              onChange={(reccurrence) =>
-                setTask((pre) => ({
-                  ...pre,
-                  reccurrence,
-                }))
-              }
-              open={openMonthSelector}
-              setOpen={setOpenMonthSelector}
-            />
+            <>
+              <MonthlyDatesSelector
+                value={task.reccurrence}
+                onChange={(reccurrence) =>
+                  setTask((pre) => ({
+                    ...pre,
+                    reccurrence,
+                  }))
+                }
+                open={openMonthSelector}
+                setOpen={setOpenMonthSelector}
+              />
+              {!!task.reccurrence.dates.length && (
+                <div className={styles.selectedWeekdays}>
+                  <div className={styles.label}>Selected Dates:</div>
+                  <div className={styles.value}>
+                    {task.reccurrence.dates.join(', ')}
+                  </div>
+                  {task.reccurrence.invalidDateStrategy ? (
+                    <>
+                      <div className={styles.label}>Missing date strategy:</div>
+                      <div>
+                        {
+                          INVALID_DATE_STRATEGY_LABELS[
+                            task.reccurrence.invalidDateStrategy
+                          ]
+                        }
+                      </div>
+                    </>
+                  ) : null}
+                </div>
+              )}
+            </>
           ) : task.reccurrence.type === RECURRENCE.YEARLY ? (
-            <YearlyDateSelector
-              open={openYearSelector}
-              setOpen={setOpenYearSelector}
-              value={task.reccurrence}
-              onChange={(reccurrence) =>
-                setTask((pre) => ({
-                  ...pre,
-                  reccurrence,
-                }))
-              }
-            />
+            <>
+              <YearlyDateSelector
+                open={openYearSelector}
+                setOpen={setOpenYearSelector}
+                value={task.reccurrence}
+                onChange={(reccurrence) =>
+                  setTask((pre) => ({
+                    ...pre,
+                    reccurrence,
+                  }))
+                }
+              />
+              {!!Object.keys(task.reccurrence.monthAndDates).length && (
+                <div className={styles.selectedWeekdays}>
+                  <div className={styles.label}>Selected Dates:</div>
+                  <div className={styles.value}>
+                    {Object.keys(task.reccurrence.monthAndDates)
+                      .map((month) =>
+                        (task.reccurrence as RecurrenceYearly).monthAndDates[
+                          Number(month) as keyof MonthAndDates
+                        ]
+                          ?.map(
+                            (date) =>
+                              `${MONTHS_3_LETTER[Number(month)]} ${date}`
+                          )
+                          .join(', ')
+                      )
+                      .join(', ')}
+                  </div>
+                  {task.reccurrence.feb29Strategy ? (
+                    <>
+                      <div className={styles.label}>Missing date strategy:</div>
+                      <div>
+                        {
+                          INVALID_DATE_STRATEGY_LABELS[
+                            task.reccurrence.feb29Strategy
+                          ]
+                        }
+                      </div>
+                    </>
+                  ) : null}
+                </div>
+              )}
+            </>
           ) : null}
-
-          {(task.reccurrence as RecurrenceWeekly)?.weekDays?.length && (
-            <div className={styles.selectedWeekdays}>
-              Selected days:{' '}
-              {(task.reccurrence as RecurrenceWeekly)?.weekDays
-                ?.map((day) => WEEKS_3_LETTER[day])
-                .join(', ')}
-            </div>
-          )}
         </>
       )}
 
