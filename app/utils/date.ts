@@ -128,3 +128,17 @@ export const getMinuteBlock: (minute: string) => string = (minute) => {
   const blockStart = Math.floor(num / 5) * 5;
   return String(blockStart).padStart(2, '0');
 };
+
+export const getBlockOf18: (input: number) => {
+  blockStart: number;
+  block: number[];
+} = (input) => {
+  if (input < 1) {
+    throw new Error('Input must be a positive number');
+  }
+  const blockStart = Math.floor((input - 1) / 18) * 18 + 1;
+  return {
+    blockStart,
+    block: Array.from({ length: 18 }, (_, i) => blockStart + i),
+  };
+};

@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import {
-  DATES,
   INITIAL_RECURRENCE_AND_REMOVE,
   INITIAL_TASK,
   INVALID_DATE_STRATEGY_LABELS,
@@ -11,8 +10,7 @@ import {
 } from '~/constants';
 import type {
   InitialRecurrenceIF,
-  MonthAndDates,
-  RecurrenceWeekly,
+  MonthIndex,
   RecurrenceYearly,
   TaskReqBodyIF,
 } from '~/types/task-types';
@@ -25,14 +23,11 @@ import { capitalize } from '~/utils/string';
 import WeekdaySelector from '~/components/weekday-selector/weekday-selector';
 import MonthlyDatesSelector from '~/components/monthly-dates-selector/monthly-dates-selector';
 import YearlyDateSelector from '../yearly-date-selector/yearly-date-selector';
-import DateSelector from '../date-selector/date-selector';
 
 const TaskForm: React.FC<{ isEditMode: boolean }> = ({ isEditMode }) => {
   const [task, setTask] = useState<TaskReqBodyIF>(INITIAL_TASK);
   const [searchParams, setSearchParams] = useSearchParams();
-  const [openWeekSelector, setOpenWeekSelector] = useState(false);
-  const [openMonthSelector, setOpenMonthSelector] = useState(false);
-  const [openYearSelector, setOpenYearSelector] = useState(true);
+  const [openSelector, setOpenSelector] = useState(false);
 
   const step = +(searchParams.get('step') || 1);
 
@@ -108,12 +103,6 @@ const TaskForm: React.FC<{ isEditMode: boolean }> = ({ isEditMode }) => {
               />
             </div>
           </div>
-          <DateSelector
-            value={new Date().getTime()}
-            onChange={() => {}}
-            open={true}
-            setOpen={() => {}}
-          />
         </>
       )}
 
@@ -126,15 +115,7 @@ const TaskForm: React.FC<{ isEditMode: boolean }> = ({ isEditMode }) => {
                 <label
                   key={freq}
                   className={styles.radio}
-                  onClick={
-                    freq === RECURRENCE.WEEKLY
-                      ? () => setOpenWeekSelector(true)
-                      : freq === RECURRENCE.MONTHLY
-                      ? () => setOpenMonthSelector(true)
-                      : freq === RECURRENCE.YEARLY
-                      ? () => setOpenYearSelector(true)
-                      : undefined
-                  }
+                  onClick={() => setOpenSelector(true)}
                 >
                   <input
                     type="radio"
@@ -160,8 +141,8 @@ const TaskForm: React.FC<{ isEditMode: boolean }> = ({ isEditMode }) => {
                     reccurrence: { ...pre.reccurrence, weekDays },
                   }))
                 }
-                open={openWeekSelector}
-                setOpen={setOpenWeekSelector}
+                open={openSelector}
+                setOpen={setOpenSelector}
               />
               {!!task.reccurrence.weekDays.length && (
                 <div className={styles.selectedWeekdays}>
@@ -184,8 +165,8 @@ const TaskForm: React.FC<{ isEditMode: boolean }> = ({ isEditMode }) => {
                     reccurrence,
                   }))
                 }
-                open={openMonthSelector}
-                setOpen={setOpenMonthSelector}
+                open={openSelector}
+                setOpen={setOpenSelector}
               />
               {!!task.reccurrence.dates.length && (
                 <div className={styles.selectedWeekdays}>
@@ -211,8 +192,8 @@ const TaskForm: React.FC<{ isEditMode: boolean }> = ({ isEditMode }) => {
           ) : task.reccurrence.type === RECURRENCE.YEARLY ? (
             <>
               <YearlyDateSelector
-                open={openYearSelector}
-                setOpen={setOpenYearSelector}
+                open={openSelector}
+                setOpen={setOpenSelector}
                 value={task.reccurrence}
                 onChange={(reccurrence) =>
                   setTask((pre) => ({
@@ -228,7 +209,7 @@ const TaskForm: React.FC<{ isEditMode: boolean }> = ({ isEditMode }) => {
                     {Object.keys(task.reccurrence.monthAndDates)
                       .map((month) =>
                         (task.reccurrence as RecurrenceYearly).monthAndDates[
-                          Number(month) as keyof MonthAndDates
+                          Number(month) as MonthIndex
                         ]
                           ?.map(
                             (date) =>

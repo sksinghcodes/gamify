@@ -37,21 +37,6 @@
   background: no-repeat;
   aspect-ratio: 1;
 }
-.monthList {
-  display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-  padding: 1.5rem;
-}
-.month {
-  border: 1px solid var(--border-color);
-  color: var(--text-color-soft);
-  padding: 0.5rem 1rem;
-  border-radius: 2rem;
-  width: calc(50% - 0.25rem);
-  text-align: center;
-}
-.month.active,
 .date.active {
   border: 1px solid var(--primary-accent);
   color: var(--primary-accent);
