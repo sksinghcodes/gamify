@@ -1,0 +1,96 @@
+.wrapper {
+  position: fixed;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  background-color: var(--primary-background);
+  top: 0;
+  left: 0;
+  z-index: 9;
+  padding: 2rem 2rem 6rem;
+}
+
+.numWrap {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-bottom: 2rem;
+}
+
+.changeBtn {
+  border-radius: 0;
+  border: 1px solid var(--border-color);
+  background-color: var(--secondary-background);
+  width: 2.2918rem;
+  color: var(--text-color-soft);
+}
+
+.changeBtn:active {
+  background-color: var(--buton-active-color);
+}
+
+.numInput {
+  padding: 0.5rem 0.75rem;
+  font-size: 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  background-color: var(--bg-input);
+  color: var(--text-primary);
+  width: 4rem;
+  text-align: center;
+  border-radius: 0;
+}
+
+.numInput::placeholder {
+  color: var(--placeholder-color);
+}
+
+.unitsWrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.inputCheck {
+  display: none;
+}
+
+.option {
+  border: 1px solid var(--border-color);
+  color: var(--text-color-soft);
+  padding: 0.5rem 1rem;
+  border-radius: 2rem;
+  display: block;
+  width: calc(50% - 0.25rem);
+  text-align: center;
+}
+
+.option.active {
+  border: 1px solid var(--primary-action-color);
+  color: var(--primary-action-color);
+}
+
+.preview {
+  color: var(--text-color-hard);
+  text-align: center;
+  font-weight: 400;
+  font-size: 1.5rem;
+  margin-bottom: 3rem;
+}
+
+.fab {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  background-color: var(--primary-action-color);
+  color: #fff;
+  cursor: pointer;
+  font-weight: 100;
+  font-size: 2rem;
+  border: 1px solid var(--primary-action-color);
+}

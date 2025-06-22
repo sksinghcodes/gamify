@@ -2,6 +2,7 @@ import { useState } from 'react';
 import {
   INITIAL_RECURRENCE_AND_REMOVE,
   INITIAL_TASK,
+  INVALID_DATE_STRATEGY,
   INVALID_DATE_STRATEGY_LABELS,
   MONTHS_3_LETTER,
   RECURRENCE,
@@ -25,13 +26,15 @@ import WeekdaySelector from '~/components/weekday-selector/weekday-selector';
 import MonthlyDatesSelector from '~/components/monthly-dates-selector/monthly-dates-selector';
 import YearlyDateSelector from '../yearly-date-selector/yearly-date-selector';
 import DateSelector from '../date-selector/date-selector';
-import { getDateString } from '~/utils/date';
+import { getDateString, getDurationString } from '~/utils/date';
+import DurationSelector from '../duration-selector/duration-selector';
 
 const TaskForm: React.FC<{ isEditMode: boolean }> = ({ isEditMode }) => {
   const [task, setTask] = useState<TaskReqBodyIF>(INITIAL_TASK);
   const [searchParams, setSearchParams] = useSearchParams();
   const [openSelector, setOpenSelector] = useState(false);
   const [showDateSelector, setShowDateSelector] = useState(false);
+  const [showDurationSelector, setShowDurationSelector] = useState(false);
 
   const step = +(searchParams.get('step') || 1);
 
@@ -180,7 +183,8 @@ const TaskForm: React.FC<{ isEditMode: boolean }> = ({ isEditMode }) => {
                   <div className={styles.value}>
                     {task.reccurrence.dates.join(', ')}
                   </div>
-                  {task.reccurrence.invalidDateStrategy ? (
+                  {task.reccurrence.invalidDateStrategy !==
+                  INVALID_DATE_STRATEGY.NONE ? (
                     <>
                       <div className={styles.label}>Missing date strategy:</div>
                       <div>
@@ -225,7 +229,8 @@ const TaskForm: React.FC<{ isEditMode: boolean }> = ({ isEditMode }) => {
                       )
                       .join(', ')}
                   </div>
-                  {task.reccurrence.feb29Strategy ? (
+                  {task.reccurrence.feb29Strategy !==
+                  INVALID_DATE_STRATEGY.NONE ? (
                     <>
                       <div className={styles.label}>Missing date strategy:</div>
                       <div>
@@ -271,7 +276,7 @@ const TaskForm: React.FC<{ isEditMode: boolean }> = ({ isEditMode }) => {
               ))}
             </div>
           </div>
-          {task.removeIt.type === REMOVE_TYPE.ON_DATE && (
+          {task.removeIt.type === REMOVE_TYPE.AFTER_GIVEN_DATE && (
             <>
               <label
                 className={styles.dateInputWrap}
@@ -309,6 +314,41 @@ const TaskForm: React.FC<{ isEditMode: boolean }> = ({ isEditMode }) => {
               />
             </>
           )}
+          {task.removeIt.type === REMOVE_TYPE.AFTER_GIVEN_DURATION && (
+            <>
+              <label
+                className={styles.dateInputWrap}
+                onClick={() => setShowDurationSelector(true)}
+              >
+                <input
+                  type="text"
+                  placeholder="Select Duration"
+                  name="select-duration"
+                  readOnly
+                  className={`${styles.dateInput} ${styles.inputText}`}
+                  value={getDurationString(task.removeIt)}
+                />
+                <span
+                  className={`material-symbols-outlined ${styles.dateIcon}`}
+                >
+                  hourglass
+                </span>
+              </label>
+              <DurationSelector
+                value={task.removeIt}
+                onChange={(duration) =>
+                  setTask((pre) => {
+                    return {
+                      ...pre,
+                      removeIt: { ...duration },
+                    };
+                  })
+                }
+                open={showDurationSelector}
+                setOpen={setShowDurationSelector}
+              />
+            </>
+          )}
         </>
       )}
 
@@ -326,7 +366,7 @@ const TaskForm: React.FC<{ isEditMode: boolean }> = ({ isEditMode }) => {
         onClick={() => {
           step === 3
             ? (() => {
-                console.log('Done');
+                console.log(task);
               })()
             : setSearchParams({ step: String(step + 1) });
         }}

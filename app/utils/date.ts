@@ -1,3 +1,6 @@
+import type { RemoveAfterGivenDuration } from '~/types/task-types';
+import { capitalize } from './string';
+
 export const getRelativeDayLabel: (dateEpoch: number) => string = (
   dateEpoch
 ) => {
@@ -20,9 +23,13 @@ export const getRelativeDayLabel: (dateEpoch: number) => string = (
 };
 
 export const getDateString: (
-  dateEpoch: number,
+  dateEpoch: number | null,
   includeWeekday?: boolean
 ) => string = (dateEpoch, includeWeekday) => {
+  if (dateEpoch === null) {
+    return '';
+  }
+
   const options: Intl.DateTimeFormatOptions = {
     year: 'numeric',
     month: 'short',
@@ -34,6 +41,13 @@ export const getDateString: (
   }
 
   return new Intl.DateTimeFormat('en-US', options).format(new Date(dateEpoch));
+};
+
+export const getDurationString: (input: RemoveAfterGivenDuration) => string = (
+  input
+) => {
+  const suffix = input.nValue === 1 ? '' : 's';
+  return `${input.nValue} ${capitalize(input.unit)}${suffix}`;
 };
 
 export const getTodayEpoch: () => number = () => {

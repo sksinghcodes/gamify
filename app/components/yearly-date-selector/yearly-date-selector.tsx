@@ -60,6 +60,11 @@ const YearlyDateSelectorModal: React.FC<YearlyDateSelectorModalProps> = ({
       } else {
         delete newInnerMonthAndDates[month];
       }
+
+      if (!Boolean(newInnerMonthAndDates[1]?.includes(29))) {
+        setInnerFeb29Strategy(INVALID_DATE_STRATEGY.NONE);
+      }
+
       setInnerMonthAndDates(newInnerMonthAndDates);
     } else {
       setInnerMonthAndDates({

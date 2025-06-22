@@ -151,8 +151,10 @@ export const DURATION_UNIT = {
 
 export const REMOVE_TYPE = {
   NEVER: RemoveTypeEnum.NEVER as RemoveTypeEnum.NEVER,
-  AFTER_N_UNIT: RemoveTypeEnum.AFTER_N_UNIT as RemoveTypeEnum.AFTER_N_UNIT,
-  ON_DATE: RemoveTypeEnum.ON_DATE as RemoveTypeEnum.ON_DATE,
+  AFTER_GIVEN_DURATION:
+    RemoveTypeEnum.AFTER_GIVEN_DURATION as RemoveTypeEnum.AFTER_GIVEN_DURATION,
+  AFTER_GIVEN_DATE:
+    RemoveTypeEnum.AFTER_GIVEN_DATE as RemoveTypeEnum.AFTER_GIVEN_DATE,
 };
 
 export const RECURRENCE = {
@@ -165,19 +167,19 @@ export const RECURRENCE = {
 export const INVALID_DATE_STRATEGY = {
   LAST_VALID: 'LAST_VALID' as InvalidDateStrategy.LAST_VALID,
   SKIP: 'SKIP' as InvalidDateStrategy.SKIP,
-  NONE: '' as InvalidDateStrategy.NONE,
+  NONE: 'NONE' as InvalidDateStrategy.NONE,
 };
 
 export const INVALID_DATE_STRATEGY_LABELS = {
-  [InvalidDateStrategy.LAST_VALID]: 'Skip month',
-  [InvalidDateStrategy.SKIP]: 'Move to last date',
-  [InvalidDateStrategy.NONE]: '',
+  [InvalidDateStrategy.LAST_VALID]: 'Move to last date',
+  [InvalidDateStrategy.SKIP]: 'Skip month',
+  [InvalidDateStrategy.NONE]: 'None',
 };
 
 export const REMOVE_TYPE_LABELS = {
   [RemoveTypeEnum.NEVER]: "Don't remove it automatically",
-  [RemoveTypeEnum.AFTER_N_UNIT]: 'Remove it after a duration',
-  [RemoveTypeEnum.ON_DATE]: 'Remove it after a date',
+  [RemoveTypeEnum.AFTER_GIVEN_DURATION]: 'Remove it after a duration',
+  [RemoveTypeEnum.AFTER_GIVEN_DATE]: 'Remove it after a date',
 };
 
 export const INITIAL_TASK: TaskReqBodyIF = {
@@ -214,18 +216,13 @@ export const INITIAL_RECURRENCE_AND_REMOVE: InitialRecurrenceIF = {
   NEVER: {
     type: REMOVE_TYPE.NEVER,
   },
-  AFTER_N_UNIT: {
-    type: REMOVE_TYPE.AFTER_N_UNIT,
+  AFTER_GIVEN_DURATION: {
+    type: REMOVE_TYPE.AFTER_GIVEN_DURATION,
     unit: DURATION_UNIT.DAY,
     nValue: 5,
   },
-  ON_DATE: {
-    type: REMOVE_TYPE.ON_DATE,
-    dateEpoch: (() => {
-      const date = new Date();
-      date.setDate(date.getDate() + 5);
-      date.setHours(0, 0, 0, 0);
-      return date.getTime();
-    })(),
+  AFTER_GIVEN_DATE: {
+    type: REMOVE_TYPE.AFTER_GIVEN_DATE,
+    dateEpoch: null,
   },
 };

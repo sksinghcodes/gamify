@@ -6,30 +6,38 @@ import type { MonthIndex } from '~/types/task-types';
 import YearSelector from '../year-selector/year-selector';
 
 interface DateSelectorModalProps {
-  value: number; // date epoch
-  onDone: (value: number) => void;
+  value: number | null; // date epoch
+  onDone: (value: number | null) => void;
 }
 interface DateSelectorProps {
-  value: number; // date epoch
-  onChange: (value: number) => void;
+  value: number | null; // date epoch
+  onChange: (value: number | null) => void;
   open: boolean;
   setOpen: (open: boolean) => void;
 }
 
-const extractDateComponents = (epoch: number) => {
-  const date = new Date(epoch);
-  return {
-    date: date.getDate(),
-    month: date.getMonth(),
-    year: date.getFullYear(),
-  };
+const extractDateComponents = (epoch: number | null) => {
+  if (epoch === null) {
+    return {
+      date: null,
+      month: null,
+      year: null,
+    };
+  } else {
+    const date = new Date(epoch);
+    return {
+      date: date.getDate(),
+      month: date.getMonth(),
+      year: date.getFullYear(),
+    };
+  }
 };
 
 const DateSelectorModal: React.FC<DateSelectorModalProps> = ({
   value,
   onDone,
 }) => {
-  const [innerValue, setInnerValue] = useState<number>(0);
+  const [innerValue, setInnerValue] = useState<number | null>(0);
   const { date, month, year } = extractDateComponents(innerValue);
   const [selectedMonth, setSelectedMonth] = useState<MonthIndex>(0);
   const [showMonthSelector, setShowMonthSelector] = useState(false);

@@ -36,23 +36,26 @@ const MonthlyDatesSelectorModal: React.FC<MonthlyDatesSelectorModalProps> = ({
   }, [value.dates, value.invalidDateStrategy]);
 
   const handleDateToggle = (date: number) => {
-    setInnerDates((prev) =>
-      prev.includes(date)
-        ? prev.filter((d) => d !== date)
-        : [...prev, date].sort((a, b) => a - b)
-    );
+    let newDates = [];
+    if (innerDates.includes(date)) {
+      newDates = innerDates.filter((d) => d !== date);
+    } else {
+      newDates = [...innerDates, date].sort((a, b) => a - b);
+    }
+
+    if (
+      !(newDates.includes(29) || newDates.includes(30) || newDates.includes(31))
+    ) {
+      setInnerInvalidDateStrategy(INVALID_DATE_STRATEGY.NONE);
+    }
+
+    setInnerDates(newDates);
   };
 
   const showQuestion =
     innerDates.includes(29) ||
     innerDates.includes(30) ||
     innerDates.includes(31);
-
-  useEffect(() => {
-    if (!showQuestion) {
-      setInnerInvalidDateStrategy(INVALID_DATE_STRATEGY.NONE);
-    }
-  }, [showQuestion]);
 
   return (
     <>

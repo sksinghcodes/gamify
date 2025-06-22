@@ -7,8 +7,8 @@ export enum RecurrenceEnum {
 
 export enum RemoveTypeEnum {
   NEVER = 'NEVER',
-  AFTER_N_UNIT = 'AFTER_N_UNIT',
-  ON_DATE = 'ON_DATE',
+  AFTER_GIVEN_DURATION = 'AFTER_GIVEN_DURATION',
+  AFTER_GIVEN_DATE = 'AFTER_GIVEN_DATE',
 }
 
 export enum DurationEnum {
@@ -19,7 +19,7 @@ export enum DurationEnum {
 }
 
 export enum InvalidDateStrategy {
-  NONE = '',
+  NONE = 'NONE',
   LAST_VALID = 'LAST_VALID',
   SKIP = 'SKIP',
 }
@@ -28,15 +28,15 @@ export interface RemoveNever {
   type: RemoveTypeEnum.NEVER;
 }
 
-export interface RemoveAfterNUnit {
-  type: RemoveTypeEnum.AFTER_N_UNIT;
+export interface RemoveAfterGivenDuration {
+  type: RemoveTypeEnum.AFTER_GIVEN_DURATION;
   unit: DurationEnum;
   nValue: number;
 }
 
-export interface RemoveOnDate {
-  type: RemoveTypeEnum.ON_DATE;
-  dateEpoch: number;
+export interface RemoveAfterGivenDate {
+  type: RemoveTypeEnum.AFTER_GIVEN_DATE;
+  dateEpoch: number | null;
 }
 
 export interface RecurrenceDaily {
@@ -87,7 +87,7 @@ export interface TaskReqBodyIF {
     | RecurrenceWeekly
     | RecurrenceMonthly
     | RecurrenceYearly;
-  removeIt: RemoveNever | RemoveAfterNUnit | RemoveOnDate;
+  removeIt: RemoveNever | RemoveAfterGivenDuration | RemoveAfterGivenDate;
 }
 
 export interface TaskIF extends TaskReqBodyIF {
@@ -102,6 +102,6 @@ export interface InitialRecurrenceIF {
   MONTHLY: RecurrenceMonthly;
   YEARLY: RecurrenceYearly;
   NEVER: RemoveNever;
-  AFTER_N_UNIT: RemoveAfterNUnit;
-  ON_DATE: RemoveOnDate;
+  AFTER_GIVEN_DURATION: RemoveAfterGivenDuration;
+  AFTER_GIVEN_DATE: RemoveAfterGivenDate;
 }
