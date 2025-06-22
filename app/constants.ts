@@ -174,6 +174,12 @@ export const INVALID_DATE_STRATEGY_LABELS = {
   [InvalidDateStrategy.NONE]: '',
 };
 
+export const REMOVE_TYPE_LABELS = {
+  [RemoveTypeEnum.NEVER]: "Don't remove it automatically",
+  [RemoveTypeEnum.AFTER_N_UNIT]: 'Remove it after a duration',
+  [RemoveTypeEnum.ON_DATE]: 'Remove it after a date',
+};
+
 export const INITIAL_TASK: TaskReqBodyIF = {
   name: '',
   description: '',

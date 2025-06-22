@@ -17,7 +17,7 @@ const Header = () => {
   const [dateEpoch, setDateEpoch] = useState<number>(getTodayEpoch());
 
   const adjacentDay = getRelativeDayLabel(dateEpoch);
-  const dateString = getDateString(dateEpoch);
+  const dateString = getDateString(dateEpoch, true);
 
   const setNextDate = () => {
     const date = new Date(dateEpoch);

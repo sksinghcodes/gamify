@@ -17,8 +17,8 @@
   font-weight: 500;
 }
 
-input[type='text'],
-textarea {
+.inputText,
+.textarea {
   padding: 0.5rem 0.75rem;
   font-size: 1rem;
   border: 1px solid var(--border-color);
@@ -27,12 +27,12 @@ textarea {
   color: var(--text-primary);
 }
 
-input[type='text']::placeholder,
-textarea::placeholder {
+.inputText::placeholder,
+.textarea::placeholder {
   color: var(--placeholder-color);
 }
 
-textarea {
+.textarea {
   resize: vertical;
   min-height: 80px;
 }
@@ -57,31 +57,6 @@ textarea {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-}
-
-.weekChips {
-  display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-  margin-bottom: 1rem;
-}
-
-.chip {
-  background-color: var(--chip-bg);
-  border-radius: 20px;
-  padding: 0.25rem 0.75rem;
-  font-size: 0.9rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  border: 1px solid var(--border-color);
-}
-
-.calendarGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(40px, 1fr));
-  gap: 0.5rem;
-  margin-top: 0.5rem;
 }
 
 .fab {
@@ -130,4 +105,40 @@ textarea {
 
 .value {
   margin-bottom: 0.75rem;
+}
+
+.option {
+  border: 1px solid var(--border-color);
+  color: var(--text-color-soft);
+  padding: 0.5rem 1rem;
+  border-radius: 2rem;
+}
+
+.option.active {
+  border: 1px solid var(--primary-action-color);
+  color: var(--primary-action-color);
+}
+
+.optionInput {
+  display: none;
+}
+
+.dateInputWrap {
+  display: flex;
+  border: 1px solid var(--border-color);
+}
+
+.dateInput {
+  flex-grow: 1;
+  border: none;
+}
+
+.dateInput:focus {
+  outline: none;
+}
+
+.dateIcon {
+  display: flex;
+  align-items: center;
+  padding: 0 0.3rem;
 }

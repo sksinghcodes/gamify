@@ -6,6 +6,7 @@ import {
   MONTHS_3_LETTER,
   RECURRENCE,
   REMOVE_TYPE,
+  REMOVE_TYPE_LABELS,
   WEEKS,
 } from '~/constants';
 import type {
@@ -23,11 +24,14 @@ import { capitalize } from '~/utils/string';
 import WeekdaySelector from '~/components/weekday-selector/weekday-selector';
 import MonthlyDatesSelector from '~/components/monthly-dates-selector/monthly-dates-selector';
 import YearlyDateSelector from '../yearly-date-selector/yearly-date-selector';
+import DateSelector from '../date-selector/date-selector';
+import { getDateString } from '~/utils/date';
 
 const TaskForm: React.FC<{ isEditMode: boolean }> = ({ isEditMode }) => {
   const [task, setTask] = useState<TaskReqBodyIF>(INITIAL_TASK);
   const [searchParams, setSearchParams] = useSearchParams();
   const [openSelector, setOpenSelector] = useState(false);
+  const [showDateSelector, setShowDateSelector] = useState(false);
 
   const step = +(searchParams.get('step') || 1);
 
@@ -68,6 +72,7 @@ const TaskForm: React.FC<{ isEditMode: boolean }> = ({ isEditMode }) => {
               placeholder="eg: Go to gym"
               value={task.name}
               onChange={handleChange}
+              className={styles.inputText}
             />
           </div>
 
@@ -81,6 +86,7 @@ const TaskForm: React.FC<{ isEditMode: boolean }> = ({ isEditMode }) => {
               placeholder="Describe the task... (Optional)"
               value={task.description}
               onChange={handleChange}
+              className={styles.textarea}
             />
           </div>
 
@@ -246,23 +252,63 @@ const TaskForm: React.FC<{ isEditMode: boolean }> = ({ isEditMode }) => {
             </span>
             <div className={styles.radioColumn}>
               {Object.values(REMOVE_TYPE).map((type) => (
-                <label key={type}>
+                <label
+                  key={type}
+                  className={`${styles.option} ${
+                    task.removeIt.type === type ? styles.active : ''
+                  }`}
+                >
                   <input
                     type="radio"
                     name="removeIt"
                     value={type}
                     checked={task.removeIt.type === type}
                     onChange={handleChange}
+                    className={styles.optionInput}
                   />
-                  {type === REMOVE_TYPE.NEVER
-                    ? "Don't remove it automatically"
-                    : type === REMOVE_TYPE.AFTER_N_UNIT
-                    ? 'Remove it after a duration'
-                    : 'Remove it after a date'}
+                  {REMOVE_TYPE_LABELS[type]}
                 </label>
               ))}
             </div>
           </div>
+          {task.removeIt.type === REMOVE_TYPE.ON_DATE && (
+            <>
+              <label
+                className={styles.dateInputWrap}
+                onClick={() => setShowDateSelector(true)}
+              >
+                <input
+                  type="text"
+                  placeholder="Select Date"
+                  name="select-date"
+                  readOnly
+                  className={`${styles.dateInput} ${styles.inputText}`}
+                  value={getDateString(task.removeIt.dateEpoch)}
+                />
+                <span
+                  className={`material-symbols-outlined ${styles.dateIcon}`}
+                >
+                  calendar_today
+                </span>
+              </label>
+              <DateSelector
+                value={task.removeIt.dateEpoch}
+                onChange={(date) => {
+                  setTask((pre) => {
+                    return {
+                      ...pre,
+                      removeIt: {
+                        ...pre.removeIt,
+                        dateEpoch: date,
+                      },
+                    };
+                  });
+                }}
+                open={showDateSelector}
+                setOpen={setShowDateSelector}
+              />
+            </>
+          )}
         </>
       )}
 

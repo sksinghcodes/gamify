@@ -19,13 +19,19 @@ export const getRelativeDayLabel: (dateEpoch: number) => string = (
   return '';
 };
 
-export const getDateString: (dateEpoch: number) => string = (dateEpoch) => {
+export const getDateString: (
+  dateEpoch: number,
+  includeWeekday?: boolean
+) => string = (dateEpoch, includeWeekday) => {
   const options: Intl.DateTimeFormatOptions = {
-    weekday: 'short',
     year: 'numeric',
     month: 'short',
     day: 'numeric',
   };
+
+  if (includeWeekday) {
+    options.weekday = 'short';
+  }
 
   return new Intl.DateTimeFormat('en-US', options).format(new Date(dateEpoch));
 };
