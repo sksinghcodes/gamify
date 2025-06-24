@@ -1,0 +1,109 @@
+.wrapper {
+  padding: 1rem 1rem 6rem;
+}
+
+.headingWrap {
+  margin-bottom: 2rem;
+}
+
+.name {
+  font-size: 1.3rem;
+  font-weight: 300;
+  color: var(--text-color-hard);
+  margin-bottom: 0.75rem;
+}
+
+.description {
+  color: var(--text-color-soft);
+  line-height: 1.5;
+}
+
+.sectionWrap {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.section {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.icon {
+  color: var(--icon-color);
+  font-weight: var(--icon-font-weight);
+}
+
+.detailsWrap {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.2rem;
+}
+
+.detailsWrap p {
+  line-height: 1.5;
+  color: var(--text-color-soft);
+}
+
+.boxesWrap {
+  display: flex;
+  gap: 0.4rem;
+  margin-top: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.squareBox,
+.rectBox {
+  height: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-color-soft);
+  font-size: 0.8rem;
+  border: 1px solid var(--border-color);
+}
+
+.squareBox {
+  width: 1.5rem;
+}
+
+.squareBox.active {
+  color: var(--primary-action-color);
+  border: 1px solid var(--primary-action-color);
+}
+
+.rectBox {
+  width: 2.5rem;
+  flex-shrink: 0;
+}
+
+.yearlyDates {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.4rem;
+}
+
+.yearlyDates .boxesWrap {
+  margin-top: 0;
+}
+
+.missingDateInfo {
+  font-size: 0.9rem;
+  margin-top: 0.3rem;
+}
+
+.fab {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  background-color: var(--primary-action-color);
+  color: #fff;
+  cursor: pointer;
+  font-weight: 100;
+  font-size: 2rem;
+  border: 1px solid var(--primary-action-color);
+}

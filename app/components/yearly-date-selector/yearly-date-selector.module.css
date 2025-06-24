@@ -7,7 +7,7 @@
   height: 100%;
   top: 0;
   left: 0;
-  backdrop-filter: blur(20px);
+  background-color: var(--primary-background);
   padding-bottom: 4rem;
   z-index: 9;
 }

@@ -20,7 +20,7 @@ import styles from './task-form.module.css';
 import TimeSelector, {
   type TimeSelectorOnChange,
 } from '~/components/time-selector/time-selector';
-import { useSearchParams } from 'react-router';
+import { useNavigate, useSearchParams } from 'react-router';
 import { capitalize } from '~/utils/string';
 import WeekdaySelector from '~/components/weekday-selector/weekday-selector';
 import MonthlyDatesSelector from '~/components/monthly-dates-selector/monthly-dates-selector';
@@ -35,6 +35,7 @@ const TaskForm: React.FC<{ isEditMode: boolean }> = ({ isEditMode }) => {
   const [openSelector, setOpenSelector] = useState(false);
   const [showDateSelector, setShowDateSelector] = useState(false);
   const [showDurationSelector, setShowDurationSelector] = useState(false);
+  const navigate = useNavigate();
 
   const step = +(searchParams.get('step') || 1);
 
@@ -46,7 +47,7 @@ const TaskForm: React.FC<{ isEditMode: boolean }> = ({ isEditMode }) => {
     setTask((pre) => ({
       ...pre,
       [name]:
-        name === 'reccurrence' || name === 'removeIt'
+        name === 'recurrence' || name === 'removeIt'
           ? INITIAL_RECURRENCE_AND_REMOVE[value as keyof InitialRecurrenceIF]
           : value,
     }));
@@ -128,9 +129,9 @@ const TaskForm: React.FC<{ isEditMode: boolean }> = ({ isEditMode }) => {
                 >
                   <input
                     type="radio"
-                    name="reccurrence"
+                    name="recurrence"
                     value={freq}
-                    checked={task.reccurrence.type === freq}
+                    checked={task.recurrence.type === freq}
                     onChange={handleChange}
                     className={styles.radioInput}
                   />
@@ -140,57 +141,57 @@ const TaskForm: React.FC<{ isEditMode: boolean }> = ({ isEditMode }) => {
             </div>
           </div>
 
-          {task.reccurrence.type === RECURRENCE.WEEKLY ? (
+          {task.recurrence.type === RECURRENCE.WEEKLY ? (
             <>
               <WeekdaySelector
-                value={task.reccurrence.weekDays || []}
+                value={task.recurrence.weekDays || []}
                 onChange={(weekDays) =>
                   setTask((pre) => ({
                     ...pre,
-                    reccurrence: { ...pre.reccurrence, weekDays },
+                    recurrence: { ...pre.recurrence, weekDays },
                   }))
                 }
                 open={openSelector}
                 setOpen={setOpenSelector}
               />
-              {!!task.reccurrence.weekDays.length && (
+              {!!task.recurrence.weekDays.length && (
                 <div className={styles.selectedWeekdays}>
                   <div className={styles.label}>Selected days:</div>
                   <div>
-                    {task.reccurrence.weekDays
+                    {task.recurrence.weekDays
                       ?.map((day) => WEEKS[day])
                       .join(', ')}
                   </div>
                 </div>
               )}
             </>
-          ) : task.reccurrence.type === RECURRENCE.MONTHLY ? (
+          ) : task.recurrence.type === RECURRENCE.MONTHLY ? (
             <>
               <MonthlyDatesSelector
-                value={task.reccurrence}
-                onChange={(reccurrence) =>
+                value={task.recurrence}
+                onChange={(recurrence) =>
                   setTask((pre) => ({
                     ...pre,
-                    reccurrence,
+                    recurrence,
                   }))
                 }
                 open={openSelector}
                 setOpen={setOpenSelector}
               />
-              {!!task.reccurrence.dates.length && (
+              {!!task.recurrence.dates.length && (
                 <div className={styles.selectedWeekdays}>
                   <div className={styles.label}>Selected Dates:</div>
                   <div className={styles.value}>
-                    {task.reccurrence.dates.join(', ')}
+                    {task.recurrence.dates.join(', ')}
                   </div>
-                  {task.reccurrence.invalidDateStrategy !==
+                  {task.recurrence.invalidDateStrategy !==
                   INVALID_DATE_STRATEGY.NONE ? (
                     <>
                       <div className={styles.label}>Missing date strategy:</div>
                       <div>
                         {
                           INVALID_DATE_STRATEGY_LABELS[
-                            task.reccurrence.invalidDateStrategy
+                            task.recurrence.invalidDateStrategy
                           ]
                         }
                       </div>
@@ -199,26 +200,26 @@ const TaskForm: React.FC<{ isEditMode: boolean }> = ({ isEditMode }) => {
                 </div>
               )}
             </>
-          ) : task.reccurrence.type === RECURRENCE.YEARLY ? (
+          ) : task.recurrence.type === RECURRENCE.YEARLY ? (
             <>
               <YearlyDateSelector
                 open={openSelector}
                 setOpen={setOpenSelector}
-                value={task.reccurrence}
-                onChange={(reccurrence) =>
+                value={task.recurrence}
+                onChange={(recurrence) =>
                   setTask((pre) => ({
                     ...pre,
-                    reccurrence,
+                    recurrence,
                   }))
                 }
               />
-              {!!Object.keys(task.reccurrence.monthAndDates).length && (
+              {!!Object.keys(task.recurrence.monthAndDates).length && (
                 <div className={styles.selectedWeekdays}>
                   <div className={styles.label}>Selected Dates:</div>
                   <div className={styles.value}>
-                    {Object.keys(task.reccurrence.monthAndDates)
+                    {Object.keys(task.recurrence.monthAndDates)
                       .map((month) =>
-                        (task.reccurrence as RecurrenceYearly).monthAndDates[
+                        (task.recurrence as RecurrenceYearly).monthAndDates[
                           Number(month) as MonthIndex
                         ]
                           ?.map(
@@ -229,14 +230,14 @@ const TaskForm: React.FC<{ isEditMode: boolean }> = ({ isEditMode }) => {
                       )
                       .join(', ')}
                   </div>
-                  {task.reccurrence.feb29Strategy !==
+                  {task.recurrence.feb29Strategy !==
                   INVALID_DATE_STRATEGY.NONE ? (
                     <>
                       <div className={styles.label}>Missing date strategy:</div>
                       <div>
                         {
                           INVALID_DATE_STRATEGY_LABELS[
-                            task.reccurrence.feb29Strategy
+                            task.recurrence.feb29Strategy
                           ]
                         }
                       </div>
@@ -355,7 +356,7 @@ const TaskForm: React.FC<{ isEditMode: boolean }> = ({ isEditMode }) => {
       {step !== 1 && (
         <button
           className={`${styles.fab} ${styles.prev} material-symbols-outlined`}
-          onClick={() => setSearchParams({ step: String(step - 1) })}
+          onClick={() => navigate(-1)}
         >
           west
         </button>

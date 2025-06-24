@@ -187,7 +187,7 @@ export const INITIAL_TASK: TaskReqBodyIF = {
   description: '',
   startTime: '',
   endTime: '',
-  reccurrence: {
+  recurrence: {
     type: RECURRENCE.DAILY,
   },
   removeIt: {

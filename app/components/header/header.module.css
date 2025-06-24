@@ -4,13 +4,12 @@
   transition-property: border-color;
   transition-duration: 0.2s;
   transition-timing-function: ease-in-out;
-  height: 50px;
+  height: 3.1875rem;
 }
 
 .header.default {
   justify-content: space-between;
   align-items: center;
-  padding: 0.75rem 1rem;
 }
 
 .header.taskList {
@@ -33,17 +32,6 @@
   font-size: 0.75rem;
 }
 
-.header.taskList .navBtn {
-  background: none;
-  border: none;
-  height: 100%;
-  width: 50px;
-}
-
-.header.taskList .navBtn:active {
-  background-color: var(--button-active-color);
-}
-
 .title {
   font-size: 1.2rem;
   font-weight: 400;
@@ -53,7 +41,13 @@
   transition-timing-function: ease-in-out;
 }
 
-.backButton {
+.headerButton {
   background: none;
   border: none;
+  width: 3.125rem;
+  height: 3.125rem;
+}
+
+.headerButton:active {
+  background-color: var(--button-active-color);
 }

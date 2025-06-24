@@ -1,5 +1,9 @@
-import type { RemoveAfterGivenDuration } from '~/types/task-types';
+import type {
+  DurationEnum,
+  RemoveAfterGivenDuration,
+} from '~/types/task-types';
 import { capitalize } from './string';
+import { DURATION_UNIT, REMOVE_TYPE } from '~/constants';
 
 export const getRelativeDayLabel: (dateEpoch: number) => string = (
   dateEpoch
@@ -69,7 +73,7 @@ export const to12HourFormat: (time24: string) => string = (time24) => {
 
   hour = hour % 12 || 12;
 
-  const hourStrFinal = hourStr ? hour.toString().padStart(2, '0') : '00';
+  const hourStrFinal = hourStr ? hour : '00';
 
   return `${hourStrFinal}:${minute} ${suffix}`;
 };
@@ -161,4 +165,91 @@ export const getBlockOf18: (input: number) => {
     blockStart,
     block: Array.from({ length: 18 }, (_, i) => blockStart + i),
   };
+};
+
+export const getDuration: (epoch1: number, epoch2: number) => string = (
+  epoch1,
+  epoch2
+) => {
+  const diffMs = Math.abs(epoch2 - epoch1);
+
+  const minutes = Math.floor(diffMs / (1000 * 60)) % 60;
+  const hours = Math.floor(diffMs / (1000 * 60 * 60)) % 24;
+  const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+  const durArr = [];
+
+  if (days) {
+    durArr.push(`${days} day${days === 1 ? 's' : ''}`);
+  }
+
+  if (hours) {
+    durArr.push(`${hours} hour${hours === 1 ? 's' : ''}`);
+  }
+
+  if (minutes) {
+    durArr.push(`${minutes} minute${minutes === 1 ? 's' : ''}`);
+  }
+
+  let str = '';
+
+  if (durArr.length > 1) {
+    str = durArr.slice(0, -1).join(', ');
+    str = `${str} and ${durArr.at(-1)}`;
+  } else {
+    str = durArr.toString();
+  }
+
+  return str;
+};
+
+export const getTimeDuration: (startTime: string, endTime: string) => string = (
+  startTime,
+  endTime
+) => {
+  const [startHours, startMinutes] = startTime.split(':').map(Number);
+  const [endHours, endMinutes] = endTime.split(':').map(Number);
+
+  const startTotalMinutes = startHours * 60 + startMinutes;
+  const endTotalMinutes = endHours * 60 + endMinutes;
+
+  let diffMinutes = endTotalMinutes - startTotalMinutes;
+  if (diffMinutes < 0) {
+    diffMinutes += 24 * 60;
+  }
+
+  const hours = Math.floor(diffMinutes / 60);
+
+  const minutes = diffMinutes % 60;
+
+  const hoursStr = hours ? `${hours} hour${hours === 1 ? '' : 's'}` : '';
+  const minutesStr = minutes
+    ? `${minutes} minute${minutes === 1 ? '' : 's'}`
+    : '';
+
+  return `${hoursStr}${hoursStr && minutesStr ? ' and ' : ''}${minutesStr}`;
+};
+
+export const getDateAfterDuration: (
+  fromEpoch: number,
+  duration: RemoveAfterGivenDuration
+) => number = (fromEpoch, duration) => {
+  const date = new Date(fromEpoch);
+
+  switch (duration.unit) {
+    case DURATION_UNIT.DAY:
+      date.setDate(date.getDate() + duration.nValue);
+      break;
+    case DURATION_UNIT.WEEK:
+      date.setDate(date.getDate() + duration.nValue * 7);
+      break;
+    case DURATION_UNIT.MONTH:
+      date.setMonth(date.getMonth() + duration.nValue);
+      break;
+    case DURATION_UNIT.YEAR:
+      date.setFullYear(date.getFullYear() + duration.nValue);
+      break;
+  }
+
+  return date.getTime();
 };

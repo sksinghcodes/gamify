@@ -11,14 +11,14 @@ import StrategyInfo from '../stratefy-info/stratefy-info';
 
 interface MonthlyDatesSelectorProps {
   value: RecurrenceMonthly;
-  onChange: (reccurrence: RecurrenceMonthly) => void;
+  onChange: (recurrence: RecurrenceMonthly) => void;
   open: boolean;
   setOpen: (open: boolean) => void;
 }
 
 interface MonthlyDatesSelectorModalProps {
   value: RecurrenceMonthly;
-  onDone: (reccurrence: RecurrenceMonthly) => void;
+  onDone: (recurrence: RecurrenceMonthly) => void;
 }
 
 const MonthlyDatesSelectorModal: React.FC<MonthlyDatesSelectorModalProps> = ({

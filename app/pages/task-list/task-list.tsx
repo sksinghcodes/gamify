@@ -2,6 +2,12 @@ import { Fragment } from 'react';
 import styles from './task-list.module.css';
 import { ROUTES } from '~/constants';
 import { useNavigate } from 'react-router';
+import {
+  DurationEnum,
+  InvalidDateStrategy,
+  RecurrenceEnum,
+  RemoveTypeEnum,
+} from '~/types/task-types';
 
 export const meta = () => {
   return [{ title: ROUTES.TASK_LIST.title }];
@@ -9,55 +15,242 @@ export const meta = () => {
 
 const TaskList = () => {
   const navigate = useNavigate();
+  const now = new Date(
+    new Date().getFullYear(),
+    new Date().getMonth(),
+    new Date().getDate()
+  ).getTime();
 
   const tasks = [
+    // DAILY + NEVER
     {
-      id: '1',
-      name: 'Not yet scorable',
+      id: 'task-1',
+      name: 'Daily Standup',
+      description: 'Daily quick sync with team',
+      startTime: '09:00',
+      endTime: '09:15',
+      recurrence: {
+        type: RecurrenceEnum.DAILY,
+      },
+      removeIt: {
+        type: RemoveTypeEnum.NEVER,
+      },
+      score: null,
       isScorable: false,
-      start: '06:30',
-      end: '07:15',
+    },
+
+    // DAILY + AFTER_GIVEN_DURATION
+    {
+      id: 'task-2',
+      name: 'Daily Meditation',
+      description: '10 minutes mindfulness',
+      startTime: '07:00',
+      endTime: '07:10',
+      recurrence: {
+        type: RecurrenceEnum.DAILY,
+      },
+      removeIt: {
+        type: RemoveTypeEnum.AFTER_GIVEN_DURATION,
+        unit: DurationEnum.DAY,
+        nValue: 10,
+      },
       score: null,
-    },
-    {
-      id: '2',
-      name: 'Scorable',
       isScorable: true,
-      start: '07:15',
-      end: '07:30',
+    },
+
+    // DAILY + AFTER_GIVEN_DATE
+    {
+      id: 'task-3',
+      name: 'Daily Coding',
+      description: 'Practice coding problems practice coding problems',
+      startTime: '08:00',
+      endTime: '09:00',
+      recurrence: {
+        type: RecurrenceEnum.DAILY,
+      },
+      removeIt: {
+        type: RemoveTypeEnum.AFTER_GIVEN_DATE,
+        dateEpoch: now + 7 * 24 * 60 * 60 * 1000,
+      },
+      score: 30,
+      isScorable: true,
+    },
+
+    // WEEKLY + NEVER
+    {
+      id: 'task-4',
+      name: 'Weekly Review',
+      description: 'Plan and review goals',
+      startTime: '20:00',
+      endTime: '21:00',
+      recurrence: {
+        type: RecurrenceEnum.WEEKLY,
+        weekDays: [0, 6], // Sunday, Saturday
+      },
+      removeIt: {
+        type: RemoveTypeEnum.NEVER,
+      },
+      score: 40,
+      isScorable: true,
+    },
+
+    // WEEKLY + AFTER_GIVEN_DURATION
+    {
+      id: 'task-5',
+      name: 'Weekly Yoga',
+      description: 'Yoga on weekdays',
+      startTime: '18:00',
+      endTime: '19:00',
+      recurrence: {
+        type: RecurrenceEnum.WEEKLY,
+        weekDays: [1, 3, 5],
+      },
+      removeIt: {
+        type: RemoveTypeEnum.AFTER_GIVEN_DURATION,
+        unit: DurationEnum.WEEK,
+        nValue: 5,
+      },
+      score: 50,
+      isScorable: true,
+    },
+
+    // WEEKLY + AFTER_GIVEN_DATE
+    {
+      id: 'task-6',
+      name: 'Weekly Study Group',
+      description: 'Meet up for study sessions',
+      startTime: '19:00',
+      endTime: '21:00',
+      recurrence: {
+        type: RecurrenceEnum.WEEKLY,
+        weekDays: [2],
+      },
+      removeIt: {
+        type: RemoveTypeEnum.AFTER_GIVEN_DATE,
+        dateEpoch: now + 14 * 24 * 60 * 60 * 1000,
+      },
+      score: 60,
+      isScorable: true,
+    },
+
+    // MONTHLY + NEVER
+    {
+      id: 'task-7',
+      name: 'Monthly Report',
+      description: 'Generate project reports',
+      startTime: '10:00',
+      endTime: '11:00',
+      recurrence: {
+        type: RecurrenceEnum.MONTHLY,
+        dates: [1],
+        invalidDateStrategy: InvalidDateStrategy.LAST_VALID,
+      },
+      removeIt: {
+        type: RemoveTypeEnum.NEVER,
+      },
+      score: 70,
+      isScorable: true,
+    },
+
+    // MONTHLY + AFTER_GIVEN_DURATION
+    {
+      id: 'task-8',
+      name: 'Monthly Cleanup',
+      description: 'Declutter workspace',
+      startTime: '16:00',
+      endTime: '17:00',
+      recurrence: {
+        type: RecurrenceEnum.MONTHLY,
+        dates: [15, 30],
+        invalidDateStrategy: InvalidDateStrategy.SKIP,
+      },
+      removeIt: {
+        type: RemoveTypeEnum.AFTER_GIVEN_DURATION,
+        unit: DurationEnum.MONTH,
+        nValue: 2,
+      },
+      score: 80,
+      isScorable: true,
+    },
+
+    // MONTHLY + AFTER_GIVEN_DATE
+    {
+      id: 'task-9',
+      name: 'Monthly Budget Review',
+      description: 'Review finances',
+      startTime: '20:00',
+      endTime: '21:00',
+      recurrence: {
+        type: RecurrenceEnum.MONTHLY,
+        dates: [29],
+        invalidDateStrategy: InvalidDateStrategy.NONE,
+      },
+      removeIt: {
+        type: RemoveTypeEnum.AFTER_GIVEN_DATE,
+        dateEpoch: now + 30 * 24 * 60 * 60 * 1000,
+      },
+      score: 90,
+      isScorable: true,
+    },
+
+    // YEARLY + NEVER
+    {
+      id: 'task-10',
+      name: 'Yearly Backup',
+      description: 'System-wide backup',
+      startTime: '02:00',
+      endTime: '04:00',
+      recurrence: {
+        type: RecurrenceEnum.YEARLY,
+        monthAndDates: { 11: [31] }, // December 31
+        feb29Strategy: InvalidDateStrategy.SKIP,
+      },
+      removeIt: {
+        type: RemoveTypeEnum.NEVER,
+      },
+      score: 7,
+      isScorable: true,
+    },
+
+    // YEARLY + AFTER_GIVEN_DURATION
+    {
+      id: 'task-11',
+      name: 'Yearly Health Checkup',
+      description: 'Full body checkup',
+      startTime: '09:00',
+      endTime: '11:00',
+      recurrence: {
+        type: RecurrenceEnum.YEARLY,
+        monthAndDates: { 0: [15], 6: [15] }, // Jan 15, July 15
+        feb29Strategy: InvalidDateStrategy.LAST_VALID,
+      },
+      removeIt: {
+        type: RemoveTypeEnum.AFTER_GIVEN_DURATION,
+        unit: DurationEnum.YEAR,
+        nValue: 3,
+      },
       score: null,
+      isScorable: false,
     },
+
+    // YEARLY + AFTER_GIVEN_DATE
     {
-      id: '3',
-      name: 'Green: High score',
+      id: 'task-12',
+      name: 'Leap Day Party',
+      description: 'Party on Feb 29!',
+      startTime: '17:00',
+      endTime: '23:59',
+      recurrence: {
+        type: RecurrenceEnum.YEARLY,
+        monthAndDates: { 1: [29] },
+        feb29Strategy: InvalidDateStrategy.NONE,
+      },
+      removeIt: {
+        type: RemoveTypeEnum.AFTER_GIVEN_DATE,
+        dateEpoch: now + 365 * 24 * 60 * 60 * 1000,
+      },
+      score: null,
       isScorable: true,
-      start: '10:00',
-      end: '11:30',
-      score: 82,
-    },
-    {
-      id: '4',
-      name: 'Yellow: Moderate score',
-      isScorable: true,
-      start: '13:00',
-      end: '14:00',
-      score: 65,
-    },
-    {
-      id: '5',
-      name: 'Orange: Low score',
-      isScorable: true,
-      start: '15:00',
-      end: '15:45',
-      score: 43,
-    },
-    {
-      id: '6',
-      name: 'Red: Very low score',
-      isScorable: true,
-      start: '17:00',
-      end: '17:30',
-      score: 18,
     },
   ];
 
@@ -86,7 +279,7 @@ const TaskList = () => {
           <div className={styles.emptyState}>
             <p>No tasks for today.</p>
             <button
-              onClick={() => navigate('/create')}
+              onClick={() => navigate(ROUTES.CREATE_TASK.path)}
               className={styles.addTaskBtn}
             >
               + Create Task
@@ -99,12 +292,12 @@ const TaskList = () => {
               <div key={task.id} className={styles.taskCard}>
                 <button
                   className={styles.details}
-                  onClick={() => navigate(`/task/${task.id}`)}
+                  onClick={() => navigate(ROUTES.TASK_PREVIEW.path)}
                 >
                   <div className={styles.taskName}>{task.name}</div>
                   <div className={styles.meta}>
-                    {task.start} – {task.end} •{' '}
-                    {formatDuration(task.start, task.end)}
+                    {task.startTime} – {task.endTime} •{' '}
+                    {formatDuration(task.startTime, task.endTime)}
                   </div>
                 </button>
                 <button

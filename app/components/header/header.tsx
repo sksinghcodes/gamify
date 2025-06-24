@@ -10,11 +10,13 @@ import {
 import { useState } from 'react';
 
 import { HeaderType } from '~/types/common-types';
+import DateSelector from '../date-selector/date-selector';
 
 const Header = () => {
   const navigate = useNavigate();
   const pageData = ROUTES_BY_PATH[location.pathname];
   const [dateEpoch, setDateEpoch] = useState<number>(getTodayEpoch());
+  const [openDateSelector, setOpenDateSelector] = useState<boolean>(false);
 
   const adjacentDay = getRelativeDayLabel(dateEpoch);
   const dateString = getDateString(dateEpoch, true);
@@ -34,7 +36,7 @@ const Header = () => {
   return pageData.headerType === HeaderType.DEFAULT ? (
     <header className={`${styles.header} ${styles.default}`}>
       <button
-        className={`${styles.backButton} material-symbols-outlined`}
+        className={`${styles.headerButton} material-symbols-outlined`}
         onClick={() => navigate(-1)}
       >
         arrow_back
@@ -46,12 +48,12 @@ const Header = () => {
   ) : pageData.headerType === HeaderType.TASK_LIST ? (
     <header className={`${styles.header} ${styles.taskList}`}>
       <button
-        className={`${styles.navBtn} material-symbols-outlined`}
+        className={`${styles.headerButton} material-symbols-outlined`}
         onClick={setPrevDate}
       >
         chevron_left
       </button>
-      <div className={styles.date}>
+      <div className={styles.date} onClick={() => setOpenDateSelector(true)}>
         <div className={styles.dateRel}>
           {adjacentDay ? adjacentDay : dateString}
         </div>
@@ -60,13 +62,39 @@ const Header = () => {
         ) : null}
       </div>
       <button
-        className={`${styles.navBtn} material-symbols-outlined`}
+        className={`${styles.headerButton} material-symbols-outlined`}
         onClick={setNextDate}
       >
         chevron_right
       </button>
+      <DateSelector
+        value={dateEpoch}
+        onChange={(date) => setDateEpoch(date === null ? dateEpoch : date)}
+        open={openDateSelector}
+        setOpen={setOpenDateSelector}
+      />
     </header>
-  ) : null;
+  ) : pageData.headerType === HeaderType.TASK_PREVIEW ? (
+    <header className={`${styles.header} ${styles.default}`}>
+      <button
+        className={`${styles.headerButton} material-symbols-outlined`}
+        onClick={() => navigate(-1)}
+      >
+        arrow_back
+      </button>
+
+      <div>
+        <button className={`${styles.headerButton} material-symbols-outlined`}>
+          edit
+        </button>
+        <button className={`${styles.headerButton} material-symbols-outlined`}>
+          delete
+        </button>
+      </div>
+    </header>
+  ) : (
+    <></>
+  );
 };
 
 export default Header;

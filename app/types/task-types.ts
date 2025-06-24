@@ -82,7 +82,7 @@ export interface TaskReqBodyIF {
   description: string;
   startTime: string;
   endTime: string;
-  reccurrence:
+  recurrence:
     | RecurrenceDaily
     | RecurrenceWeekly
     | RecurrenceMonthly
@@ -94,6 +94,7 @@ export interface TaskIF extends TaskReqBodyIF {
   id: string;
   score: null | number;
   isScorable: boolean;
+  createdAt: number;
 }
 
 export interface InitialRecurrenceIF {
