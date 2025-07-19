@@ -92,9 +92,7 @@ const Header = () => {
         </button>
       </div>
     </header>
-  ) : (
-    <></>
-  );
+  ) : null;
 };
 
 export default Header;

@@ -27,8 +27,8 @@
 }
 
 .weekday.active {
-  color: var(--primary-accent);
-  border: 1px solid var(--primary-accent);
+  color: var(--primary-action-color);
+  border: 1px solid var(--primary-action-color);
   font-weight: 600;
 }
 

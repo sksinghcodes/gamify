@@ -13,7 +13,7 @@
   width: 64px;
   height: 64px;
   border-radius: 50%;
-  background-color: var(--primary-accent);
+  background-color: var(--primary-action-color);
   display: flex;
   align-items: center;
   justify-content: center;

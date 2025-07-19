@@ -7,12 +7,17 @@ export enum RecurrenceEnum {
 
 export enum RemoveTypeEnum {
   NEVER = 'NEVER',
-  AFTER_GIVEN_DURATION = 'AFTER_GIVEN_DURATION',
   AFTER_GIVEN_DATE = 'AFTER_GIVEN_DATE',
 }
 
 export enum DurationEnum {
   DAY = 'DAY',
+  WEEK = 'WEEK',
+  MONTH = 'MONTH',
+  YEAR = 'YEAR',
+}
+
+export enum UnitEnum {
   WEEK = 'WEEK',
   MONTH = 'MONTH',
   YEAR = 'YEAR',
@@ -26,12 +31,6 @@ export enum InvalidDateStrategy {
 
 export interface RemoveNever {
   type: RemoveTypeEnum.NEVER;
-}
-
-export interface RemoveAfterGivenDuration {
-  type: RemoveTypeEnum.AFTER_GIVEN_DURATION;
-  unit: DurationEnum;
-  nValue: number;
 }
 
 export interface RemoveAfterGivenDate {
@@ -77,23 +76,33 @@ export interface RecurrenceYearly {
   feb29Strategy: InvalidDateStrategy;
 }
 
-export interface TaskReqBodyIF {
+export interface TaskBase {
   name: string;
   description: string;
   startTime: string;
   endTime: string;
+}
+
+export interface TaskRecord extends TaskBase {
+  id: string;
+  taskId: string;
+  createdAt: number;
+  recurrenceType: RecurrenceEnum;
+  score: null | number; // null when isScorable is false, null or number when its true
+  isScorable: boolean;
+}
+
+export interface TaskReqBody extends TaskBase {
   recurrence:
     | RecurrenceDaily
     | RecurrenceWeekly
     | RecurrenceMonthly
     | RecurrenceYearly;
-  removeIt: RemoveNever | RemoveAfterGivenDuration | RemoveAfterGivenDate;
+  removeIt: RemoveNever | RemoveAfterGivenDate;
 }
 
-export interface TaskIF extends TaskReqBodyIF {
+export interface Task extends TaskReqBody {
   id: string;
-  score: null | number;
-  isScorable: boolean;
   createdAt: number;
 }
 
@@ -103,6 +112,30 @@ export interface InitialRecurrenceIF {
   MONTHLY: RecurrenceMonthly;
   YEARLY: RecurrenceYearly;
   NEVER: RemoveNever;
-  AFTER_GIVEN_DURATION: RemoveAfterGivenDuration;
   AFTER_GIVEN_DATE: RemoveAfterGivenDate;
+}
+
+export interface WeekValue {
+  type: UnitEnum.WEEK;
+  year: number;
+  week: number;
+}
+
+export interface MonthValue {
+  type: UnitEnum.MONTH;
+  year: number;
+  month: MonthIndex;
+}
+
+export interface YearValue {
+  type: UnitEnum.YEAR;
+  year: number;
+}
+
+export type PriodCarouselValue = WeekValue | MonthValue | YearValue;
+
+export interface InitialUnitValues {
+  WEEK: WeekValue;
+  MONTH: MonthValue;
+  YEAR: YearValue;
 }

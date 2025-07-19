@@ -14,7 +14,7 @@ import type {
   InitialRecurrenceIF,
   MonthIndex,
   RecurrenceYearly,
-  TaskReqBodyIF,
+  TaskReqBody,
 } from '~/types/task-types';
 import styles from './task-form.module.css';
 import TimeSelector, {
@@ -26,11 +26,10 @@ import WeekdaySelector from '~/components/weekday-selector/weekday-selector';
 import MonthlyDatesSelector from '~/components/monthly-dates-selector/monthly-dates-selector';
 import YearlyDateSelector from '../yearly-date-selector/yearly-date-selector';
 import DateSelector from '../date-selector/date-selector';
-import { getDateString, getDurationString } from '~/utils/date';
-import DurationSelector from '../duration-selector/duration-selector';
+import { getDateString } from '~/utils/date';
 
 const TaskForm: React.FC<{ isEditMode: boolean }> = ({ isEditMode }) => {
-  const [task, setTask] = useState<TaskReqBodyIF>(INITIAL_TASK);
+  const [task, setTask] = useState<TaskReqBody>(INITIAL_TASK);
   const [searchParams, setSearchParams] = useSearchParams();
   const [openSelector, setOpenSelector] = useState(false);
   const [showDateSelector, setShowDateSelector] = useState(false);
@@ -312,41 +311,6 @@ const TaskForm: React.FC<{ isEditMode: boolean }> = ({ isEditMode }) => {
                 }}
                 open={showDateSelector}
                 setOpen={setShowDateSelector}
-              />
-            </>
-          )}
-          {task.removeIt.type === REMOVE_TYPE.AFTER_GIVEN_DURATION && (
-            <>
-              <label
-                className={styles.dateInputWrap}
-                onClick={() => setShowDurationSelector(true)}
-              >
-                <input
-                  type="text"
-                  placeholder="Select Duration"
-                  name="select-duration"
-                  readOnly
-                  className={`${styles.dateInput} ${styles.inputText}`}
-                  value={getDurationString(task.removeIt)}
-                />
-                <span
-                  className={`material-symbols-outlined ${styles.dateIcon}`}
-                >
-                  hourglass
-                </span>
-              </label>
-              <DurationSelector
-                value={task.removeIt}
-                onChange={(duration) =>
-                  setTask((pre) => {
-                    return {
-                      ...pre,
-                      removeIt: { ...duration },
-                    };
-                  })
-                }
-                open={showDurationSelector}
-                setOpen={setShowDurationSelector}
               />
             </>
           )}

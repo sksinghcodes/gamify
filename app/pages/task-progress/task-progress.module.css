@@ -1,0 +1,178 @@
+.wrapper {
+  padding: 1rem 1rem 6rem;
+}
+
+.title {
+  font-size: 1.3rem;
+  font-weight: 300;
+  color: var(--text-color-hard);
+  margin-bottom: 0.75rem;
+}
+
+.table {
+  width: 100%;
+}
+
+.cell {
+  padding: 0.75rem 0;
+}
+
+.dateCell {
+  width: 140px;
+}
+
+.date {
+  color: var(--text-color-soft);
+}
+
+.scoreWrap {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.scoreText {
+  color: var(--primary-action-color);
+  font-weight: 300;
+  width: 1.75rem;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.fluidBar {
+  border: 1px solid var(--primary-action-color);
+  width: 100%;
+  padding: 2px;
+}
+
+.fluid {
+  height: 5px;
+  background-color: var(--primary-action-color);
+}
+
+.scoreWrap.poor .scoreText {
+  color: var(--poor-text-color);
+}
+
+.scoreWrap.poor .fluidBar {
+  border: 1px solid var(--poor-border-color);
+}
+
+.scoreWrap.poor .fluid {
+  background-color: var(--poor-border-color);
+}
+
+.scoreWrap.fair .scoreText {
+  color: var(--fair-text-color);
+}
+
+.scoreWrap.fair .fluidBar {
+  border: 1px solid var(--fair-border-color);
+}
+
+.scoreWrap.fair .fluid {
+  background-color: var(--fair-border-color);
+}
+
+.scoreWrap.good .scoreText {
+  color: var(--good-text-color);
+}
+
+.scoreWrap.good .fluidBar {
+  border: 1px solid var(--good-border-color);
+}
+
+.scoreWrap.good .fluid {
+  background-color: var(--good-border-color);
+}
+
+.scoreWrap.excellent .scoreText {
+  color: var(--excellent-text-color);
+}
+
+.scoreWrap.excellent .fluidBar {
+  border: 1px solid var(--excellent-border-color);
+}
+
+.scoreWrap.excellent .fluid {
+  background-color: var(--excellent-border-color);
+}
+
+.chartWrap {
+  display: flex;
+  margin: 0 -1rem 0 -0.5rem;
+  padding-top: 0.7rem;
+}
+
+.xAxis {
+  width: calc(100% - 35px);
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-top: 7px;
+  padding-right: 1rem;
+}
+
+.yAxis {
+  width: 35px;
+}
+
+.viewByUnits {
+  display: flex;
+  align-items: center;
+}
+
+.viewByUnit {
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--border-color);
+  color: var(--text-color-soft);
+  font-size: 0.8rem;
+}
+
+.viewByUnit.active {
+  border-color: var(--primary-action-color);
+  color: var(--primary-action-color);
+}
+
+.viewByUnit:nth-child(2) {
+  border-radius: 1rem 0 0 1rem;
+  padding-left: 1.3rem;
+}
+
+.viewByUnit:last-child {
+  border-radius: 0 1rem 1rem 0;
+  padding-right: 1.3rem;
+}
+
+.viewByLabel {
+  color: var(--text-color-soft);
+  margin-right: 1rem;
+  padding-bottom: 0.1rem;
+}
+
+.periodCarouselWrap {
+  padding: 1rem 0 0.5rem;
+}
+
+.viewModa {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.modeButton {
+  border: none;
+  background-color: transparent;
+  padding: 0;
+  color: var(--icon-color);
+  opacity: 0.4;
+  font-size: 2rem;
+  width: 2.5rem;
+  height: 2.5rem;
+}
+
+.modeButton:active {
+  background-color: var(--button-active-color);
+}
+
+.modeButton.active {
+  opacity: 0.8;
+}

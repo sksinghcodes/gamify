@@ -23,6 +23,7 @@ export enum RoutesEnum {
   CREATE_TASK = '/create-task',
   EDIT_TASK = '/edit-task',
   PROGRESS_OVERVIEW = '/progress-overview',
+  TASK_PROGRESS = '/task-progress',
   PROFILE = '/profile',
   SETTINGS = '/settings',
   SIGN_IN = '/auth/sign-in',

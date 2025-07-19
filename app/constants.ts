@@ -5,8 +5,9 @@ import {
   InvalidDateStrategy,
   RecurrenceEnum,
   RemoveTypeEnum,
+  UnitEnum,
   type InitialRecurrenceIF,
-  type TaskReqBodyIF,
+  type TaskReqBody,
 } from './types/task-types';
 
 export const MONTHS = [
@@ -56,6 +57,12 @@ export const ROUTES: RoutesIF = {
     showBottomNav: true,
     path: RoutesEnum.TASK_LIST,
     title: 'GAMIFY',
+  },
+  TASK_PROGRESS: {
+    headerType: HeaderType.DEFAULT,
+    showBottomNav: false,
+    path: RoutesEnum.TASK_PROGRESS,
+    title: 'Task Progress',
   },
   TASK_PREVIEW: {
     headerType: HeaderType.TASK_PREVIEW,
@@ -149,10 +156,20 @@ export const DURATION_UNIT = {
   YEAR: DurationEnum.YEAR as DurationEnum.YEAR,
 };
 
+export const VIEW_BY_UNITS_MAP = {
+  WEEK: UnitEnum.WEEK as UnitEnum.WEEK,
+  MONTH: UnitEnum.MONTH as UnitEnum.MONTH,
+  YEAR: UnitEnum.YEAR as UnitEnum.YEAR,
+};
+
+export const VIEW_BY_UNITS = [
+  VIEW_BY_UNITS_MAP.WEEK,
+  VIEW_BY_UNITS_MAP.MONTH,
+  VIEW_BY_UNITS_MAP.YEAR,
+];
+
 export const REMOVE_TYPE = {
   NEVER: RemoveTypeEnum.NEVER as RemoveTypeEnum.NEVER,
-  AFTER_GIVEN_DURATION:
-    RemoveTypeEnum.AFTER_GIVEN_DURATION as RemoveTypeEnum.AFTER_GIVEN_DURATION,
   AFTER_GIVEN_DATE:
     RemoveTypeEnum.AFTER_GIVEN_DATE as RemoveTypeEnum.AFTER_GIVEN_DATE,
 };
@@ -178,11 +195,10 @@ export const INVALID_DATE_STRATEGY_LABELS = {
 
 export const REMOVE_TYPE_LABELS = {
   [RemoveTypeEnum.NEVER]: "Don't remove it automatically",
-  [RemoveTypeEnum.AFTER_GIVEN_DURATION]: 'Remove it after a duration',
   [RemoveTypeEnum.AFTER_GIVEN_DATE]: 'Remove it after a date',
 };
 
-export const INITIAL_TASK: TaskReqBodyIF = {
+export const INITIAL_TASK: TaskReqBody = {
   name: '',
   description: '',
   startTime: '',
@@ -215,11 +231,6 @@ export const INITIAL_RECURRENCE_AND_REMOVE: InitialRecurrenceIF = {
   },
   NEVER: {
     type: REMOVE_TYPE.NEVER,
-  },
-  AFTER_GIVEN_DURATION: {
-    type: REMOVE_TYPE.AFTER_GIVEN_DURATION,
-    unit: DURATION_UNIT.DAY,
-    nValue: 5,
   },
   AFTER_GIVEN_DATE: {
     type: REMOVE_TYPE.AFTER_GIVEN_DATE,

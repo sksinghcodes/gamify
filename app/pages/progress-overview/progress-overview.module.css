@@ -31,7 +31,7 @@ h2 {
 }
 
 .streakOn {
-  background-color: var(--primary-accent);
+  background-color: var(--primary-action-color);
 }
 
 .streakOff {

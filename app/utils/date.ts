@@ -1,9 +1,12 @@
 import type {
-  DurationEnum,
-  RemoveAfterGivenDuration,
+  MonthIndex,
+  MonthValue,
+  PriodCarouselValue,
+  UnitEnum,
+  WeekValue,
+  YearValue,
 } from '~/types/task-types';
-import { capitalize } from './string';
-import { DURATION_UNIT, REMOVE_TYPE } from '~/constants';
+import { MONTHS, VIEW_BY_UNITS_MAP } from '~/constants';
 
 export const getRelativeDayLabel: (dateEpoch: number) => string = (
   dateEpoch
@@ -45,13 +48,6 @@ export const getDateString: (
   }
 
   return new Intl.DateTimeFormat('en-US', options).format(new Date(dateEpoch));
-};
-
-export const getDurationString: (input: RemoveAfterGivenDuration) => string = (
-  input
-) => {
-  const suffix = input.nValue === 1 ? '' : 's';
-  return `${input.nValue} ${capitalize(input.unit)}${suffix}`;
 };
 
 export const getTodayEpoch: () => number = () => {
@@ -230,26 +226,55 @@ export const getTimeDuration: (startTime: string, endTime: string) => string = (
   return `${hoursStr}${hoursStr && minutesStr ? ' and ' : ''}${minutesStr}`;
 };
 
-export const getDateAfterDuration: (
-  fromEpoch: number,
-  duration: RemoveAfterGivenDuration
-) => number = (fromEpoch, duration) => {
-  const date = new Date(fromEpoch);
+export const getWeekNumber: (dateEpoch: number) => number = (dateEpoch) => {
+  const date = new Date(dateEpoch);
+  const tempDate = new Date(
+    Date.UTC(date.getFullYear(), date.getMonth(), date.getDate())
+  );
+  const dayNum = tempDate.getUTCDay() || 7; // Make Sunday (0) into 7
+  tempDate.setUTCDate(tempDate.getUTCDate() + 4 - dayNum); // Set to nearest Thursday
+  const yearStart = new Date(Date.UTC(tempDate.getUTCFullYear(), 0, 1));
+  const weekNum = Math.ceil(
+    ((tempDate.getTime() - yearStart.getTime()) / 86400000 + 1) / 7
+  );
+  return weekNum;
+};
 
-  switch (duration.unit) {
-    case DURATION_UNIT.DAY:
-      date.setDate(date.getDate() + duration.nValue);
-      break;
-    case DURATION_UNIT.WEEK:
-      date.setDate(date.getDate() + duration.nValue * 7);
-      break;
-    case DURATION_UNIT.MONTH:
-      date.setMonth(date.getMonth() + duration.nValue);
-      break;
-    case DURATION_UNIT.YEAR:
-      date.setFullYear(date.getFullYear() + duration.nValue);
-      break;
+export const getUnitValue: (type: UnitEnum) => PriodCarouselValue = (type) => {
+  const returnValue: any = {
+    type: type,
+    year: new Date().getFullYear(),
+  };
+
+  if (type === VIEW_BY_UNITS_MAP.WEEK) {
+    returnValue.week = getWeekNumber(new Date().getTime());
+    return returnValue as WeekValue;
   }
 
-  return date.getTime();
+  if (type === VIEW_BY_UNITS_MAP.MONTH) {
+    returnValue.month = new Date().getMonth() as MonthIndex;
+    return returnValue as MonthValue;
+  }
+
+  return returnValue as YearValue;
+};
+
+export const getDateUnitStr: (value: PriodCarouselValue) => string = (
+  value
+) => {
+  if (value.type === VIEW_BY_UNITS_MAP.WEEK) {
+    return `Week ${value.week}, ${value.year}`;
+  }
+
+  if (value.type === VIEW_BY_UNITS_MAP.MONTH) {
+    return `${MONTHS[value.month]}, ${value.year}`;
+  }
+
+  return `${value.year}`;
+};
+
+export const getMaxWeeks: (year: number) => number = (year) => {
+  const jan1 = new Date(year, 0, 1).getDay(); // Sunday = 0
+  const dec31 = new Date(year, 11, 31).getDay();
+  return jan1 === 4 || dec31 === 4 ? 53 : 52;
 };

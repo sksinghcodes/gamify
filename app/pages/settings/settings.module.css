@@ -75,7 +75,7 @@
 }
 
 input:checked + .slider {
-  background-color: var(--primary-accent);
+  background-color: var(--primary-action-color);
 }
 
 input:checked + .slider:before {

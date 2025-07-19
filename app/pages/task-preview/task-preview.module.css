@@ -55,17 +55,18 @@
 
 .squareBox,
 .rectBox {
-  height: 1.5rem;
+  height: 2rem;
   display: flex;
   align-items: center;
   justify-content: center;
   color: var(--text-color-soft);
   font-size: 0.8rem;
   border: 1px solid var(--border-color);
+  padding-top: 0.1rem;
 }
 
 .squareBox {
-  width: 1.5rem;
+  width: 2rem;
 }
 
 .squareBox.active {

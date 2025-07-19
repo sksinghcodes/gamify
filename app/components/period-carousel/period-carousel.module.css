@@ -1,0 +1,28 @@
+.priodCarousel {
+  display: flex;
+}
+
+.nav {
+  width: 2.2rem;
+  height: 2.2rem;
+  border-radius: 0;
+  border: 1px solid var(--border-color);
+  color: var(--text-color-soft);
+  background-color: transparent;
+}
+
+.nav:active {
+  background-color: var(--button-active-color);
+}
+
+.preview {
+  flex-grow: 1;
+  border: 1px solid var(--border-color);
+  border-left: 0;
+  border-right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-color-soft);
+  font-size: 0.8rem;
+}

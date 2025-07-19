@@ -9,9 +9,8 @@ html {
   --text-color-hard: #333333;
   --text-color-soft: #636363;
   --primary-action-color: #3a8dff;
-  --primary-accent: #4c7eff;
   --progress-bg: #00000021;
-  --border-color: #0003;
+  --border-color: #c1c1c1;
   --icon-color: #000;
   --button-active-color: #e3e3e3;
   --icon-font-weight: 200;
@@ -44,9 +43,8 @@ html {
     --text-color-hard: #e4e4e4;
     --text-color-soft: #a0a0a0;
     --primary-action-color: #3a8dff;
-    --primary-accent: #4c7eff;
     --progress-bg: #e0e0e024;
-    --border-color: #fff2;
+    --border-color: #323232;
     --icon-color: #fff;
     --button-active-color: #1f1f1f;
     --icon-font-weight: 100;
@@ -80,9 +78,8 @@ html {
   --text-color-hard: #333333;
   --text-color-soft: #636363;
   --primary-action-color: #3a8dff;
-  --primary-accent: #4c7eff;
   --progress-bg: #00000021;
-  --border-color: #0003;
+  --border-color: #c1c1c1;
   --icon-color: #000;
   --button-active-color: #e3e3e3;
   --icon-font-weight: 200;
@@ -115,9 +112,8 @@ html {
   --text-color-hard: #e4e4e4;
   --text-color-soft: #a0a0a0;
   --primary-action-color: #3a8dff;
-  --primary-accent: #4c7eff;
   --progress-bg: #e0e0e024;
-  --border-color: #fff2;
+  --border-color: #323232;
   --icon-color: #fff;
   --button-active-color: #1f1f1f;
   --icon-font-weight: 100;

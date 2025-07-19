@@ -29,8 +29,8 @@
 }
 
 .year.active {
-  border: 1px solid var(--primary-accent);
-  color: var(--primary-accent);
+  border: 1px solid var(--primary-action-color);
+  color: var(--primary-action-color);
 }
 
 .nav {

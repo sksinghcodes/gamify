@@ -4,6 +4,7 @@ import { ROUTES } from './constants';
 const {
   TASK_LIST: { path: TASK_LIST },
   TASK_PREVIEW: { path: TASK_PREVIEW },
+  TASK_PROGRESS: { path: TASK_PROGRESS },
   CREATE_TASK: { path: CREATE_TASK },
   EDIT_TASK: { path: EDIT_TASK },
   PROGRESS_OVERVIEW: { path: PROGRESS_OVERVIEW },
@@ -20,8 +21,9 @@ export default [
   layout('layouts/main-app-layout/main-app-layout.tsx', [
     route(TASK_LIST, 'pages/task-list/task-list.tsx'),
     route(TASK_PREVIEW, 'pages/task-preview/task-preview.tsx'),
+    route(TASK_PROGRESS, 'pages/task-progress/task-progress.tsx'),
     route(CREATE_TASK, 'pages/create-task/create-task.tsx'),
-    route(`${EDIT_TASK}:id`, 'pages/edit-task/edit-task.tsx'),
+    route(EDIT_TASK, 'pages/edit-task/edit-task.tsx'),
     route(PROGRESS_OVERVIEW, 'pages/progress-overview/progress-overview.tsx'),
     route(SETTINGS, 'pages/settings/settings.tsx'),
     route(PROFILE, 'pages/profile/profile.tsx'),

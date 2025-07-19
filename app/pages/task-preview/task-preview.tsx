@@ -1,9 +1,7 @@
 import { useNavigate } from 'react-router';
 import styles from './task-preview.module.css';
 import {
-  DURATION_UNIT,
   INVALID_DATE_STRATEGY,
-  MONTHS,
   MONTHS_3_LETTER,
   RECURRENCE,
   REMOVE_TYPE,
@@ -13,15 +11,10 @@ import {
 import {
   type MonthIndex,
   type RecurrenceWeekly,
-  type TaskIF,
+  type Task,
 } from '~/types/task-types';
 import { HeaderType } from '~/types/common-types';
-import {
-  getDateAfterDuration,
-  getDateString,
-  getTimeDuration,
-  to12HourFormat,
-} from '~/utils/date';
+import { getDateString, getTimeDuration, to12HourFormat } from '~/utils/date';
 import { capitalize } from '~/utils/string';
 
 export const meta = () => [{ title: ROUTES.TASK_PREVIEW.title }];
@@ -30,7 +23,7 @@ export const handle = { headerType: HeaderType.DEFAULT };
 const now = new Date().getTime();
 
 // Replace this with dynamic data later
-const task: TaskIF = {
+const task: Task = {
   id: 'task-3',
   name: 'Daily Coding',
   description: 'Practice coding problems practice coding problems',
@@ -56,13 +49,9 @@ const task: TaskIF = {
     // type: REMOVE_TYPE.AFTER_GIVEN_DATE,
     // dateEpoch: new Date(2026, 2, 28).getTime(),
 
-    type: REMOVE_TYPE.AFTER_GIVEN_DURATION,
-    unit: DURATION_UNIT.DAY,
-    nValue: 5,
+    type: REMOVE_TYPE.NEVER,
   },
-  score: 30,
   createdAt: new Date().getTime(),
-  isScorable: true,
 };
 
 const { name, description, startTime, endTime, recurrence, removeIt } = task;
@@ -106,6 +95,7 @@ const TaskPreview: React.FC = () => {
                           ? styles.active
                           : ''
                       }`}
+                      key={i}
                     >
                       {weekday}
                     </div>
@@ -119,7 +109,9 @@ const TaskPreview: React.FC = () => {
                 <p>{capitalize(recurrence.type)} on below dates</p>
                 <div className={styles.boxesWrap}>
                   {recurrence.dates.map((date, i) => (
-                    <div className={styles.squareBox}>{date}</div>
+                    <div className={styles.squareBox} key={i}>
+                      {date}
+                    </div>
                   ))}
                 </div>
                 {recurrence.invalidDateStrategy ===
@@ -143,7 +135,7 @@ const TaskPreview: React.FC = () => {
                 <p>{capitalize(recurrence.type)} on below dates</p>
 
                 {Object.keys(recurrence.monthAndDates).map((monthIndex) => (
-                  <div className={styles.yearlyDates}>
+                  <div className={styles.yearlyDates} key={monthIndex}>
                     <div className={styles.rectBox}>
                       {MONTHS_3_LETTER[Number(monthIndex)]}
                     </div>
@@ -151,7 +143,9 @@ const TaskPreview: React.FC = () => {
                       {recurrence.monthAndDates[
                         Number(monthIndex) as MonthIndex
                       ]?.map((date) => (
-                        <div className={styles.squareBox}>{date}</div>
+                        <div className={styles.squareBox} key={date}>
+                          {date}
+                        </div>
                       ))}
                     </div>
                   </div>
@@ -185,12 +179,7 @@ const TaskPreview: React.FC = () => {
                   Will be automatically deleted after{' '}
                   {removeIt.type === REMOVE_TYPE.AFTER_GIVEN_DATE
                     ? getDateString(removeIt.dateEpoch)
-                    : removeIt.type === REMOVE_TYPE.AFTER_GIVEN_DURATION
-                    ? getDateString(
-                        getDateAfterDuration(task.createdAt, removeIt)
-                      )
                     : ''}
-                  {}
                 </p>
               </div>
             </div>
@@ -200,9 +189,9 @@ const TaskPreview: React.FC = () => {
 
       <button
         className={`${styles.fab} material-symbols-outlined`}
-        onClick={() => navigate(ROUTES.PROGRESS_OVERVIEW.path)}
+        onClick={() => navigate(ROUTES.TASK_PROGRESS.path)}
       >
-        show_chart
+        stairs_2
       </button>
     </div>
   );

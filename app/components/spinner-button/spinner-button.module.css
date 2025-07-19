@@ -2,7 +2,7 @@
   position: relative;
   padding: 0.5rem 2.5rem;
   border: 1px solid var(--border-color);
-  background-color: var(--primary-accent);
+  background-color: var(--primary-action-color);
   color: white;
   font-size: 1rem;
   border-radius: 6px;

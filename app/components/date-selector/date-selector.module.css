@@ -35,7 +35,7 @@
 }
 
 .date.active {
-  color: var(--primary-accent);
+  color: var(--primary-action-color);
 }
 
 .calendarTable {

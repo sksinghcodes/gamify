@@ -47,12 +47,12 @@ const ProgressOverview = () => {
                 <linearGradient id="xpGradient" x1="0" y1="0" x2="0" y2="1">
                   <stop
                     offset="5%"
-                    stopColor="var(--primary-accent)"
+                    stopColor="var(--primary-action-color)"
                     stopOpacity={0.8}
                   />
                   <stop
                     offset="95%"
-                    stopColor="var(--primary-accent)"
+                    stopColor="var(--primary-action-color)"
                     stopOpacity={0.1}
                   />
                 </linearGradient>
@@ -67,7 +67,7 @@ const ProgressOverview = () => {
               <Area
                 type="monotone"
                 dataKey="xp"
-                stroke="var(--primary-accent)"
+                stroke="var(--primary-action-color)"
                 fill="url(#xpGradient)"
               />
             </AreaChart>
