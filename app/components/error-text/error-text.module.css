@@ -1,4 +1,5 @@
 .errorText {
-  color: #e57373;
-  font-size: 0.875rem;
+  font-size: 0.8rem;
+  padding: 0.5rem;
+  color: var(--error-text);
 }

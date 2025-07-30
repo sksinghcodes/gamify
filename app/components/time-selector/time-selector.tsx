@@ -126,6 +126,7 @@ const TimeSelectorModal: React.FC<TimeSelectorModalProps> = ({
         <button
           className={`${styles.fab} material-symbols-outlined`}
           onClick={() => onDone(hour24Format)}
+          disabled={hour === '' && minute === '' && period == ''}
         >
           done
         </button>

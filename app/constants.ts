@@ -7,7 +7,7 @@ import {
   RemoveTypeEnum,
   UnitEnum,
   type InitialRecurrenceIF,
-  type TaskReqBody,
+  type TaskFormState,
 } from './types/task-types';
 
 export const MONTHS = [
@@ -198,17 +198,53 @@ export const REMOVE_TYPE_LABELS = {
   [RemoveTypeEnum.AFTER_GIVEN_DATE]: 'Remove it after a date',
 };
 
-export const INITIAL_TASK: TaskReqBody = {
-  name: '',
-  description: '',
-  startTime: '',
-  endTime: '',
+export const INITIAL_TASK_STATE: TaskFormState = {
+  name: {
+    value: '',
+    error: '',
+    touched: false,
+  },
+  description: {
+    value: '',
+    error: '',
+    touched: false,
+  },
+  startTime: {
+    value: '',
+    error: '',
+    touched: false,
+  },
+  endTime: {
+    value: '',
+    error: '',
+    touched: false,
+  },
   recurrence: {
-    type: RECURRENCE.DAILY,
+    value: {
+      type: RECURRENCE.DAILY,
+    },
+    error: '',
+    touched: false,
   },
   removeIt: {
-    type: REMOVE_TYPE.NEVER,
+    value: {
+      type: REMOVE_TYPE.NEVER,
+    },
+    error: '',
+    touched: false,
   },
+};
+
+export const INITIAL_TASK_ERRORS = {
+  name: 'ddd',
+  startTime: 'ddd',
+  endTime: 'ddd',
+};
+
+export const INITIAL_TASK_TOUCHED = {
+  name: false,
+  startTime: false,
+  endTime: false,
 };
 
 export const INITIAL_RECURRENCE_AND_REMOVE: InitialRecurrenceIF = {

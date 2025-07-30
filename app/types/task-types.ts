@@ -101,6 +101,43 @@ export interface TaskReqBody extends TaskBase {
   removeIt: RemoveNever | RemoveAfterGivenDate;
 }
 
+export interface TaskFormState {
+  name: {
+    value: string;
+    error: string;
+    touched: boolean;
+  };
+  description: {
+    value: string;
+    error: string;
+    touched: boolean;
+  };
+  startTime: {
+    value: string;
+    error: string;
+    touched: boolean;
+  };
+  endTime: {
+    value: string;
+    error: string;
+    touched: boolean;
+  };
+  recurrence: {
+    value:
+      | RecurrenceDaily
+      | RecurrenceWeekly
+      | RecurrenceMonthly
+      | RecurrenceYearly;
+    error: string;
+    touched: boolean;
+  };
+  removeIt: {
+    value: RemoveNever | RemoveAfterGivenDate;
+    error: string;
+    touched: boolean;
+  };
+}
+
 export interface Task extends TaskReqBody {
   id: string;
   createdAt: number;

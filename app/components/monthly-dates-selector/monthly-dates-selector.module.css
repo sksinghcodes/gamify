@@ -57,3 +57,7 @@
   font-size: 2rem;
   border: 1px solid var(--primary-action-color);
 }
+
+.fab:disabled {
+  opacity: 0.3;
+}

@@ -3,6 +3,7 @@ import styles from './task-list.module.css';
 import { ROUTES } from '~/constants';
 import { useNavigate } from 'react-router';
 import { type TaskRecord } from '~/types/task-types';
+import arrow from '~/assets/arrow.svg';
 
 export const meta = () => {
   return [{ title: ROUTES.TASK_LIST.title }];
@@ -35,15 +36,7 @@ const TaskList = () => {
     <div className={styles.taskListContainer}>
       <div className={styles.taskList}>
         {tasks.length === 0 ? (
-          <div className={styles.emptyState}>
-            <p>No tasks for today.</p>
-            <button
-              onClick={() => navigate(ROUTES.CREATE_TASK.path)}
-              className={styles.addTaskBtn}
-            >
-              + Create Task
-            </button>
-          </div>
+          <div className={styles.emptyState}>No tasks available</div>
         ) : (
           tasks.map((task, i) => (
             <Fragment key={task.id}>
@@ -79,6 +72,8 @@ const TaskList = () => {
       >
         add
       </button>
+      <div className={styles.hintBox}>Click here to create a task</div>
+      <img src={arrow} className={styles.arrowImage} />
     </div>
   );
 };

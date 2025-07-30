@@ -164,6 +164,7 @@ const DateSelectorModal: React.FC<DateSelectorModalProps> = ({
       <button
         className={`${styles.fab} material-symbols-outlined`}
         onClick={() => onDone(innerValue)}
+        disabled={innerValue === null}
       >
         done
       </button>

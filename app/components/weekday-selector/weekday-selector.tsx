@@ -52,6 +52,7 @@ const WeekdaySelectorModal: React.FC<WeekdaySelectorModalProps> = ({
       <button
         className={`${styles.fab} material-symbols-outlined`}
         onClick={() => onDone(innerDays)}
+        disabled={innerDays.length === 0}
       >
         done
       </button>

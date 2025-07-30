@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import {
   INITIAL_RECURRENCE_AND_REMOVE,
-  INITIAL_TASK,
+  INITIAL_TASK_STATE,
   INVALID_DATE_STRATEGY,
   INVALID_DATE_STRATEGY_LABELS,
   MONTHS_3_LETTER,
@@ -14,7 +14,7 @@ import type {
   InitialRecurrenceIF,
   MonthIndex,
   RecurrenceYearly,
-  TaskReqBody,
+  TaskFormState,
 } from '~/types/task-types';
 import styles from './task-form.module.css';
 import TimeSelector, {
@@ -27,37 +27,100 @@ import MonthlyDatesSelector from '~/components/monthly-dates-selector/monthly-da
 import YearlyDateSelector from '../yearly-date-selector/yearly-date-selector';
 import DateSelector from '../date-selector/date-selector';
 import { getDateString } from '~/utils/date';
+import ErrorText from '../error-text/error-text';
+import { normalizeTaskFormState } from '~/utils/generic';
 
 const TaskForm: React.FC<{ isEditMode: boolean }> = ({ isEditMode }) => {
-  const [task, setTask] = useState<TaskReqBody>(INITIAL_TASK);
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [task, setTask] = useState<TaskFormState>(INITIAL_TASK_STATE);
   const [openSelector, setOpenSelector] = useState(false);
   const [showDateSelector, setShowDateSelector] = useState(false);
-  const [showDurationSelector, setShowDurationSelector] = useState(false);
+  const [step, setStep] = useState(1);
+
+  console.log(task);
+
   const navigate = useNavigate();
 
-  const step = +(searchParams.get('step') || 1);
+  const validate = (task: TaskFormState, fromSubmit: boolean) => {
+    let isValid = true;
+    const taskCopy = {
+      ...task,
+      name: { ...task.name },
+      startTime: { ...task.startTime },
+      endTime: { ...task.endTime },
+    };
+
+    if (!task.name.value.trim()) {
+      taskCopy.name.error = 'Name is required';
+      isValid = false;
+    } else {
+      taskCopy.name.error = '';
+    }
+
+    if (!task.startTime.value.trim()) {
+      taskCopy.startTime.error = 'Start time is required';
+      isValid = false;
+    } else {
+      taskCopy.startTime.error = '';
+    }
+
+    if (!task.endTime.value.trim()) {
+      taskCopy.endTime.error = 'End time is required';
+      isValid = false;
+    } else {
+      taskCopy.endTime.error = '';
+    }
+
+    if (fromSubmit) {
+      taskCopy.name.touched = true;
+      taskCopy.startTime.touched = true;
+      taskCopy.endTime.touched = true;
+    }
+
+    setTask(taskCopy);
+    return isValid;
+  };
 
   const handleChange: React.ChangeEventHandler<
     HTMLInputElement | HTMLTextAreaElement
   > = (e) => {
     const { name, value } = e.target;
 
-    setTask((pre) => ({
-      ...pre,
-      [name]:
-        name === 'recurrence' || name === 'removeIt'
-          ? INITIAL_RECURRENCE_AND_REMOVE[value as keyof InitialRecurrenceIF]
-          : value,
-    }));
+    setTask((pre) => {
+      const newTask = {
+        ...pre,
+        [name]: {
+          ...pre[name as keyof TaskFormState],
+          value:
+            name === 'recurrence' || name === 'removeIt'
+              ? INITIAL_RECURRENCE_AND_REMOVE[
+                  value as keyof InitialRecurrenceIF
+                ]
+              : value,
+          touched: true,
+        },
+      };
+
+      validate(newTask, false);
+      return newTask;
+    });
   };
 
   const handleTimeChange: TimeSelectorOnChange = (e) => {
     const { name, value } = e;
-    setTask((pre) => ({
-      ...pre,
-      [name]: value,
-    }));
+
+    setTask((pre) => {
+      const newTask = {
+        ...pre,
+        [name]: {
+          ...pre[name as keyof TaskFormState],
+          value,
+          touched: true,
+        },
+      };
+
+      validate(newTask, false);
+      return newTask;
+    });
   };
 
   return (
@@ -73,10 +136,13 @@ const TaskForm: React.FC<{ isEditMode: boolean }> = ({ isEditMode }) => {
               id="taskName"
               name="name"
               placeholder="eg: Go to gym"
-              value={task.name}
+              value={task.name.value}
               onChange={handleChange}
               className={styles.inputText}
             />
+            {task.name.touched && task.name.error ? (
+              <ErrorText>{task.name.error}</ErrorText>
+            ) : null}
           </div>
 
           <div className={styles.formGroup}>
@@ -87,7 +153,7 @@ const TaskForm: React.FC<{ isEditMode: boolean }> = ({ isEditMode }) => {
               id="description"
               name="description"
               placeholder="Describe the task... (Optional)"
-              value={task.description}
+              value={task.description.value}
               onChange={handleChange}
               className={styles.textarea}
             />
@@ -97,19 +163,25 @@ const TaskForm: React.FC<{ isEditMode: boolean }> = ({ isEditMode }) => {
             <div className={styles.formGroup}>
               <span className={styles.label}>From time</span>
               <TimeSelector
-                value={task.startTime}
+                value={task.startTime.value}
                 onChange={handleTimeChange}
                 name="startTime"
               />
+              {task.startTime.touched && task.startTime.error ? (
+                <ErrorText>{task.startTime.error}</ErrorText>
+              ) : null}
             </div>
 
             <div className={styles.formGroup}>
               <span className={styles.label}>To time</span>
               <TimeSelector
-                value={task.endTime}
+                value={task.endTime.value}
                 onChange={handleTimeChange}
                 name="endTime"
               />
+              {task.endTime.touched && task.endTime.error ? (
+                <ErrorText>{task.endTime.error}</ErrorText>
+              ) : null}
             </div>
           </div>
         </>
@@ -130,7 +202,7 @@ const TaskForm: React.FC<{ isEditMode: boolean }> = ({ isEditMode }) => {
                     type="radio"
                     name="recurrence"
                     value={freq}
-                    checked={task.recurrence.type === freq}
+                    checked={task.recurrence.value.type === freq}
                     onChange={handleChange}
                     className={styles.radioInput}
                   />
@@ -140,57 +212,66 @@ const TaskForm: React.FC<{ isEditMode: boolean }> = ({ isEditMode }) => {
             </div>
           </div>
 
-          {task.recurrence.type === RECURRENCE.WEEKLY ? (
+          {task.recurrence.value.type === RECURRENCE.WEEKLY ? (
             <>
               <WeekdaySelector
-                value={task.recurrence.weekDays || []}
+                value={task.recurrence.value.weekDays || []}
                 onChange={(weekDays) =>
                   setTask((pre) => ({
                     ...pre,
-                    recurrence: { ...pre.recurrence, weekDays },
+                    recurrence: {
+                      ...pre.recurrence,
+                      value: {
+                        ...pre.recurrence.value,
+                        weekDays,
+                      },
+                    },
                   }))
                 }
                 open={openSelector}
                 setOpen={setOpenSelector}
               />
-              {!!task.recurrence.weekDays.length && (
+              {!!task.recurrence.value.weekDays.length && (
                 <div className={styles.selectedWeekdays}>
                   <div className={styles.label}>Selected days:</div>
                   <div>
-                    {task.recurrence.weekDays
+                    {task.recurrence.value.weekDays
                       ?.map((day) => WEEKS[day])
                       .join(', ')}
                   </div>
                 </div>
               )}
             </>
-          ) : task.recurrence.type === RECURRENCE.MONTHLY ? (
+          ) : task.recurrence.value.type === RECURRENCE.MONTHLY ? (
             <>
               <MonthlyDatesSelector
-                value={task.recurrence}
+                value={task.recurrence.value}
                 onChange={(recurrence) =>
                   setTask((pre) => ({
                     ...pre,
-                    recurrence,
+                    recurrence: {
+                      ...pre.recurrence,
+                      value: recurrence,
+                    },
                   }))
                 }
                 open={openSelector}
                 setOpen={setOpenSelector}
               />
-              {!!task.recurrence.dates.length && (
+              {!!task.recurrence.value.dates.length && (
                 <div className={styles.selectedWeekdays}>
                   <div className={styles.label}>Selected Dates:</div>
                   <div className={styles.value}>
-                    {task.recurrence.dates.join(', ')}
+                    {task.recurrence.value.dates.join(', ')}
                   </div>
-                  {task.recurrence.invalidDateStrategy !==
+                  {task.recurrence.value.invalidDateStrategy !==
                   INVALID_DATE_STRATEGY.NONE ? (
                     <>
                       <div className={styles.label}>Missing date strategy:</div>
                       <div>
                         {
                           INVALID_DATE_STRATEGY_LABELS[
-                            task.recurrence.invalidDateStrategy
+                            task.recurrence.value.invalidDateStrategy
                           ]
                         }
                       </div>
@@ -199,28 +280,31 @@ const TaskForm: React.FC<{ isEditMode: boolean }> = ({ isEditMode }) => {
                 </div>
               )}
             </>
-          ) : task.recurrence.type === RECURRENCE.YEARLY ? (
+          ) : task.recurrence.value.type === RECURRENCE.YEARLY ? (
             <>
               <YearlyDateSelector
                 open={openSelector}
                 setOpen={setOpenSelector}
-                value={task.recurrence}
+                value={task.recurrence.value}
                 onChange={(recurrence) =>
                   setTask((pre) => ({
                     ...pre,
-                    recurrence,
+                    recurrence: {
+                      ...pre.recurrence,
+                      value: recurrence,
+                    },
                   }))
                 }
               />
-              {!!Object.keys(task.recurrence.monthAndDates).length && (
+              {!!Object.keys(task.recurrence.value.monthAndDates).length && (
                 <div className={styles.selectedWeekdays}>
                   <div className={styles.label}>Selected Dates:</div>
                   <div className={styles.value}>
-                    {Object.keys(task.recurrence.monthAndDates)
+                    {Object.keys(task.recurrence.value.monthAndDates)
                       .map((month) =>
-                        (task.recurrence as RecurrenceYearly).monthAndDates[
-                          Number(month) as MonthIndex
-                        ]
+                        (
+                          task.recurrence.value as RecurrenceYearly
+                        ).monthAndDates[Number(month) as MonthIndex]
                           ?.map(
                             (date) =>
                               `${MONTHS_3_LETTER[Number(month)]} ${date}`
@@ -229,14 +313,14 @@ const TaskForm: React.FC<{ isEditMode: boolean }> = ({ isEditMode }) => {
                       )
                       .join(', ')}
                   </div>
-                  {task.recurrence.feb29Strategy !==
+                  {task.recurrence.value.feb29Strategy !==
                   INVALID_DATE_STRATEGY.NONE ? (
                     <>
                       <div className={styles.label}>Missing date strategy:</div>
                       <div>
                         {
                           INVALID_DATE_STRATEGY_LABELS[
-                            task.recurrence.feb29Strategy
+                            task.recurrence.value.feb29Strategy
                           ]
                         }
                       </div>
@@ -260,15 +344,18 @@ const TaskForm: React.FC<{ isEditMode: boolean }> = ({ isEditMode }) => {
                 <label
                   key={type}
                   className={`${styles.option} ${
-                    task.removeIt.type === type ? styles.active : ''
+                    task.removeIt.value.type === type ? styles.active : ''
                   }`}
                 >
                   <input
                     type="radio"
                     name="removeIt"
                     value={type}
-                    checked={task.removeIt.type === type}
-                    onChange={handleChange}
+                    checked={task.removeIt.value.type === type}
+                    onChange={(e) => {
+                      setShowDateSelector(true);
+                      handleChange(e);
+                    }}
                     className={styles.optionInput}
                   />
                   {REMOVE_TYPE_LABELS[type]}
@@ -276,7 +363,7 @@ const TaskForm: React.FC<{ isEditMode: boolean }> = ({ isEditMode }) => {
               ))}
             </div>
           </div>
-          {task.removeIt.type === REMOVE_TYPE.AFTER_GIVEN_DATE && (
+          {task.removeIt.value.type === REMOVE_TYPE.AFTER_GIVEN_DATE && (
             <>
               <label
                 className={styles.dateInputWrap}
@@ -288,7 +375,7 @@ const TaskForm: React.FC<{ isEditMode: boolean }> = ({ isEditMode }) => {
                   name="select-date"
                   readOnly
                   className={`${styles.dateInput} ${styles.inputText}`}
-                  value={getDateString(task.removeIt.dateEpoch)}
+                  value={getDateString(task.removeIt.value.dateEpoch)}
                 />
                 <span
                   className={`material-symbols-outlined ${styles.dateIcon}`}
@@ -297,14 +384,17 @@ const TaskForm: React.FC<{ isEditMode: boolean }> = ({ isEditMode }) => {
                 </span>
               </label>
               <DateSelector
-                value={task.removeIt.dateEpoch}
+                value={task.removeIt.value.dateEpoch}
                 onChange={(date) => {
                   setTask((pre) => {
                     return {
                       ...pre,
                       removeIt: {
                         ...pre.removeIt,
-                        dateEpoch: date,
+                        value: {
+                          ...pre.removeIt.value,
+                          dateEpoch: date,
+                        },
                       },
                     };
                   });
@@ -320,7 +410,7 @@ const TaskForm: React.FC<{ isEditMode: boolean }> = ({ isEditMode }) => {
       {step !== 1 && (
         <button
           className={`${styles.fab} ${styles.prev} material-symbols-outlined`}
-          onClick={() => navigate(-1)}
+          onClick={() => setStep(step - 1)}
         >
           west
         </button>
@@ -329,11 +419,14 @@ const TaskForm: React.FC<{ isEditMode: boolean }> = ({ isEditMode }) => {
       <button
         className={`${styles.fab}  ${styles.next} material-symbols-outlined`}
         onClick={() => {
-          step === 3
-            ? (() => {
-                console.log(task);
-              })()
-            : setSearchParams({ step: String(step + 1) });
+          if (step === 3) {
+            console.log(normalizeTaskFormState(task));
+          } else {
+            if (step === 1 && !validate(task, true)) {
+              return;
+            }
+            setStep(step + 1);
+          }
         }}
       >
         {step === 3 ? 'done' : 'east'}

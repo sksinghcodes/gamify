@@ -61,6 +61,7 @@ const MonthSelectorModal: React.FC<MonthSelectorModalProps> = ({
         <button
           className={`${styles.fab} material-symbols-outlined`}
           onClick={() => onDone(innerValue)}
+          disabled={value.length === 0}
         >
           done
         </button>

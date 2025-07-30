@@ -84,6 +84,8 @@ const YearlyDateSelectorModal: React.FC<YearlyDateSelectorModalProps> = ({
     }
   }, [selectedMonth]);
 
+  const showQuestion = Boolean(innerMonthAndDates[1]?.includes(29));
+
   return (
     <div className={styles.wrapper}>
       <div className={styles.selectionWrap}>
@@ -134,7 +136,7 @@ const YearlyDateSelectorModal: React.FC<YearlyDateSelectorModalProps> = ({
         <InvalidDateStrategySelector
           value={innerFeb29Strategy}
           onChange={setInnerFeb29Strategy}
-          show={Boolean(innerMonthAndDates[1]?.includes(29))}
+          show={showQuestion}
           onInfoIconClick={() => setShowModal(true)}
         />
       </div>
@@ -153,6 +155,10 @@ const YearlyDateSelectorModal: React.FC<YearlyDateSelectorModalProps> = ({
             monthAndDates: innerMonthAndDates,
             feb29Strategy: innerFeb29Strategy,
           })
+        }
+        disabled={
+          Object.keys(innerMonthAndDates).length === 0 ||
+          (showQuestion && innerFeb29Strategy === INVALID_DATE_STRATEGY.NONE)
         }
       >
         done

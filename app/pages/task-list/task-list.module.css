@@ -102,3 +102,29 @@
   font-size: 2rem;
   border: 1px solid var(--primary-action-color);
 }
+
+.arrowImage {
+  bottom: 7rem;
+  width: 6rem;
+  color: aliceblue;
+  position: fixed;
+  right: 2rem;
+  rotate: 163deg;
+}
+
+.hintBox {
+  width: 6rem;
+  text-align: center;
+  position: fixed;
+  right: 3rem;
+  bottom: 14rem;
+  color: var(--text-color-soft);
+}
+
+.emptyState {
+  padding: 1rem;
+  text-align: center;
+  font-size: 1.5rem;
+  font-weight: 100;
+  color: var(--text-color-soft);
+}

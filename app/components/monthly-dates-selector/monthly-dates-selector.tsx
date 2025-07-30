@@ -91,6 +91,11 @@ const MonthlyDatesSelectorModal: React.FC<MonthlyDatesSelectorModalProps> = ({
               invalidDateStrategy: innerInvalidDateStrategy,
             })
           }
+          disabled={
+            innerDates.length === 0 ||
+            (showQuestion &&
+              innerInvalidDateStrategy === INVALID_DATE_STRATEGY.NONE)
+          }
         >
           done
         </button>
