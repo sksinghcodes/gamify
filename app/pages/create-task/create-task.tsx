@@ -1,5 +1,5 @@
-import { ROUTES } from '~/constants';
 import TaskForm from '~/components/task-form/task-form';
+import { ROUTES } from '~/constants';
 
 export const meta = () => {
   return [{ title: ROUTES.CREATE_TASK.title }];

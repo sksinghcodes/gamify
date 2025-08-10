@@ -13,24 +13,9 @@
   gap: 0.5rem;
 }
 
-.yearsWrap {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-
 .year {
-  padding: 0.5rem 0.5rem;
-  border: 1px solid var(--border-color);
-  border-radius: 2rem;
-  width: calc(33.333% - 0.334rem);
+  width: calc(33.333% - 0.335rem);
   text-align: center;
-  color: var(--text-color-soft);
-}
-
-.year.active {
-  border: 1px solid var(--primary-action-color);
-  color: var(--primary-action-color);
 }
 
 .nav {

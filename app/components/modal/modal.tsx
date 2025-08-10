@@ -3,17 +3,17 @@ import styles from './modal.module.css';
 interface ModalProps {
   title: string;
   open: boolean;
-  body: React.ReactNode;
   onClose: () => void;
+  children: React.ReactNode;
 }
 
 interface ModalBodyProps {
   title: string;
-  body: React.ReactNode;
   onClose: () => void;
+  children: React.ReactNode;
 }
 
-const ModalBody: React.FC<ModalBodyProps> = ({ title, onClose, body }) => {
+const ModalBody: React.FC<ModalBodyProps> = ({ title, onClose, children }) => {
   return (
     <div className={styles.modalWrap}>
       <div className={styles.header}>
@@ -25,14 +25,16 @@ const ModalBody: React.FC<ModalBodyProps> = ({ title, onClose, body }) => {
           close
         </button>
       </div>
-      <div className={styles.body}>{body}</div>
+      <div className={styles.body}>{children}</div>
     </div>
   );
 };
 
-const Modal: React.FC<ModalProps> = ({ title, open, onClose, body }) => {
+const Modal: React.FC<ModalProps> = ({ title, open, onClose, children }) => {
   return open ? (
-    <ModalBody title={title} onClose={onClose} body={body} />
+    <ModalBody title={title} onClose={onClose}>
+      {children}
+    </ModalBody>
   ) : null;
 };
 

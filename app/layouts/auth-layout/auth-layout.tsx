@@ -13,12 +13,11 @@ const {
 
 const AuthLayout = () => {
   const context = useContext(Context);
+  const { pathname } = useLocation();
 
   if (context.isSignedIn === true) {
     return <Navigate to={TASK_LIST} replace />;
   }
-
-  const { pathname } = useLocation();
 
   const isSignInOrSignUp = pathname === SIGN_IN || pathname === SIGN_UP;
 

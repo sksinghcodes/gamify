@@ -1,9 +1,20 @@
-import { Fragment } from 'react';
+import { Fragment, useContext, useEffect, useState } from 'react';
 import styles from './task-list.module.css';
-import { ROUTES } from '~/constants';
+import { API_ENDPOINTS, ROUTES, SCHEDULE } from '~/constants';
 import { useNavigate } from 'react-router';
-import { type TaskRecord } from '~/types/task-types';
 import arrow from '~/assets/arrow.svg';
+import {
+  getTimeDuration,
+  to12HourFormat,
+  to_YYYY_MM_DD_Format,
+} from '~/utils/date-utils';
+import Score from '~/components/score/score';
+import Fab from '~/fab/fab';
+import type { TaskWithRecord } from '~/types/task-types';
+import { Context } from '~/context-provider';
+import api from '~/api';
+import Modal from '~/components/modal/modal';
+import ScoreLogger from '~/components/score-logger/score-logger';
 
 export const meta = () => {
   return [{ title: ROUTES.TASK_LIST.title }];
@@ -11,69 +22,148 @@ export const meta = () => {
 
 const TaskList = () => {
   const navigate = useNavigate();
+  const [openModal, setOpenModal] = useState(false);
+  const {
+    loading,
+    setLoading = () => {},
+    taskListDate,
+    cacheByDate,
+    setCacheByDate,
+    setCacheById,
+  } = useContext(Context);
+  const [tasks, setTasks] = useState<TaskWithRecord[]>([]);
+  const [activeTask, setActiveTask] = useState<TaskWithRecord | null>(null);
+  const [reloadtId, setReloadId] = useState(0);
+  const dateStr = to_YYYY_MM_DD_Format(taskListDate);
 
-  const tasks: TaskRecord[] = [];
+  useEffect(() => {
+    return () => setLoading(false);
+  }, []);
 
-  const getScoreBtnClass = (task: any) => {
-    if (!task.isScorable) return 'nonScorable';
-    if (task.score === null) return 'scorable';
-    if (task.score >= 75) return 'excellent';
-    if (task.score >= 50) return 'good';
-    if (task.score >= 25) return 'fair';
-    return 'poor';
-  };
+  useEffect(() => {
+    const controller = new AbortController();
+    if (cacheByDate && cacheByDate[dateStr]) {
+      return setTasks(cacheByDate[dateStr]);
+    }
 
-  const formatDuration = (start: string, end: string) => {
-    const [sh, sm] = start.split(':').map(Number);
-    const [eh, em] = end.split(':').map(Number);
-    const minutes = eh * 60 + em - (sh * 60 + sm);
-    const h = Math.floor(minutes / 60);
-    const m = minutes % 60;
-    return `${h ? `${h}h ` : ''}${m}m`;
+    setLoading(true);
+    const timeoutId = setTimeout(() => {
+      api
+        .get(API_ENDPOINTS.GET_TASKS_BY_DATE, {
+          signal: controller.signal,
+          params: {
+            date: dateStr,
+          },
+        })
+        .then((response) => {
+          if (response.data?.success) {
+            setTasks(response.data.tasks);
+            setCacheById((pre) => {
+              const obj = { ...(pre || {}) };
+              response.data.tasks.forEach((task: TaskWithRecord) => {
+                obj[task._id] = { ...task, taskRecord: null };
+              });
+              return obj;
+            });
+            setCacheByDate((pre) => {
+              const obj = { ...(pre || {}) };
+              obj[dateStr] = response.data.tasks;
+              return obj;
+            });
+          } else {
+            setTasks([]);
+          }
+        })
+        .catch((error) => {
+          console.error('Error saving data', error);
+        })
+        .finally(() => setLoading(false));
+    }, 1000);
+
+    return () => {
+      clearTimeout(timeoutId);
+      controller.abort();
+    };
+  }, [taskListDate, reloadtId]);
+
+  const reload = () => {
+    setReloadId((pre) => pre + 1);
   };
 
   return (
     <div className={styles.taskListContainer}>
       <div className={styles.taskList}>
-        {tasks.length === 0 ? (
+        {tasks.length === 0 && !loading ? (
           <div className={styles.emptyState}>No tasks available</div>
         ) : (
           tasks.map((task, i) => (
-            <Fragment key={task.id}>
-              {i !== 0 && <hr className={styles.line} />}
-              <div key={task.id} className={styles.taskCard}>
-                <button
+            <Fragment key={task._id}>
+              <div key={task._id} className={styles.taskCard}>
+                <div
                   className={styles.details}
-                  onClick={() => navigate(ROUTES.TASK_PREVIEW.path)}
+                  onClick={() => {
+                    // navigate(`${ROUTES.TASK_PREVIEW.path}?id=${task._id}`);
+                    setActiveTask(task);
+                    setOpenModal(true);
+                  }}
                 >
                   <div className={styles.taskName}>{task.name}</div>
-                  <div className={styles.meta}>
-                    {task.startTime} – {task.endTime} •{' '}
-                    {formatDuration(task.startTime, task.endTime)}
-                  </div>
-                </button>
-                <button
-                  className={`${styles.scoreBtn} ${
-                    styles[getScoreBtnClass(task)]
-                  }`}
-                  disabled={task.isScorable}
-                >
-                  {task.score === null ? '–' : `${task.score}%`}
-                </button>
+                  {task.schedule === SCHEDULE.TIMED ? (
+                    <div className={styles.meta}>
+                      {to12HourFormat(task.scheduleStartTime)} –{' '}
+                      {to12HourFormat(task.scheduleEndTime)} •{' '}
+                      {getTimeDuration(
+                        task.scheduleStartTime,
+                        task.scheduleEndTime
+                      )}
+                    </div>
+                  ) : task.schedule === SCHEDULE.NOT_TIMED ? (
+                    <div className={styles.meta}>Any time</div>
+                  ) : null}
+                </div>
+                <div className={styles.scoreWrap}>
+                  <Score
+                    score={
+                      task.taskRecord === null ? null : task.taskRecord.score
+                    }
+                  />
+                </div>
               </div>
             </Fragment>
           ))
         )}
       </div>
 
-      <button
-        className={`${styles.fab} material-symbols-outlined`}
-        onClick={() => navigate(`${ROUTES.CREATE_TASK.path}?step=1`)}
+      <Modal
+        title="Score"
+        open={openModal}
+        onClose={() => {
+          setOpenModal(false);
+        }}
+      >
+        <ScoreLogger
+          task={activeTask}
+          date={dateStr}
+          handleClose={() => {
+            setOpenModal(false);
+          }}
+          reload={reload}
+        />
+      </Modal>
+
+      <Fab
+        disabled={loading}
+        className={styles.fab}
+        onClick={() => navigate(`${ROUTES.CREATE_TASK.path}`)}
       >
         add
-      </button>
-      <div className={styles.hintBox}>Click here to create a task</div>
-      <img src={arrow} className={styles.arrowImage} />
+      </Fab>
+      {tasks.length === 0 && !loading && (
+        <>
+          <div className={styles.hintBox}>Click here to create a task</div>
+          <img src={arrow} className={styles.arrowImage} />
+        </>
+      )}
     </div>
   );
 };

@@ -6,16 +6,28 @@ import {
   getMinuteBlock,
   getNextFive,
   to12HourFormat,
-} from '~/utils/date';
+} from '~/utils/date-utils';
 import { useEffect, useState } from 'react';
+import type { CustomChangeEvent } from '../form-elements/option-group';
+import InputText from '../form-elements/input-text';
+import OptionGroup from '../form-elements/option-group';
+import {
+  HOURS_OPTIONS,
+  MINUTES_OPTIONS,
+  PERIOD_OPTIONS,
+} from '~/constants/options';
+import { make24HourTimeStrFromNumber } from '~/utils/time-utils';
+import Fab from '~/fab/fab';
 
 export type TimeSelectorOnChange = (e: { name: string; value: string }) => void;
 
 interface TimeSelectorProps {
-  timeDisplayProps?: React.HTMLAttributes<HTMLDivElement>;
-  value: string;
-  onChange: TimeSelectorOnChange;
+  value: number | null;
+  onChange: (e: CustomChangeEvent) => void;
   name: string;
+  label?: React.ReactNode;
+  error?: string;
+  required?: boolean;
 }
 
 interface TimeSelectorModalProps {
@@ -39,17 +51,22 @@ const TimeSelectorModal: React.FC<TimeSelectorModalProps> = ({
 
   const { hour, minute, period } = internalTime;
   const hour24Format = composeTime(internalTime);
-  const hour12Format = to12HourFormat(hour24Format);
+
+  const hour12Format = to12HourFormat(
+    hour24Format ? Number(hour24Format.replace(':', '')) : null
+  );
   const minuteBlock = getMinuteBlock(minute);
   const specificMinutes = getNextFive(minuteBlock);
 
-  const handleChange: (key: string, value: string) => void = (key, value) => {
+  const handleChange: (e: CustomChangeEvent) => void = (e) => {
+    const { name, value } = e.target;
+
     setInternalTime((prev) => {
       let { hour = '', minute = '', period = '' } = prev;
 
-      if (key === 'hour') hour = value;
-      if (key === 'minute') minute = value;
-      if (key === 'period') period = value;
+      if (name === 'hour') hour = value;
+      if (name === 'minute') minute = value;
+      if (name === 'period') period = value;
 
       if (!hour) hour = '12';
       if (!minute) minute = '00';
@@ -63,110 +80,93 @@ const TimeSelectorModal: React.FC<TimeSelectorModalProps> = ({
     <div className={styles.timeSelectWrap}>
       <div className={styles.timeSelect}>
         <div className={styles.timePreview}>{hour12Format}</div>
-        <div>
-          <span className={styles.label}>Select Hour</span>
-          <div className={styles.hourSelect}>
-            {HOURS.map((h) => (
-              <button
-                className={hour === h ? styles.active : ''}
-                key={h}
-                onClick={() => handleChange('hour', h)}
-              >
-                {h}
-              </button>
-            ))}
-          </div>
-        </div>
-        <div>
-          <span className={styles.label}>Select Minute</span>
-          <div className={styles.minuteSelect}>
-            {MINUTES.map((m) => (
-              <button
-                className={minuteBlock === m ? styles.active : ''}
-                key={m}
-                onClick={() => handleChange('minute', m)}
-              >
-                {m}
-              </button>
-            ))}
-          </div>
-        </div>
+
+        <OptionGroup
+          label="Select Hour"
+          name="hour"
+          value={hour}
+          options={HOURS_OPTIONS}
+          onChange={handleChange}
+          inputLabelProps={{ className: styles.hourMinute }}
+        />
+        <OptionGroup
+          label="Select Minute"
+          name="minute"
+          value={minuteBlock}
+          options={MINUTES_OPTIONS}
+          onChange={handleChange}
+          inputLabelProps={{ className: styles.hourMinute }}
+        />
         <div className={styles.specificMinuteWrap}>
           {specificMinutes.length ? (
-            <div
-              className={`${styles.minuteSelect} ${styles.specificMinuteSelect}`}
-            >
-              {specificMinutes.map((m) => (
-                <button
-                  key={m}
-                  onClick={() => handleChange('minute', m)}
-                  className={minute === m ? styles.active : ''}
-                >
-                  {m}
-                </button>
-              ))}
-            </div>
+            <OptionGroup
+              name="minute"
+              value={minute}
+              options={specificMinutes.map((m) => ({
+                id: m,
+                label: String(m),
+              }))}
+              onChange={handleChange}
+              inputLabelProps={{ className: styles.minute }}
+            />
           ) : null}
         </div>
-        <div className={styles.ampmSelect}>
-          <button
-            className={period === 'AM' ? styles.active : ''}
-            onClick={() => handleChange('period', 'AM')}
-          >
-            AM
-          </button>
-          <button
-            className={period === 'PM' ? styles.active : ''}
-            onClick={() => handleChange('period', 'PM')}
-          >
-            PM
-          </button>
-        </div>
+        <OptionGroup
+          name="period"
+          value={period}
+          options={PERIOD_OPTIONS}
+          onChange={handleChange}
+          inputLabelProps={{ className: styles.ampm }}
+        />
 
-        <button
-          className={`${styles.fab} material-symbols-outlined`}
+        <Fab
           onClick={() => onDone(hour24Format)}
           disabled={hour === '' && minute === '' && period == ''}
         >
           done
-        </button>
+        </Fab>
       </div>
     </div>
   );
 };
 
 const TimeSelector: React.FC<TimeSelectorProps> = ({
-  timeDisplayProps,
   value,
   onChange,
   name,
+  label,
+  error,
+  required,
 }) => {
   const [showModal, setShowModal] = useState(false);
   const hour12Format = to12HourFormat(value);
+  const stringTime = make24HourTimeStrFromNumber(value);
 
   const handleDone = (hour24Format: string) => {
     setShowModal(false);
-    onChange({ name, value: hour24Format });
+    onChange({
+      target: { name, value: Number(hour24Format.replace(':', '')) },
+    });
   };
 
   return (
-    <>
-      <div
-        {...timeDisplayProps}
-        className={`${styles.timeDisplay} ${
-          hour12Format === '00:00 AM' ? styles.placeholder : ''
-        } ${timeDisplayProps?.className || ''}`}
-        onClick={(e) => {
+    <div>
+      <InputText
+        type="text"
+        placeholder="00:00 AM"
+        readOnly={true}
+        value={hour12Format}
+        onClick={() => {
           setShowModal(!showModal);
-          if (timeDisplayProps?.onClick) {
-            timeDisplayProps.onClick(e);
-          }
         }}
-      >
-        {hour12Format}
-      </div>
-      {showModal && <TimeSelectorModal value={value} onDone={handleDone} />}
-    </>
+        label={label}
+        error={error}
+        required={required}
+      />
+      {showModal && (
+        <TimeSelectorModal value={stringTime} onDone={handleDone} />
+      )}
+    </div>
   );
 };
 

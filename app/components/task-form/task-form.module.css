@@ -1,40 +1,15 @@
 .taskFormWrapper {
   max-width: 600px;
   margin: auto;
-  padding: 2rem 1rem;
+  padding: 1rem 1rem 8rem;
   background-color: var(--bg-surface);
   border-radius: 8px;
 }
 
-.formGroup {
+.stepOneWrap {
   display: flex;
   flex-direction: column;
-  margin-bottom: 1.25rem;
-}
-
-.label {
-  margin-bottom: 0.5rem;
-  font-weight: 500;
-}
-
-.inputText,
-.textarea {
-  padding: 0.5rem 0.75rem;
-  font-size: 1rem;
-  border: 1px solid var(--border-color);
-  border-radius: 4px;
-  background-color: var(--bg-input);
-  color: var(--text-primary);
-}
-
-.inputText::placeholder,
-.textarea::placeholder {
-  color: var(--placeholder-color);
-}
-
-.textarea {
-  resize: vertical;
-  min-height: 80px;
+  gap: 1rem;
 }
 
 .timeRow {
@@ -59,34 +34,8 @@
   gap: 0.5rem;
 }
 
-.fab {
-  position: fixed;
-  bottom: 2rem;
-  width: 3rem;
-  height: 3rem;
-  border-radius: 50%;
-  background-color: var(--primary-action-color);
-  color: #fff;
-  cursor: pointer;
-  font-weight: 100;
-  font-size: 2rem;
-  border: 1px solid var(--primary-action-color);
-}
-
-.fab.prev {
-  left: 2rem;
-}
-
-.fab.next {
-  right: 2rem;
-}
-
 .radio {
   width: calc(50% - 0.375rem);
-}
-
-.radioInput {
-  display: none;
 }
 
 .radioLabel {
@@ -96,11 +45,6 @@
   border-radius: 2rem;
   text-align: center;
   color: var(--text-color-soft);
-}
-
-.radioInput:checked + .radioLabel {
-  border: 1px solid var(--primary-action-color);
-  color: var(--primary-action-color);
 }
 
 .value {
@@ -141,4 +85,68 @@
   display: flex;
   align-items: center;
   padding: 0 0.3rem;
+}
+
+.twoInputWrap {
+  display: flex;
+  gap: 1rem;
+}
+
+.dateOption.dateOption {
+  line-height: 2.143rem;
+  height: 2.143rem;
+  padding: 0;
+  width: 2.143rem;
+  text-align: center;
+  flex-shrink: 0;
+  width: calc(14.285% - 0.429rem);
+}
+
+.monthWrap {
+  border: 1px solid var(--secondary-background);
+  color: var(--text-color-soft);
+  background-color: var(--secondary-background);
+  padding: 0.6rem 2.5rem 0.6rem 1rem;
+  display: block;
+  border-radius: 2rem;
+  font-size: 0.8rem;
+  letter-spacing: 0.5px;
+  margin: 0 0 0.3rem;
+  position: relative;
+}
+
+.monthWrap .monthText {
+  position: absolute;
+  font-size: 0.96rem;
+  right: 0.8rem;
+}
+
+.dateValues {
+  display: flex;
+  gap: 0.5rem;
+  overflow: auto;
+  padding-bottom: 0.4rem;
+}
+
+.dateValue {
+  font-size: 0.8rem;
+  color: var(--text-color-soft);
+  display: block;
+  border: 1px solid var(--border-color);
+  padding: 0.2rem 0.4rem;
+  flex-shrink: 0;
+}
+
+.fade {
+  background-image: linear-gradient(
+    0deg,
+    var(--primary-background),
+    transparent
+  );
+  height: 8rem;
+  width: 100%;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  pointer-events: none;
 }

@@ -1,9 +1,10 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import styles from './date-selector.module.css';
 import { MONTHS, WEEKS_1_LETTER } from '~/constants';
-import MonthSelector from '../month-selector/month-selector';
+import MonthSelectorModal from '../month-selector-modal/month-selector-modal';
 import type { MonthIndex } from '~/types/task-types';
 import YearSelector from '../year-selector/year-selector';
+import Fab from '~/fab/fab';
 
 interface DateSelectorModalProps {
   value: number | null; // date epoch
@@ -161,18 +162,15 @@ const DateSelectorModal: React.FC<DateSelectorModalProps> = ({
           </table>
         </div>
       </div>
-      <button
-        className={`${styles.fab} material-symbols-outlined`}
-        onClick={() => onDone(innerValue)}
-        disabled={innerValue === null}
-      >
+      <Fab onClick={() => onDone(innerValue)} disabled={innerValue === null}>
         done
-      </button>
-      <MonthSelector
+      </Fab>
+      <MonthSelectorModal
+        name="selectedMonth"
         open={showMonthSelector}
         setOpen={setShowMonthSelector}
-        value={[selectedMonth]}
-        onChange={(e) => setSelectedMonth(e[0])}
+        value={selectedMonth}
+        onChange={(e) => setSelectedMonth(e.target.value)}
       />
       <YearSelector
         open={showYearSelector}

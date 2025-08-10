@@ -8,11 +8,13 @@
   background-color: var(--primary-background);
   top: 0;
   left: 0;
+  padding: 1rem;
   z-index: 9;
 }
 
-.wrapper.multi {
-  padding-bottom: 6rem;
+.inputLabel {
+  width: calc(50% - 0.25rem);
+  text-align: center;
 }
 
 .monthList {
@@ -21,6 +23,7 @@
   flex-wrap: wrap;
   padding: 1.5rem;
 }
+
 .month {
   border: 1px solid var(--border-color);
   color: var(--text-color-soft);
@@ -33,23 +36,4 @@
 .month.active {
   border: 1px solid var(--primary-action-color);
   color: var(--primary-action-color);
-}
-
-.fab {
-  position: fixed;
-  bottom: 2rem;
-  right: 2rem;
-  width: 3rem;
-  height: 3rem;
-  border-radius: 50%;
-  background-color: var(--primary-action-color);
-  color: #fff;
-  cursor: pointer;
-  font-weight: 100;
-  font-size: 2rem;
-  border: 1px solid var(--primary-action-color);
-}
-
-.fab:disabled {
-  opacity: 0.3;
 }

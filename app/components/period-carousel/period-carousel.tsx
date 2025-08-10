@@ -1,13 +1,13 @@
+import type { MonthIndex } from '~/types/task-types';
+import styles from './period-carousel.module.css';
+import { getDateUnitStr, getMaxWeeks } from '~/utils/date-utils';
+import { VIEW_BY_UNITS_MAP } from '~/constants';
 import type {
-  MonthIndex,
   MonthValue,
   PriodCarouselValue,
   WeekValue,
   YearValue,
-} from '~/types/task-types';
-import styles from './period-carousel.module.css';
-import { getDateUnitStr, getMaxWeeks } from '~/utils/date';
-import { VIEW_BY_UNITS_MAP } from '~/constants';
+} from '~/types/common-types';
 
 interface PriodCarouselProps {
   value: PriodCarouselValue;

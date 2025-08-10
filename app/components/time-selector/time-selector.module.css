@@ -1,9 +1,3 @@
-.timeDisplay {
-  font-size: 1rem;
-  border: 1px solid var(--border-color);
-  padding: 0.5rem 0.75rem;
-}
-
 .timeSelectWrap {
   position: fixed;
   display: flex;
@@ -26,52 +20,9 @@
   padding: 1rem;
 }
 
-.hourSelect,
-.minuteSelect {
-  display: flex;
-  flex-wrap: wrap;
-}
-
-.hourSelect,
-.minuteSelect,
-.ampmSelect {
-  border: 0.5px solid var(--border-color);
-}
-
-.hourSelect > button,
-.minuteSelect > button,
-.ampmSelect > button {
-  width: 16.66%;
-  aspect-ratio: 1;
-  border: 0.5px solid var(--border-color);
-  background-color: transparent;
-}
-
-.ampmSelect > button {
-  aspect-ratio: 3.0016;
-  width: 50%;
-}
-
-.ampmSelect {
-  margin-top: 0.5rem;
-}
-
 .label {
   margin-bottom: 0.5rem;
   display: block;
-}
-
-.specificMinuteSelect > button {
-  width: 20%;
-  aspect-ratio: 1.2;
-}
-
-.specificMinuteWrap {
-  height: 50.65px;
-}
-
-.active.active {
-  background-color: var(--scorable-bg-color);
 }
 
 .timePreview {
@@ -79,27 +30,28 @@
   font-weight: 500;
   font-size: 2rem;
   letter-spacing: 2px;
+  height: 2.5rem;
 }
 
-.placeholder {
-  color: var(--placeholder-color);
+.specificMinuteWrap {
+  height: 4rem;
 }
 
-.fab {
-  position: fixed;
-  bottom: 2rem;
-  right: 2rem;
-  width: 3rem;
-  height: 3rem;
-  border-radius: 50%;
-  background-color: var(--primary-action-color);
-  color: #fff;
-  cursor: pointer;
-  font-weight: 100;
-  font-size: 2rem;
-  border: 1px solid var(--primary-action-color);
+.timeSelectWrap .hourMinute,
+.timeSelectWrap .minute,
+.timeSelectWrap .ampm {
+  padding: 0.771rem 0;
+  text-align: center;
 }
 
-.fab:disabled {
-  opacity: 0.3;
+.timeSelectWrap .hourMinute {
+  width: calc(16.666% - 0.417rem);
+}
+
+.timeSelectWrap .minute {
+  width: calc(20% - 0.4rem);
+}
+
+.timeSelectWrap .ampm {
+  width: calc(50% - 0.25rem);
 }

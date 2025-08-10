@@ -1,6 +1,6 @@
 import { useSearchParams } from 'react-router';
 import styles from './task-progress.module.css';
-import { getDateString, getUnitValue } from '~/utils/date';
+import { getDateString, getUnitValue } from '~/utils/date-utils';
 import {
   Area,
   AreaChart,

@@ -1,0 +1,138 @@
+.labelText {
+  font-size: 0.9rem;
+  display: inline-block;
+  margin-bottom: 0.3rem;
+  color: var(--text-color-hard);
+  letter-spacing: 1px;
+  line-height: 1.5;
+}
+
+.inputText {
+  border-radius: 0;
+  padding: 0.4589rem 0.75rem;
+  font-size: 1rem;
+  display: block;
+  width: 100%;
+  letter-spacing: 0.5px;
+  color: var(--text-color-hard);
+  line-height: 1.5rem;
+  border: 1px solid transparent;
+  border-radius: 0.5rem;
+  background-color: var(--secondary-background);
+  resize: none;
+}
+
+.hasRightItem {
+  position: relative;
+}
+
+.hasRightItem .inputText {
+  padding-right: 2.5rem;
+}
+
+.inputText::placeholder {
+  color: var(--placeholder-color);
+}
+
+.inputText:focus {
+  border: 1px solid var(--blue-on-secondary-bg);
+}
+
+.inputText:focus-visible {
+  outline: none;
+}
+
+.hasError,
+.hasError:focus-visible {
+  border: 1px solid var(--error-text);
+}
+
+.required {
+  color: var(--error-text);
+}
+
+.spinner {
+  right: 0.75rem;
+  top: 0.75rem;
+  position: absolute;
+}
+
+.passwordToggle {
+  background-color: var(--secondary-background);
+  border: 0;
+  color: var(--text-color-hard);
+  height: 2.5rem;
+  width: 2.7rem;
+  flex-shrink: 0;
+  border-radius: 0 0.5rem 0.5rem 0;
+  border: 2px solid var(--primary-background);
+  border-width: 0 0 0 2px;
+}
+
+.passwordToggleWrap {
+  display: flex;
+}
+
+.passwordToggleWrap .inputText {
+  border-radius: 0.5rem 0 0 0.5rem;
+}
+
+.radioGroupOptions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding-top: 0.2rem;
+}
+
+.radioGroupLabel {
+  border: 1px solid var(--secondary-background);
+  color: var(--text-color-soft);
+  background-color: var(--secondary-background);
+  padding: 0.5rem 1rem;
+  display: block;
+  border-radius: 2rem;
+  font-size: 0.8rem;
+  letter-spacing: 0.5px;
+}
+
+.radioGroupLabel.active {
+  border: 1px solid;
+  color: var(--blue-on-secondary-bg);
+}
+
+.radioGroupInput {
+  display: none;
+}
+
+.baseWrap {
+  padding: 1.25rem 0;
+}
+
+.base {
+  height: 0.5rem;
+  background-color: var(--slider-base);
+  position: relative;
+  border-radius: 1rem;
+}
+
+.fluid {
+  width: 2rem;
+  height: 100%;
+  background-color: var(--primary-action-color);
+  border-radius: 1rem;
+}
+
+.thumb {
+  width: 3rem;
+  height: 3rem;
+  background-color: var(--secondary-background);
+  border-radius: 3rem;
+  position: absolute;
+  top: -1.25rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: var(--blue-on-secondary-bg);
+  border: 4px solid var(--primary-action-color);
+  user-select: none;
+}

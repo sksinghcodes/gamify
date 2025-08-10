@@ -1,306 +1,283 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router';
 import api from '~/api';
 import type {
-  ResetPasswordDataIF,
-  ResetPasswordValidationIF,
-  ResetPasswordValidationRulesIF,
+  ApiValidationResponse,
+  EmailFormState,
+  PasswordResetFormState,
 } from '~/types/auth-types';
-import { validationFunctions } from '~/utils/validation';
+import {
+  extractValues,
+  validate,
+  type ValidationRule,
+} from '~/utils/validation';
 import ErrorText from '~/components/error-text/error-text';
 import SpinnerButton from '~/components/spinner-button/spinner-button';
 import SuccessText from '~/components/success-text/success-text';
 import styles from '../auth.module.css';
 import { API_ENDPOINTS, ROUTES } from '~/constants';
+import InputText from '~/components/form-elements/input-text';
 
 export const meta = () => {
   return [{ title: ROUTES.RESET_PASSWORD.title }];
 };
 
 const ResetPassword = () => {
-  const [email, setEmail] = useState('');
-  const [emailError, setEmailError] = useState('');
+  const [emailServerError, setEmailServerError] = useState('');
+
   const [passwordResetId, setPasswordResetId] = useState('');
 
   const [resetPasswordData, setResetPasswordData] =
-    useState<ResetPasswordDataIF>({
-      code: '',
-      newPassword: '',
-      confirmNewPassword: '',
+    useState<PasswordResetFormState>({
+      code: { value: '', error: '', touched: false },
+      newPassword: { value: '', error: '', touched: false },
+      confirmNewPassword: { value: '', error: '', touched: false },
     });
 
-  const [resetPasswordValidation, setResetPasswordValidation] =
-    useState<ResetPasswordValidationIF>({
-      code: { errorMessage: '', touched: false, isValid: false },
-      newPassword: { errorMessage: '', touched: false, isValid: false },
-      confirmNewPassword: { errorMessage: '', touched: false, isValid: false },
-    });
+  const [email, setEmail] = useState<EmailFormState>({
+    email: { value: '', error: '', touched: false },
+  });
 
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
 
-  const validationRules: ResetPasswordValidationRulesIF = {
-    code: [
-      { function: 'isRequired' },
-      { function: 'noSpaces' },
-      { function: 'checkLength', args: [6, 6] },
-    ],
-    newPassword: [
-      { function: 'isRequired' },
-      { function: 'noSpaces' },
-      { function: 'checkLength', args: [6, 30] },
-      { function: 'isPassword' },
-    ],
-    confirmNewPassword: [
-      { function: 'isRequired' },
-      { function: 'isSameAsPassword', args: [resetPasswordData.newPassword] },
-    ],
+  const resetPasswordValidationRules: ValidationRule[] = [
+    {
+      field: 'code',
+      validations: [
+        { name: 'isRequired' },
+        { name: 'noSpaces' },
+        {
+          name: 'checkLength',
+          args: [6, 6, 'Verification code must contain 6 digits'],
+        },
+      ],
+    },
+    {
+      field: 'newPassword',
+      validations: [
+        { name: 'isRequired' },
+        { name: 'noSpaces' },
+        { name: 'checkLength', args: [6, 30] },
+        { name: 'isPassword' },
+      ],
+    },
+    {
+      field: 'confirmNewPassword',
+      validations: [
+        { name: 'isRequired' },
+        { name: 'isSameAsPassword', getArgsFunction: 'getNewPassword' },
+      ],
+    },
+  ];
+
+  const emailValidationRules: ValidationRule[] = [
+    {
+      field: 'email',
+      validations: [{ name: 'isRequired' }, { name: 'isEmail' }],
+    },
+  ];
+
+  const handleResetPassowrdChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const { name, value } = e.currentTarget;
+    const key = name as keyof PasswordResetFormState;
+    validate({
+      rules: resetPasswordValidationRules,
+      state: resetPasswordData,
+      setState: setResetPasswordData,
+      newInput: [key, value],
+      onlyValidateTouched: true,
+      argumentGetters: {
+        getNewPassword: (state) => [state.newPassword.value],
+      },
+    });
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.currentTarget;
+    const key = name as keyof EmailFormState;
+    validate({
+      rules: emailValidationRules,
+      state: email,
+      setState: setEmail,
+      newInput: [key, value],
+      onlyValidateTouched: true,
+    });
+  };
 
-    setResetPasswordData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+  const handleEmailSubmit = async () => {
+    setError('');
 
-    setResetPasswordValidation((prev) => ({
-      ...prev,
-      [name]: {
-        ...prev[name as keyof ResetPasswordValidationIF],
-        touched: true,
+    const { isValid, someFieldsAsyncValidating } = validate({
+      rules: emailValidationRules,
+      state: email,
+      setState: setEmail,
+      onlyValidateTouched: false,
+    });
+
+    const canSubmit = isValid && !someFieldsAsyncValidating;
+
+    if (!canSubmit) {
+      return;
+    }
+
+    setLoading(true);
+    setEmailServerError('');
+
+    try {
+      const { data }: ApiValidationResponse<EmailFormState> = await api.get(
+        API_ENDPOINTS.RESET_PASSWORD,
+        {
+          params: extractValues(email),
+        }
+      );
+
+      if (data.success) {
+        setPasswordResetId(data.passwordResetId || '');
+      } else {
+        setEmailServerError(data.error || '');
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        setError(error.message);
+      } else {
+        setError(String(error));
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResetPasswordSubmit = async () => {
+    setError('');
+
+    const { isValid, someFieldsAsyncValidating } = validate({
+      rules: resetPasswordValidationRules,
+      state: resetPasswordData,
+      setState: setResetPasswordData,
+      onlyValidateTouched: false,
+      argumentGetters: {
+        getNewPassword: (state) => [state.newPassword.value],
       },
-    }));
+    });
+
+    const canSubmit = isValid && !someFieldsAsyncValidating;
+
+    if (!canSubmit) {
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const { data } = await api.post(API_ENDPOINTS.RESET_PASSWORD, {
+        ...extractValues(resetPasswordData),
+        passwordResetId,
+      });
+
+      if (data.success) {
+        setSuccess(true);
+      } else {
+        if (data.validation) {
+          const updatedValidation = { ...resetPasswordData };
+          for (const key of Object.keys(data.validation)) {
+            const keyTyped = key as keyof PasswordResetFormState;
+            updatedValidation[keyTyped] = {
+              ...updatedValidation[keyTyped],
+              error: data.validation[keyTyped].errorMessage,
+            };
+          }
+          setResetPasswordData(updatedValidation);
+        }
+        if (data.error) {
+          setSuccess(false);
+          setError(data.error);
+        }
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        setError(error.message);
+      } else {
+        setError(String(error));
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSubmit = (e: React.SyntheticEvent) => {
     e.preventDefault();
-    setError('');
-
-    if (!passwordResetId) {
-      if (email.trim()) {
-        setLoading(true);
-        setEmailError('');
-        api
-          .get(API_ENDPOINTS.RESET_PASSWORD, { params: { email } })
-          .then(({ data }) => {
-            setLoading(false);
-            if (data.success) {
-              setPasswordResetId(data.passwordResetId);
-            } else {
-              setEmailError(data.error);
-            }
-          })
-          .catch((err) => {
-            setLoading(false);
-            setError(err.message);
-          });
-      } else {
-        setEmailError('Please enter email');
-      }
+    if (passwordResetId) {
+      handleResetPasswordSubmit();
     } else {
-      const isFormValid =
-        resetPasswordValidation.code.isValid &&
-        resetPasswordValidation.newPassword.isValid &&
-        resetPasswordValidation.confirmNewPassword.isValid;
-
-      if (isFormValid) {
-        setLoading(true);
-        api
-          .post(API_ENDPOINTS.RESET_PASSWORD, {
-            ...resetPasswordData,
-            passwordResetId,
-          })
-          .then(({ data }) => {
-            setLoading(false);
-            if (data.success) {
-              setSuccess(true);
-            } else {
-              if (data.validation) {
-                const updatedValidation = { ...resetPasswordValidation };
-                for (const key of Object.keys(data.validation)) {
-                  updatedValidation[key as keyof ResetPasswordValidationIF] = {
-                    ...updatedValidation[
-                      key as keyof ResetPasswordValidationIF
-                    ],
-                    errorMessage: data.validation[key].errorMessage,
-                    isValid: data.validation[key].isValid,
-                  };
-                }
-                setResetPasswordValidation(updatedValidation);
-              }
-              if (data.error) {
-                setSuccess(false);
-                setError(data.error);
-              }
-            }
-          })
-          .catch((err) => {
-            setLoading(false);
-            setError(err.message);
-            setSuccess(false);
-          });
-      } else {
-        validate(validationRules, true);
-      }
+      handleEmailSubmit();
     }
   };
-
-  const validate = (
-    validationRules: ResetPasswordValidationRulesIF,
-    fromSubmit: boolean = false
-  ) => {
-    const updatedValidation: ResetPasswordValidationIF = {
-      ...resetPasswordValidation,
-    };
-
-    for (const [key, rules] of Object.entries(validationRules)) {
-      if (
-        resetPasswordValidation[key as keyof ResetPasswordValidationIF]
-          .touched ||
-        fromSubmit
-      ) {
-        for (let i = 0; i < rules.length; i++) {
-          const rule = rules[i];
-          const message = validationFunctions[rule.function](
-            resetPasswordData[key as keyof ResetPasswordDataIF],
-            ...(rule.args || [])
-          );
-
-          if (message) {
-            updatedValidation[key as keyof ResetPasswordValidationIF] = {
-              ...updatedValidation[key as keyof ResetPasswordValidationIF],
-              errorMessage: message,
-              isValid: false,
-            };
-            break;
-          }
-
-          if (i === rules.length - 1) {
-            updatedValidation[key as keyof ResetPasswordValidationIF] = {
-              ...updatedValidation[key as keyof ResetPasswordValidationIF],
-              errorMessage: '',
-              isValid: true,
-            };
-          }
-        }
-      }
-    }
-
-    setResetPasswordValidation(updatedValidation);
-  };
-
-  useEffect(() => {
-    validate(validationRules);
-  }, [
-    resetPasswordData.code,
-    resetPasswordData.newPassword,
-    resetPasswordData.confirmNewPassword,
-  ]);
 
   return (
     <form onSubmit={handleSubmit} className={styles.form}>
       {!passwordResetId ? (
-        <div className={styles.field}>
-          <label className={styles.inputWrap}>
-            <span className={styles.labelText}>
-              Enter the email address that you used in your profile
-            </span>
-            <input
-              className={styles.input}
-              type="text"
-              name="email"
-              value={email}
-              placeholder="Email Address"
-              onChange={(e) => setEmail(e.target.value.trim())}
-            />
-          </label>
-          {emailError && <ErrorText>{emailError}</ErrorText>}
-        </div>
+        <InputText
+          type="text"
+          label="Enter the email address that you used in your profile"
+          name="email"
+          id="email"
+          placeholder="Email Address"
+          value={email.email.value}
+          onChange={handleEmailChange}
+          error={email.email.error || emailServerError}
+        />
       ) : (
         <>
-          <div className={styles.field}>
-            <label className={styles.inputWrap}>
-              <span className={styles.labelText}>
-                A six-digit code has been sent to your email address. Please
-                enter it here to reset your password.
-              </span>
-              <input
-                className={styles.input}
-                type="text"
-                name="code"
-                placeholder="XXXXXX"
-                value={resetPasswordData.code}
-                onChange={handleChange}
-                autoComplete="username"
-              />
-            </label>
-            {resetPasswordValidation.code.errorMessage && (
-              <ErrorText>{resetPasswordValidation.code.errorMessage}</ErrorText>
-            )}
-          </div>
+          <InputText
+            type="text"
+            label="A six-digit code has been sent to your email address. Please enter it here to reset your password."
+            name="code"
+            id="code"
+            placeholder="XXXXXX"
+            value={resetPasswordData.code.value}
+            onChange={handleResetPassowrdChange}
+            error={resetPasswordData.code.error}
+          />
 
-          <div className={styles.field}>
-            <label className={styles.inputWrap}>
-              <span className={styles.labelText}>New Password</span>
-              <input
-                className={styles.input}
-                type="password"
-                name="newPassword"
-                placeholder="New Password"
-                value={resetPasswordData.newPassword}
-                onChange={handleChange}
-              />
-            </label>
-            {resetPasswordValidation.newPassword.errorMessage && (
-              <ErrorText>
-                {resetPasswordValidation.newPassword.errorMessage}
-              </ErrorText>
-            )}
-          </div>
+          <InputText
+            type="password"
+            label="New Password"
+            name="newPassword"
+            id="newPassword"
+            placeholder="New Password"
+            value={resetPasswordData.newPassword.value}
+            onChange={handleResetPassowrdChange}
+            error={resetPasswordData.newPassword.error}
+          />
 
-          <div className={styles.field}>
-            <label className={styles.inputWrap}>
-              <span className={styles.labelText}>Confirm New Password</span>
-              <input
-                className={styles.input}
-                type="password"
-                name="confirmNewPassword"
-                placeholder="Confirm new password"
-                value={resetPasswordData.confirmNewPassword}
-                onChange={handleChange}
-              />
-            </label>
-            {resetPasswordValidation.confirmNewPassword.errorMessage && (
-              <ErrorText>
-                {resetPasswordValidation.confirmNewPassword.errorMessage}
-              </ErrorText>
-            )}
-          </div>
+          <InputText
+            type="password"
+            label="Confirm New Password"
+            name="confirmNewPassword"
+            id="confirmNewPassword"
+            placeholder="Confirm new password"
+            value={resetPasswordData.confirmNewPassword.value}
+            onChange={handleResetPassowrdChange}
+            error={resetPasswordData.confirmNewPassword.error}
+          />
         </>
       )}
 
-      <div className="text-center">
-        <SpinnerButton disabled={loading} loading={loading}>
-          {!passwordResetId ? 'Get Confirmation Code' : 'Reset Password'}
-        </SpinnerButton>
-      </div>
+      <SpinnerButton disabled={loading} loading={loading}>
+        {!passwordResetId ? 'Get Confirmation Code' : 'Reset Password'}
+      </SpinnerButton>
 
-      {error && (
-        <>
-          <ErrorText>{error}</ErrorText>
-        </>
-      )}
+      {error && <ErrorText>{error}</ErrorText>}
 
       {success && (
-        <>
-          <SuccessText>
-            Your password has been changed. Now you can{' '}
-            <Link to={ROUTES.SIGN_IN.path}>Sign In</Link>.
-          </SuccessText>
-        </>
+        <SuccessText>
+          Your password has been changed. Now you can{' '}
+          <Link to={ROUTES.SIGN_IN.path}>Sign In</Link>.
+        </SuccessText>
       )}
     </form>
   );

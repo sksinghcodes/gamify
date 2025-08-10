@@ -1,26 +1,51 @@
-export const validationFunctions: any = {
-  isRequired: function (value: string) {
-    return !!value.trim() ? '' : 'This field is required';
-  },
-  checkLength: function (value: string, min: number, max: number) {
-    return value.trim().length >= min && value.trim().length <= max
+import type { FormFieldState } from '~/types/auth-types';
+
+type ValidatorFn = (...args: any[]) => string;
+
+const ensureString: (val: unknown) => string = (val) => {
+  return typeof val === 'string' ? val : String(val ?? '');
+};
+
+export const validationFunctions: Record<string, ValidatorFn> = {
+  isRequired: function (
+    value: string,
+    errorMessage?: string,
+    fieldName?: string
+  ) {
+    return !!ensureString(value).trim()
       ? ''
-      : `Input must be minimum ${min} and maximum ${max} characters in length`;
+      : errorMessage || `${fieldName || 'This field'} is required`;
   },
-  noSpaces: function (value: string) {
-    return !value.includes(' ') ? '' : `Input must not contain spaces`;
+  checkLength: function (
+    value: string,
+    min: number,
+    max: number,
+    errorMessage?: string
+  ) {
+    return ensureString(value).trim().length === 0 ||
+      (ensureString(value).trim().length >= min &&
+        ensureString(value).trim().length <= max)
+      ? ''
+      : errorMessage ||
+          `Input must be minimum ${min} and maximum ${max} characters in length`;
   },
-  isUsername: function (value: string) {
+  noSpaces: function (value: string, errorMessage?: string) {
+    return !value.includes(' ')
+      ? ''
+      : errorMessage || `Input must not contain spaces`;
+  },
+  isUsername: function (value: string, errorMessage?: string) {
     return /^[a-zA-Z0-9_.]+$/.test(value)
       ? ''
-      : `Only alphanumeric characters {A-Z, a-z, 0-9}, underscore {_}, and period {.} are allowed`;
+      : errorMessage ||
+          `Only alphanumeric characters {A-Z, a-z, 0-9}, underscore {_}, and period {.} are allowed`;
   },
-  isEmail: function (value: string) {
+  isEmail: function (value: string, errorMessage?: string) {
     return /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(value)
       ? ''
-      : 'Enter a valid email address';
+      : errorMessage || 'Enter a valid email address';
   },
-  isPassword: function (value: string) {
+  isPassword: function (value: string, errorMessage?: string) {
     let hasNumeric = false;
     let hasUppercase = false;
     let hasLowercase = false;
@@ -88,7 +113,9 @@ export const validationFunctions: any = {
     });
 
     if (hasInvalidChar) {
-      return `Password has invalid character${invalidChars.length ? 's' : ''}: ${invalidChars.join(' ')}`;
+      return `Password has invalid character${
+        invalidChars.length ? 's' : ''
+      }: ${invalidChars.join(' ')}`;
     }
 
     if (!hasNumeric || !hasUppercase || !hasLowercase || !hasSpecial) {
@@ -97,7 +124,175 @@ export const validationFunctions: any = {
 
     return '';
   },
-  isSameAsPassword: function (value: string, password: string) {
-    return value === password ? '' : 'Passwords do not match';
+  isSameAsPassword: function (
+    value: string,
+    password: string,
+    errorMessage?: string
+  ) {
+    return value === password ? '' : errorMessage || 'Passwords do not match';
   },
+};
+
+type ArgsFunc<T> = (state: T) => any[];
+interface ArgsFunctions<T> {
+  [key: string]: ArgsFunc<T>;
+}
+
+type CustomFunc = (...args: any[]) => string | Promise<string>;
+interface CustomFunctions {
+  [key: string]: CustomFunc;
+}
+
+type BaseValidation = {
+  name: string;
+  args?: any[];
+  getArgsFunction?: string;
+};
+
+type SyncValidation = BaseValidation & {
+  isCustom?: boolean;
+};
+
+type AsyncCustomValidation = BaseValidation & {
+  isCustom: true;
+  isAsync: true;
+};
+
+type Validation = SyncValidation | AsyncCustomValidation;
+
+export interface ValidationRule {
+  field: string;
+  validations: Validation[];
+}
+
+export const validate = <
+  T extends Record<string, FormFieldState<any>>,
+  K extends keyof T = keyof T
+>({
+  rules,
+  state,
+  setState,
+  newInput,
+  onlyValidateTouched = true,
+  customValidators,
+  argumentGetters,
+}: {
+  rules: ValidationRule[];
+  state: T;
+  setState: React.Dispatch<React.SetStateAction<T>>;
+  newInput?: [K & string, T[K]['value']];
+  onlyValidateTouched?: boolean;
+  customValidators?: CustomFunctions;
+  argumentGetters?: ArgsFunctions<T>;
+}): {
+  isValid: boolean;
+  someFieldsAsyncValidating: boolean;
+} => {
+  let isValid = true;
+  const stateCopy = structuredClone(state);
+  let changedKey: keyof T & string = '';
+
+  if (newInput) {
+    const [key, value] = newInput;
+    stateCopy[key].value = value;
+    stateCopy[key].touched = true;
+    changedKey = key;
+  }
+
+  for (const { field, validations } of rules) {
+    const key = field as keyof T;
+    const item = stateCopy[key];
+
+    if (onlyValidateTouched && (!item.touched || changedKey !== field))
+      continue;
+
+    for (const validation of validations) {
+      const staticArgs = validation.args || [];
+      const dynamicArgs = validation.getArgsFunction
+        ? argumentGetters?.[validation.getArgsFunction]?.(state) ?? []
+        : [];
+
+      const args = [item.value, ...staticArgs, ...dynamicArgs];
+
+      if (
+        (validation as AsyncCustomValidation).isAsync &&
+        validation.isCustom &&
+        customValidators?.[validation.name] &&
+        changedKey === field
+      ) {
+        item.error = '';
+        item.validatingAsync = true;
+
+        (customValidators[validation.name](...args) as Promise<string>)
+          .then((error: string) => {
+            setState((prev) => ({
+              ...prev,
+              [key]: {
+                ...prev[key],
+                error,
+                validatingAsync: false,
+              },
+            }));
+          })
+          .catch(() => {
+            setState((prev) => ({
+              ...prev,
+              [key]: {
+                ...prev[key],
+                error: 'Something went wrong. Cannot validate right now.',
+                validatingAsync: false,
+              },
+            }));
+          });
+
+        break; // Exit sync loop on async
+      }
+
+      if (
+        !(validation as AsyncCustomValidation).isAsync &&
+        validation.isCustom &&
+        customValidators?.[validation.name]
+      ) {
+        const error = customValidators[validation.name](...args) as string;
+        item.error = error;
+        if (error) break;
+      }
+
+      if (!validation.isCustom && validationFunctions[validation.name]) {
+        const error = validationFunctions[validation.name](...args);
+        item.error = error;
+        if (error) break;
+      }
+    }
+  }
+
+  for (const key in stateCopy) {
+    if (stateCopy[key].error) {
+      isValid = false;
+      break;
+    }
+  }
+
+  const someFieldsAsyncValidating = Object.values(stateCopy).some(
+    (f) => f.validatingAsync
+  );
+
+  setState(stateCopy);
+
+  return {
+    isValid,
+    someFieldsAsyncValidating,
+  };
+};
+
+export const extractValues = <T extends Record<string, { value: any }>>(
+  state: T
+): { [K in keyof T]: T[K]['value'] } => {
+  const result = {} as { [K in keyof T]: T[K]['value'] };
+
+  for (const key in state) {
+    result[key] = state[key].value;
+  }
+
+  return result;
 };

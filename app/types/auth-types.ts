@@ -1,74 +1,50 @@
-export interface AvailabilityIF {
-  checkingUnique: boolean;
-  isUnique: boolean | null;
-}
-
-export interface SignUpDataIF {
-  username: string;
-  email: string;
-  password: string;
-  confirmPassword: string;
-}
-
-export interface ValidationIF {
-  errorMessage: string;
+export type FormFieldState<T = string> = {
+  value: T;
+  error: string;
   touched: boolean;
-  isValid: boolean;
-}
+  validatingAsync?: boolean;
+};
 
-export interface SignUpValidationIF {
-  username: ValidationIF;
-  email: ValidationIF;
-  password: ValidationIF;
-  confirmPassword: ValidationIF;
-}
+export type SignUpFormState = {
+  username: FormFieldState;
+  email: FormFieldState;
+  password: FormFieldState;
+  confirmPassword: FormFieldState;
+};
 
-export interface ValidationRuleIF {
-  function: string;
-  args?: any[];
-}
+export type SignInFormState = {
+  usernameOrEmail: FormFieldState;
+  password: FormFieldState;
+};
 
-export interface SignUpValidationRulesIF {
-  username: ValidationRuleIF[];
-  email: ValidationRuleIF[];
-  password: ValidationRuleIF[];
-  confirmPassword: ValidationRuleIF[];
-}
+export type PasswordResetFormState = {
+  code: FormFieldState;
+  newPassword: FormFieldState;
+  confirmNewPassword: FormFieldState;
+};
 
-export interface SignInDataIF {
-  usernameOrEmail: string;
-  password: string;
-}
+export type EmailFormState = {
+  email: FormFieldState;
+};
 
-export interface SignInValidationIF {
-  usernameOrEmail: ValidationIF;
-  password: ValidationIF;
-}
+export type CodeFormState = {
+  code: FormFieldState;
+};
 
-export interface SignInValidationRulesIF {
-  usernameOrEmail: ValidationRuleIF[];
-  password: ValidationRuleIF[];
-}
-
-export interface ResetPasswordDataIF {
-  code: string;
-  newPassword: string;
-  confirmNewPassword: string;
-}
-
-export interface ResetPasswordValidationIF {
-  code: ValidationIF;
-  newPassword: ValidationIF;
-  confirmNewPassword: ValidationIF;
-}
-
-export interface ResetPasswordValidationRulesIF {
-  code: ValidationRuleIF[];
-  newPassword: ValidationRuleIF[];
-  confirmNewPassword: ValidationRuleIF[];
-}
-
-export interface ValidationRuleIF {
-  function: string;
-  args?: any[];
-}
+export type ApiValidationResponse<T extends Record<string, any>> = {
+  data: {
+    success: boolean;
+    error?: string;
+    confirmationCodeId?: string;
+    passwordResetId?: string;
+    validation?: Partial<
+      Record<
+        keyof T,
+        {
+          errorMessage: string;
+          isUnique?: boolean;
+        }
+      >
+    >;
+  };
+};

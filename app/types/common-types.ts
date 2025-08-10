@@ -1,20 +1,23 @@
+import type {
+  CategoryWeightTraining,
+  CategoryWithoutTarget,
+  MonthIndex,
+  RecurrenceDaily,
+  RecurrenceEnum,
+  RecurrenceMonthly,
+  RecurrenceWeekly,
+  RecurrenceYearly,
+  RemoveAfterGivenDate,
+  RemoveNever,
+  ScheduleNotTimed,
+  ScheduleTimed,
+} from './task-types';
+
 export interface UserIF {
   _id: string;
   email: string;
   username: string;
   role: number;
-}
-
-export interface ContextInterface {
-  isSignedIn: boolean | null;
-  checkSignedInStatus: () => void;
-  deviceHeight: string;
-  user: UserIF;
-  loading: boolean;
-  isDarkMode: boolean;
-  setIsDarkMode: (isDarkMode: boolean) => void;
-  isSigningOut: boolean;
-  signOut: () => void;
 }
 
 export enum RoutesEnum {
@@ -50,3 +53,60 @@ export enum HeaderType {
   DEFAULT = 'DEFAULT',
   HIDDEN = 'HIDDEN',
 }
+
+export interface InitialValues {
+  REGULAR: CategoryWithoutTarget;
+  CALISTHENICS: CategoryWithoutTarget;
+  CARDIO: CategoryWithoutTarget;
+  WEIGHT_TRAINING: CategoryWeightTraining;
+  DAILY: RecurrenceDaily;
+  WEEKLY: RecurrenceWeekly;
+  MONTHLY: RecurrenceMonthly;
+  YEARLY: RecurrenceYearly;
+  NOT_TIMED: ScheduleNotTimed;
+  TIMED: ScheduleTimed;
+  NEVER: RemoveNever;
+  AFTER_GIVEN_DATE: RemoveAfterGivenDate;
+}
+
+export interface TaskBase {
+  name: string;
+  description: string;
+}
+
+export enum DurationEnum {
+  DAY = 'DAY',
+  WEEK = 'WEEK',
+  MONTH = 'MONTH',
+  YEAR = 'YEAR',
+}
+
+export enum UnitEnum {
+  WEEK = 'WEEK',
+  MONTH = 'MONTH',
+  YEAR = 'YEAR',
+}
+export interface WeekValue {
+  type: UnitEnum.WEEK;
+  year: number;
+  week: number;
+}
+
+export interface MonthValue {
+  type: UnitEnum.MONTH;
+  year: number;
+  month: MonthIndex;
+}
+
+export interface YearValue {
+  type: UnitEnum.YEAR;
+  year: number;
+}
+
+export interface InitialUnitValues {
+  WEEK: WeekValue;
+  MONTH: MonthValue;
+  YEAR: YearValue;
+}
+
+export type PriodCarouselValue = WeekValue | MonthValue | YearValue;

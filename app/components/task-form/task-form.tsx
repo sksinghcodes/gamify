@@ -1,436 +1,580 @@
-import { useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import {
-  INITIAL_RECURRENCE_AND_REMOVE,
-  INITIAL_TASK_STATE,
   INVALID_DATE_STRATEGY,
-  INVALID_DATE_STRATEGY_LABELS,
   MONTHS_3_LETTER,
   RECURRENCE,
-  REMOVE_TYPE,
-  REMOVE_TYPE_LABELS,
-  WEEKS,
+  AUTO_REMOVE,
+  INITIAL_TASK_STEP_1,
+  INITIAL_TASK_STEP_2,
+  INITIAL_TASK_STEP_3,
+  getFormValues,
+  MONTHS,
+  SCHEDULE,
+  API_ENDPOINTS,
+  ROUTES,
 } from '~/constants';
 import type {
-  InitialRecurrenceIF,
+  InvalidDateStrategyEnum,
+  InvalidDateStrategyUnion,
   MonthIndex,
-  RecurrenceYearly,
   TaskFormState,
+  TaskFormStep1,
+  TaskFormStep2,
+  TaskFormStep3,
 } from '~/types/task-types';
 import styles from './task-form.module.css';
-import TimeSelector, {
-  type TimeSelectorOnChange,
-} from '~/components/time-selector/time-selector';
-import { useNavigate, useSearchParams } from 'react-router';
-import { capitalize } from '~/utils/string';
-import WeekdaySelector from '~/components/weekday-selector/weekday-selector';
-import MonthlyDatesSelector from '~/components/monthly-dates-selector/monthly-dates-selector';
-import YearlyDateSelector from '../yearly-date-selector/yearly-date-selector';
+import TimeSelector from '~/components/time-selector/time-selector';
+import { classes } from '~/utils/string';
 import DateSelector from '../date-selector/date-selector';
-import { getDateString } from '~/utils/date';
-import ErrorText from '../error-text/error-text';
-import { normalizeTaskFormState } from '~/utils/generic';
+import {
+  extractMonthlyDates,
+  getDateFromYearlyDate,
+  getDateOptions,
+  getDateString,
+  getMonthIndexFromYearlyDate,
+} from '~/utils/date-utils';
+import InputText from '../form-elements/input-text';
+import OptionGroup, {
+  type CustomChangeEvent,
+} from '../form-elements/option-group';
+import { extractValues, validate } from '~/utils/validation';
+import InfoText from '../info-text/info-text';
+import Label from '../form-elements/label';
+import {
+  getRecurrenceType,
+  taskStep2Rules,
+  testRecurrenceValues,
+} from '~/validation/step2-rules';
+import {
+  getAutoRemove,
+  getScheduleType,
+  taskStep3Rules,
+  validateRemoveDate,
+  validateTime,
+} from '~/validation/step3-rules';
+import {
+  CATEGORY_INFO,
+  CATEGORY_OPTIONS,
+  DATE_OPTIONS,
+  INVALID_DATE_STRATEFY_OPTIONS,
+  INVALID_DATE_STRATEGY_INFO,
+  RECURRENCE_OPTIONS,
+  SCHEDULE_OPTIONS,
+  WEEK_OPTIONS,
+} from '~/constants/options';
+import { taskStep1Rules } from '~/validation/step1-rules';
+import MonthSelectorModal from '../month-selector-modal/month-selector-modal';
+import Fab, { FAB_POSITION, FAB_TYPE } from '~/fab/fab';
+import Modal from '../modal/modal';
+import StrategyInfo from '../stratefy-info/stratefy-info';
+import api from '~/api';
+import { Context } from '~/context-provider';
+import { useNavigate } from 'react-router';
 
 const TaskForm: React.FC<{ isEditMode: boolean }> = ({ isEditMode }) => {
-  const [task, setTask] = useState<TaskFormState>(INITIAL_TASK_STATE);
+  const navigate = useNavigate();
+  const [currentMonth, setCurrentMonth] = useState(0);
+  const [showInvalidDateOption, setShowInvalidDateOption] = useState(false);
+  const [showStrategyGuide, setShowStrategyGuide] = useState(false);
+  const { loading, setLoading, setCacheByDate } = useContext(Context);
+
+  useEffect(() => {
+    return () => setLoading(false);
+  }, []);
+
+  const [taskStep1, setTaskStep1] =
+    useState<TaskFormStep1>(INITIAL_TASK_STEP_1);
+  const [taskStep2, setTaskStep2] =
+    useState<TaskFormStep2>(INITIAL_TASK_STEP_2);
+  const [taskStep3, setTaskStep3] =
+    useState<TaskFormStep3>(INITIAL_TASK_STEP_3);
   const [openSelector, setOpenSelector] = useState(false);
   const [showDateSelector, setShowDateSelector] = useState(false);
   const [step, setStep] = useState(1);
 
-  console.log(task);
-
-  const navigate = useNavigate();
-
-  const validate = (task: TaskFormState, fromSubmit: boolean) => {
-    let isValid = true;
-    const taskCopy = {
-      ...task,
-      name: { ...task.name },
-      startTime: { ...task.startTime },
-      endTime: { ...task.endTime },
-    };
-
-    if (!task.name.value.trim()) {
-      taskCopy.name.error = 'Name is required';
-      isValid = false;
-    } else {
-      taskCopy.name.error = '';
-    }
-
-    if (!task.startTime.value.trim()) {
-      taskCopy.startTime.error = 'Start time is required';
-      isValid = false;
-    } else {
-      taskCopy.startTime.error = '';
-    }
-
-    if (!task.endTime.value.trim()) {
-      taskCopy.endTime.error = 'End time is required';
-      isValid = false;
-    } else {
-      taskCopy.endTime.error = '';
-    }
-
-    if (fromSubmit) {
-      taskCopy.name.touched = true;
-      taskCopy.startTime.touched = true;
-      taskCopy.endTime.touched = true;
-    }
-
-    setTask(taskCopy);
-    return isValid;
-  };
-
-  const handleChange: React.ChangeEventHandler<
-    HTMLInputElement | HTMLTextAreaElement
-  > = (e) => {
+  const handleStep1Change = (e: CustomChangeEvent) => {
     const { name, value } = e.target;
+    const key = name as keyof TaskFormStep1;
 
-    setTask((pre) => {
-      const newTask = {
-        ...pre,
-        [name]: {
-          ...pre[name as keyof TaskFormState],
-          value:
-            name === 'recurrence' || name === 'removeIt'
-              ? INITIAL_RECURRENCE_AND_REMOVE[
-                  value as keyof InitialRecurrenceIF
-                ]
-              : value,
-          touched: true,
-        },
-      };
-
-      validate(newTask, false);
-      return newTask;
+    validate({
+      rules: taskStep1Rules,
+      state: taskStep1,
+      setState: setTaskStep1,
+      newInput: [key, value],
+      onlyValidateTouched: true,
     });
   };
 
-  const handleTimeChange: TimeSelectorOnChange = (e) => {
-    const { name, value } = e;
-
-    setTask((pre) => {
-      const newTask = {
-        ...pre,
-        [name]: {
-          ...pre[name as keyof TaskFormState],
-          value,
-          touched: true,
-        },
-      };
-
-      validate(newTask, false);
-      return newTask;
+  const handleStep1Submit = () => {
+    const { isValid } = validate({
+      rules: taskStep1Rules,
+      state: taskStep1,
+      setState: setTaskStep1,
+      onlyValidateTouched: false,
     });
+
+    if (isValid) {
+      setStep(2);
+    }
+  };
+
+  const handleStep2Change: (e: CustomChangeEvent) => void = (e) => {
+    const { name, value } = e.target;
+    const key = name as keyof TaskFormStep2;
+    let finalValue = value;
+
+    if (Array.isArray(finalValue)) {
+      finalValue.sort((a, b) => a - b);
+    }
+
+    validate({
+      rules: taskStep2Rules,
+      state: taskStep2,
+      setState: setTaskStep2,
+      newInput: [key, finalValue],
+      onlyValidateTouched: true,
+      customValidators: {
+        testRecurrenceValues,
+      },
+      argumentGetters: {
+        getRecurrenceType,
+      },
+    });
+
+    if (name === 'recurrence' && value !== taskStep2.recurrence.value) {
+      setTaskStep2((pre) => ({
+        ...pre,
+        recurrenceValues: getFormValues(value === RECURRENCE.DAILY ? null : []),
+        recurrenceInvalidDateStrategy: getFormValues(null),
+      }));
+      setShowInvalidDateOption(false);
+      setCurrentMonth(0);
+    }
+
+    if (name === 'recurrenceValues') {
+      const typeValue: number[] = value || [];
+      let invalidDateStrategy: InvalidDateStrategyUnion = null;
+
+      const includesInvalidMonthlyDate =
+        typeValue.includes(29) ||
+        typeValue.includes(30) ||
+        typeValue.includes(31);
+
+      const isInvalidMonth =
+        taskStep2.recurrence.value === RECURRENCE.MONTHLY &&
+        includesInvalidMonthlyDate;
+
+      const isInvalidYear =
+        taskStep2.recurrence.value === RECURRENCE.YEARLY &&
+        typeValue.includes(129);
+
+      if (isInvalidMonth || isInvalidYear) {
+        invalidDateStrategy = INVALID_DATE_STRATEGY.SHIFT;
+        setShowInvalidDateOption(true);
+      } else {
+        setShowInvalidDateOption(false);
+      }
+      setTaskStep2((pre) => ({
+        ...pre,
+        recurrenceInvalidDateStrategy: getFormValues(invalidDateStrategy),
+      }));
+    }
+  };
+
+  // TDOD: SKIP is removed on values change
+
+  const handleStep2Submit = () => {
+    const { isValid } = validate({
+      rules: taskStep2Rules,
+      state: taskStep2,
+      setState: setTaskStep2,
+      onlyValidateTouched: false,
+      customValidators: {
+        testRecurrenceValues,
+      },
+      argumentGetters: {
+        getRecurrenceType,
+      },
+    });
+
+    if (isValid) {
+      setStep(3);
+    }
+  };
+
+  const handleStep3Change: (e: CustomChangeEvent) => void = (e) => {
+    const { name, value } = e.target;
+    const key = name as keyof TaskFormStep3;
+    let finalValue = value;
+
+    validate({
+      rules: taskStep3Rules,
+      state: taskStep3,
+      setState: setTaskStep3,
+      newInput: [key, finalValue],
+      onlyValidateTouched: true,
+      customValidators: {
+        validateTime,
+        validateRemoveDate,
+      },
+      argumentGetters: {
+        getScheduleType,
+        getAutoRemove,
+      },
+    });
+
+    if (name === 'schedule' && value === SCHEDULE.NOT_TIMED) {
+      setTaskStep3((pre) => ({
+        ...pre,
+        scheduleStartTime: getFormValues(null),
+        scheduleEndTime: getFormValues(null),
+      }));
+    }
+
+    if (name === 'autoRemove' && value === AUTO_REMOVE.NEVER) {
+      setTaskStep3((pre) => ({
+        ...pre,
+        autoRemoveDate: getFormValues(null),
+      }));
+    }
+  };
+
+  const handleStep3Submit = () => {
+    const { isValid } = validate({
+      rules: taskStep3Rules,
+      state: taskStep3,
+      setState: setTaskStep3,
+      onlyValidateTouched: false,
+      customValidators: {
+        validateTime,
+        validateRemoveDate,
+      },
+      argumentGetters: {
+        getScheduleType,
+        getAutoRemove,
+      },
+    });
+
+    if (isValid) {
+      handleSubmit();
+    }
+  };
+
+  const handleNextButton = () => {
+    if (step === 1) {
+      handleStep1Submit();
+    } else if (step === 2) {
+      handleStep2Submit();
+    } else if (step === 3) {
+      handleStep3Submit();
+    }
+  };
+
+  const toYearlyDatesValues = (
+    monthIndex: number,
+    dates: number[],
+    existingYearlyDates: number[]
+  ) => {
+    const datesWithoutCurrentMonth = existingYearlyDates.filter(
+      (date: number) => monthIndex !== getMonthIndexFromYearlyDate(date)
+    );
+
+    const newDates = dates.map((date) => monthIndex * 100 + date);
+
+    handleStep2Change({
+      target: {
+        value: [...datesWithoutCurrentMonth, ...newDates],
+        name: 'recurrenceValues',
+      },
+    });
+  };
+
+  const handleSubmit = async () => {
+    if (loading) {
+      return;
+    }
+    setLoading(true);
+    try {
+      const taskForm: TaskFormState = {
+        ...taskStep1,
+        ...taskStep2,
+        ...taskStep3,
+      };
+      const taskData = extractValues(taskForm);
+      const response = await api.post(API_ENDPOINTS.CREATE_TASK, taskData);
+      if (response.data.success) {
+        setCacheByDate(null);
+        navigate(ROUTES.TASK_LIST.path);
+      }
+    } catch (e) {
+      console.log(e);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className={styles.taskFormWrapper}>
       {step === 1 && (
-        <>
-          <div className={styles.formGroup}>
-            <label htmlFor="taskName" className={styles.label}>
-              Name
-            </label>
-            <input
-              type="text"
-              id="taskName"
-              name="name"
-              placeholder="eg: Go to gym"
-              value={task.name.value}
-              onChange={handleChange}
-              className={styles.inputText}
-            />
-            {task.name.touched && task.name.error ? (
-              <ErrorText>{task.name.error}</ErrorText>
-            ) : null}
-          </div>
+        <div className={styles.stepOneWrap}>
+          <InputText
+            type="text"
+            value={taskStep1.name.value}
+            onChange={handleStep1Change}
+            placeholder="eg: Read a book"
+            label="Name"
+            id="name"
+            name="name"
+            error={taskStep1.name.error}
+            required={true}
+          />
 
-          <div className={styles.formGroup}>
-            <label htmlFor="description" className={styles.label}>
-              Description
-            </label>
-            <textarea
-              id="description"
-              name="description"
-              placeholder="Describe the task... (Optional)"
-              value={task.description.value}
-              onChange={handleChange}
-              className={styles.textarea}
-            />
-          </div>
+          <InputText
+            type="textarea"
+            value={taskStep1.description.value}
+            onChange={handleStep1Change}
+            placeholder="Describe the task... (Optional)"
+            label="Description"
+            id="description"
+            name="description"
+            error={taskStep1.description.error}
+          />
 
-          <div className={styles.timeRow}>
-            <div className={styles.formGroup}>
-              <span className={styles.label}>From time</span>
-              <TimeSelector
-                value={task.startTime.value}
-                onChange={handleTimeChange}
-                name="startTime"
-              />
-              {task.startTime.touched && task.startTime.error ? (
-                <ErrorText>{task.startTime.error}</ErrorText>
-              ) : null}
-            </div>
-
-            <div className={styles.formGroup}>
-              <span className={styles.label}>To time</span>
-              <TimeSelector
-                value={task.endTime.value}
-                onChange={handleTimeChange}
-                name="endTime"
-              />
-              {task.endTime.touched && task.endTime.error ? (
-                <ErrorText>{task.endTime.error}</ErrorText>
-              ) : null}
-            </div>
-          </div>
-        </>
+          <OptionGroup
+            label="What type of task is this?"
+            value={taskStep1.category.value}
+            onChange={handleStep1Change}
+            name="category"
+            options={CATEGORY_OPTIONS}
+          />
+          {<InfoText info={CATEGORY_INFO[taskStep1.category.value]} />}
+        </div>
       )}
 
       {step === 2 && (
         <>
-          <div className={styles.formGroup}>
-            <span className={styles.label}>Frequency</span>
-            <div className={styles.radioRow}>
-              {Object.values(RECURRENCE).map((freq) => (
-                <label
-                  key={freq}
-                  className={styles.radio}
-                  onClick={() => setOpenSelector(true)}
-                >
-                  <input
-                    type="radio"
-                    name="recurrence"
-                    value={freq}
-                    checked={task.recurrence.value.type === freq}
-                    onChange={handleChange}
-                    className={styles.radioInput}
-                  />
-                  <span className={styles.radioLabel}>{capitalize(freq)}</span>
-                </label>
-              ))}
-            </div>
-          </div>
+          <div className={styles.stepOneWrap}>
+            <OptionGroup
+              label="How often are you going to do it?"
+              name="recurrence"
+              value={taskStep2.recurrence.value}
+              onChange={(e) => handleStep2Change(e)}
+              options={RECURRENCE_OPTIONS}
+            />
 
-          {task.recurrence.value.type === RECURRENCE.WEEKLY ? (
-            <>
-              <WeekdaySelector
-                value={task.recurrence.value.weekDays || []}
-                onChange={(weekDays) =>
-                  setTask((pre) => ({
-                    ...pre,
-                    recurrence: {
-                      ...pre.recurrence,
-                      value: {
-                        ...pre.recurrence.value,
-                        weekDays,
-                      },
-                    },
-                  }))
-                }
-                open={openSelector}
-                setOpen={setOpenSelector}
+            {taskStep2.recurrence.value === RECURRENCE.WEEKLY ? (
+              <OptionGroup
+                label="On what days?"
+                name="recurrenceValues"
+                value={taskStep2.recurrenceValues.value || []}
+                onChange={(e) => handleStep2Change(e)}
+                options={WEEK_OPTIONS}
+                allowMulti={true}
+                error={taskStep2.recurrenceValues.error}
+                required={true}
               />
-              {!!task.recurrence.value.weekDays.length && (
-                <div className={styles.selectedWeekdays}>
-                  <div className={styles.label}>Selected days:</div>
-                  <div>
-                    {task.recurrence.value.weekDays
-                      ?.map((day) => WEEKS[day])
-                      .join(', ')}
+            ) : taskStep2.recurrence.value === RECURRENCE.MONTHLY ? (
+              <OptionGroup
+                label="On what dates every month?"
+                name="recurrenceValues"
+                value={taskStep2.recurrenceValues.value || []}
+                onChange={(e) => handleStep2Change(e)}
+                options={DATE_OPTIONS}
+                allowMulti={true}
+                inputLabelProps={{
+                  className: styles.dateOption,
+                }}
+                error={taskStep2.recurrenceValues.error}
+                required={true}
+              />
+            ) : taskStep2.recurrence.value === RECURRENCE.YEARLY ? (
+              <>
+                <div>
+                  <Label required={true}>On what dates every year?</Label>
+                  <div
+                    className={styles.monthWrap}
+                    onClick={() => setOpenSelector(true)}
+                  >
+                    {MONTHS[currentMonth as MonthIndex]}
+                    <span
+                      className={classes(
+                        styles.monthText,
+                        'material-symbols-outlined'
+                      )}
+                    >
+                      expand_all
+                    </span>
                   </div>
-                </div>
-              )}
-            </>
-          ) : task.recurrence.value.type === RECURRENCE.MONTHLY ? (
-            <>
-              <MonthlyDatesSelector
-                value={task.recurrence.value}
-                onChange={(recurrence) =>
-                  setTask((pre) => ({
-                    ...pre,
-                    recurrence: {
-                      ...pre.recurrence,
-                      value: recurrence,
-                    },
-                  }))
-                }
-                open={openSelector}
-                setOpen={setOpenSelector}
-              />
-              {!!task.recurrence.value.dates.length && (
-                <div className={styles.selectedWeekdays}>
-                  <div className={styles.label}>Selected Dates:</div>
-                  <div className={styles.value}>
-                    {task.recurrence.value.dates.join(', ')}
-                  </div>
-                  {task.recurrence.value.invalidDateStrategy !==
-                  INVALID_DATE_STRATEGY.NONE ? (
-                    <>
-                      <div className={styles.label}>Missing date strategy:</div>
-                      <div>
-                        {
-                          INVALID_DATE_STRATEGY_LABELS[
-                            task.recurrence.value.invalidDateStrategy
-                          ]
-                        }
-                      </div>
-                    </>
-                  ) : null}
-                </div>
-              )}
-            </>
-          ) : task.recurrence.value.type === RECURRENCE.YEARLY ? (
-            <>
-              <YearlyDateSelector
-                open={openSelector}
-                setOpen={setOpenSelector}
-                value={task.recurrence.value}
-                onChange={(recurrence) =>
-                  setTask((pre) => ({
-                    ...pre,
-                    recurrence: {
-                      ...pre.recurrence,
-                      value: recurrence,
-                    },
-                  }))
-                }
-              />
-              {!!Object.keys(task.recurrence.value.monthAndDates).length && (
-                <div className={styles.selectedWeekdays}>
-                  <div className={styles.label}>Selected Dates:</div>
-                  <div className={styles.value}>
-                    {Object.keys(task.recurrence.value.monthAndDates)
-                      .map((month) =>
-                        (
-                          task.recurrence.value as RecurrenceYearly
-                        ).monthAndDates[Number(month) as MonthIndex]
-                          ?.map(
-                            (date) =>
-                              `${MONTHS_3_LETTER[Number(month)]} ${date}`
-                          )
-                          .join(', ')
+                  <MonthSelectorModal
+                    open={openSelector}
+                    setOpen={setOpenSelector}
+                    value={currentMonth as MonthIndex}
+                    onChange={(e) => setCurrentMonth(e.target.value)}
+                    name="currentMonth"
+                  />
+                  <OptionGroup
+                    name="recurrenceValues"
+                    value={extractMonthlyDates(
+                      currentMonth,
+                      taskStep2.recurrenceValues.value || []
+                    )}
+                    onChange={(e) =>
+                      toYearlyDatesValues(
+                        currentMonth as MonthIndex,
+                        e.target.value,
+                        taskStep2.recurrenceValues.value || []
                       )
-                      .join(', ')}
-                  </div>
-                  {task.recurrence.value.feb29Strategy !==
-                  INVALID_DATE_STRATEGY.NONE ? (
-                    <>
-                      <div className={styles.label}>Missing date strategy:</div>
-                      <div>
-                        {
-                          INVALID_DATE_STRATEGY_LABELS[
-                            task.recurrence.value.feb29Strategy
-                          ]
-                        }
-                      </div>
-                    </>
-                  ) : null}
+                    }
+                    options={getDateOptions(currentMonth as MonthIndex)}
+                    allowMulti={true}
+                    inputLabelProps={{
+                      className: styles.dateOption,
+                    }}
+                    error={taskStep2.recurrenceValues.error}
+                  />
                 </div>
+                {!!(taskStep2.recurrenceValues.value || []).length && (
+                  <div>
+                    <Label>Selected Dates:</Label>
+                    <div className={styles.dateValues}>
+                      {(taskStep2.recurrenceValues.value || []).map((date) => {
+                        const monthIndex = getMonthIndexFromYearlyDate(date);
+                        const monthlyDate = getDateFromYearlyDate(date);
+                        return (
+                          <span key={date} className={styles.dateValue}>
+                            {MONTHS_3_LETTER[monthIndex]} {monthlyDate}
+                          </span>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </>
+            ) : null}
+
+            {taskStep2.recurrenceInvalidDateStrategy.value !== null &&
+              showInvalidDateOption && (
+                <>
+                  <OptionGroup
+                    label="Choose missing date strategy"
+                    name="recurrenceInvalidDateStrategy"
+                    value={taskStep2.recurrenceInvalidDateStrategy.value}
+                    onChange={(e) => handleStep2Change(e)}
+                    options={INVALID_DATE_STRATEFY_OPTIONS}
+                    required
+                  />
+                  <InfoText
+                    info={
+                      INVALID_DATE_STRATEGY_INFO[
+                        taskStep2.recurrenceInvalidDateStrategy
+                          .value as InvalidDateStrategyEnum
+                      ]
+                    }
+                    onClick={() => setShowStrategyGuide(true)}
+                  />
+                  <Modal
+                    title="Missing date strategy guide"
+                    open={showStrategyGuide}
+                    onClose={() => setShowStrategyGuide(false)}
+                  >
+                    <StrategyInfo />
+                  </Modal>
+                </>
               )}
-            </>
-          ) : null}
+          </div>
         </>
       )}
 
       {step === 3 && (
-        <>
-          <div className={styles.formGroup}>
-            <span className={styles.label}>
-              When to automatically remove this task?
-            </span>
-            <div className={styles.radioColumn}>
-              {Object.values(REMOVE_TYPE).map((type) => (
-                <label
-                  key={type}
-                  className={`${styles.option} ${
-                    task.removeIt.value.type === type ? styles.active : ''
-                  }`}
-                >
-                  <input
-                    type="radio"
-                    name="removeIt"
-                    value={type}
-                    checked={task.removeIt.value.type === type}
-                    onChange={(e) => {
-                      setShowDateSelector(true);
-                      handleChange(e);
-                    }}
-                    className={styles.optionInput}
-                  />
-                  {REMOVE_TYPE_LABELS[type]}
-                </label>
-              ))}
+        <div className={styles.stepOneWrap}>
+          <OptionGroup
+            label="When are you going to do it?"
+            name="schedule"
+            value={taskStep3.schedule.value}
+            onChange={handleStep3Change}
+            options={SCHEDULE_OPTIONS}
+          />
+
+          {taskStep3.schedule.value === SCHEDULE.TIMED && (
+            <div className={styles.timeRow}>
+              <TimeSelector
+                value={taskStep3.scheduleStartTime.value}
+                onChange={handleStep3Change}
+                name="scheduleStartTime"
+                error={taskStep3.scheduleStartTime.error}
+                label="From time"
+                required={true}
+              />
+
+              <TimeSelector
+                value={taskStep3.scheduleEndTime.value}
+                onChange={handleStep3Change}
+                name="scheduleEndTime"
+                error={taskStep3.scheduleEndTime.error}
+                label="To time"
+                required={true}
+              />
             </div>
-          </div>
-          {task.removeIt.value.type === REMOVE_TYPE.AFTER_GIVEN_DATE && (
+          )}
+
+          <OptionGroup
+            label="Automatically remove this task later?"
+            name="autoRemove"
+            value={taskStep3.autoRemove.value}
+            onChange={handleStep3Change}
+            options={[
+              { id: AUTO_REMOVE.NEVER, label: 'No' },
+              {
+                id: AUTO_REMOVE.AFTER_GIVEN_DATE,
+                label: 'Yes',
+              },
+            ]}
+          />
+
+          {taskStep3.autoRemove.value === AUTO_REMOVE.AFTER_GIVEN_DATE && (
             <>
-              <label
-                className={styles.dateInputWrap}
+              <InputText
+                label="When?"
+                type="text"
+                placeholder="Select Date"
+                name="select-date"
+                readOnly={true}
+                required={true}
+                value={getDateString(taskStep3.autoRemoveDate.value)}
+                error={taskStep3.autoRemoveDate.error}
                 onClick={() => setShowDateSelector(true)}
-              >
-                <input
-                  type="text"
-                  placeholder="Select Date"
-                  name="select-date"
-                  readOnly
-                  className={`${styles.dateInput} ${styles.inputText}`}
-                  value={getDateString(task.removeIt.value.dateEpoch)}
-                />
-                <span
-                  className={`material-symbols-outlined ${styles.dateIcon}`}
-                >
-                  calendar_today
-                </span>
-              </label>
+              />
               <DateSelector
-                value={task.removeIt.value.dateEpoch}
-                onChange={(date) => {
-                  setTask((pre) => {
-                    return {
-                      ...pre,
-                      removeIt: {
-                        ...pre.removeIt,
-                        value: {
-                          ...pre.removeIt.value,
-                          dateEpoch: date,
-                        },
-                      },
-                    };
-                  });
-                }}
+                value={taskStep3.autoRemoveDate.value}
+                onChange={(date) =>
+                  handleStep3Change({
+                    target: { name: 'autoRemoveDate', value: date },
+                  })
+                }
                 open={showDateSelector}
                 setOpen={setShowDateSelector}
               />
             </>
           )}
-        </>
+        </div>
       )}
 
+      <div className={styles.fade}></div>
+
       {step !== 1 && (
-        <button
-          className={`${styles.fab} ${styles.prev} material-symbols-outlined`}
+        <Fab
+          disabled={loading}
+          position={FAB_POSITION.LEFT}
+          fabType={FAB_TYPE.SECONDARY}
           onClick={() => setStep(step - 1)}
         >
           west
-        </button>
+        </Fab>
       )}
 
-      <button
-        className={`${styles.fab}  ${styles.next} material-symbols-outlined`}
-        onClick={() => {
-          if (step === 3) {
-            console.log(normalizeTaskFormState(task));
-          } else {
-            if (step === 1 && !validate(task, true)) {
-              return;
-            }
-            setStep(step + 1);
-          }
-        }}
-      >
+      <Fab loading={loading} disabled={loading} onClick={handleNextButton}>
         {step === 3 ? 'done' : 'east'}
-      </button>
+      </Fab>
     </div>
   );
 };

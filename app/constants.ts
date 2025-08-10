@@ -1,13 +1,23 @@
-import type { RoutesIF } from './types/common-types';
-import { HeaderType, RoutesEnum } from './types/common-types';
+import type { FormFieldState } from './types/auth-types';
+import type { InitialValues, RoutesIF } from './types/common-types';
 import {
   DurationEnum,
-  InvalidDateStrategy,
-  RecurrenceEnum,
-  RemoveTypeEnum,
+  HeaderType,
+  RoutesEnum,
   UnitEnum,
-  type InitialRecurrenceIF,
+} from './types/common-types';
+import {
+  InvalidDateStrategyEnum,
+  RecurrenceEnum,
+  AutoRemoveEnum,
   type TaskFormState,
+  ScheduleEnum,
+  CategoryEnum,
+  type TaskFormStep1,
+  type TaskFormStep2,
+  type TaskFormStep3,
+  type TaskRecordFormState,
+  type WeightTrainingSetForm,
 } from './types/task-types';
 
 export const MONTHS = [
@@ -147,6 +157,11 @@ export const API_ENDPOINTS = {
   SIGN_OUT: '/user/sign-out',
   CHECK_UNIQUE: '/user/check-unique',
   VERIFY_PROFILE: '/user/verify-profile',
+  CREATE_TASK: '/task/create',
+  GET_ONE_TASK: '/task/get-one',
+  GET_ALL_TASKS: '/task/get-all',
+  GET_TASKS_BY_DATE: '/task/get-by-date',
+  CREATE_TASK_RECORD: '/task-record/create',
 };
 
 export const DURATION_UNIT = {
@@ -168,10 +183,17 @@ export const VIEW_BY_UNITS = [
   VIEW_BY_UNITS_MAP.YEAR,
 ];
 
-export const REMOVE_TYPE = {
-  NEVER: RemoveTypeEnum.NEVER as RemoveTypeEnum.NEVER,
+export const CATEGORY = {
+  REGULAR: CategoryEnum.REGULAR as CategoryEnum.REGULAR,
+  CARDIO: CategoryEnum.CARDIO as CategoryEnum.CARDIO,
+  CALISTHENICS: CategoryEnum.CALISTHENICS as CategoryEnum.CALISTHENICS,
+  WEIGHT_TRAINING: CategoryEnum.WEIGHT_TRAINING as CategoryEnum.WEIGHT_TRAINING,
+};
+
+export const AUTO_REMOVE = {
+  NEVER: AutoRemoveEnum.NEVER as AutoRemoveEnum.NEVER,
   AFTER_GIVEN_DATE:
-    RemoveTypeEnum.AFTER_GIVEN_DATE as RemoveTypeEnum.AFTER_GIVEN_DATE,
+    AutoRemoveEnum.AFTER_GIVEN_DATE as AutoRemoveEnum.AFTER_GIVEN_DATE,
 };
 
 export const RECURRENCE = {
@@ -181,95 +203,67 @@ export const RECURRENCE = {
   YEARLY: RecurrenceEnum.YEARLY as RecurrenceEnum.YEARLY,
 };
 
+export const SCHEDULE = {
+  NOT_TIMED: ScheduleEnum.NOT_TIMED as ScheduleEnum.NOT_TIMED,
+  TIMED: ScheduleEnum.TIMED as ScheduleEnum.TIMED,
+};
+
 export const INVALID_DATE_STRATEGY = {
-  LAST_VALID: 'LAST_VALID' as InvalidDateStrategy.LAST_VALID,
-  SKIP: 'SKIP' as InvalidDateStrategy.SKIP,
-  NONE: 'NONE' as InvalidDateStrategy.NONE,
+  SHIFT: InvalidDateStrategyEnum.SHIFT as InvalidDateStrategyEnum.SHIFT,
+  SKIP: InvalidDateStrategyEnum.SKIP as InvalidDateStrategyEnum.SKIP,
 };
 
 export const INVALID_DATE_STRATEGY_LABELS = {
-  [InvalidDateStrategy.LAST_VALID]: 'Move to last date',
-  [InvalidDateStrategy.SKIP]: 'Skip month',
-  [InvalidDateStrategy.NONE]: 'None',
+  [InvalidDateStrategyEnum.SHIFT]: 'Move to last date',
+  [InvalidDateStrategyEnum.SKIP]: 'Skip month',
 };
 
-export const REMOVE_TYPE_LABELS = {
-  [RemoveTypeEnum.NEVER]: "Don't remove it automatically",
-  [RemoveTypeEnum.AFTER_GIVEN_DATE]: 'Remove it after a date',
+export const AUTO_REMOVE_LABELS = {
+  [AutoRemoveEnum.NEVER]: "Don't remove it automatically",
+  [AutoRemoveEnum.AFTER_GIVEN_DATE]: 'Remove it after a date',
 };
 
-export const INITIAL_TASK_STATE: TaskFormState = {
-  name: {
-    value: '',
+export const getFormValues: <T>(
+  value: T,
+  async?: boolean
+) => FormFieldState<T> = (value, async) => {
+  return {
+    value: value,
     error: '',
     touched: false,
-  },
-  description: {
-    value: '',
-    error: '',
-    touched: false,
-  },
-  startTime: {
-    value: '',
-    error: '',
-    touched: false,
-  },
-  endTime: {
-    value: '',
-    error: '',
-    touched: false,
-  },
-  recurrence: {
-    value: {
-      type: RECURRENCE.DAILY,
-    },
-    error: '',
-    touched: false,
-  },
-  removeIt: {
-    value: {
-      type: REMOVE_TYPE.NEVER,
-    },
-    error: '',
-    touched: false,
-  },
+    ...(async ? { validatingAsync: false } : {}),
+  };
 };
 
-export const INITIAL_TASK_ERRORS = {
-  name: 'ddd',
-  startTime: 'ddd',
-  endTime: 'ddd',
+export const INITIAL_TASK_STEP_1: TaskFormStep1 = {
+  name: getFormValues(''),
+  description: getFormValues(''),
+  category: getFormValues(CATEGORY.REGULAR),
 };
 
-export const INITIAL_TASK_TOUCHED = {
-  name: false,
-  startTime: false,
-  endTime: false,
+export const INITIAL_TASK_STEP_2: TaskFormStep2 = {
+  recurrence: getFormValues(RECURRENCE.DAILY),
+  recurrenceValues: getFormValues(null),
+  recurrenceInvalidDateStrategy: getFormValues(null),
 };
 
-export const INITIAL_RECURRENCE_AND_REMOVE: InitialRecurrenceIF = {
-  DAILY: {
-    type: RECURRENCE.DAILY,
-  },
-  WEEKLY: {
-    type: RECURRENCE.WEEKLY,
-    weekDays: [],
-  },
-  MONTHLY: {
-    type: RECURRENCE.MONTHLY,
-    dates: [],
-    invalidDateStrategy: INVALID_DATE_STRATEGY.NONE,
-  },
-  YEARLY: {
-    type: RECURRENCE.YEARLY,
-    monthAndDates: {},
-    feb29Strategy: INVALID_DATE_STRATEGY.NONE,
-  },
-  NEVER: {
-    type: REMOVE_TYPE.NEVER,
-  },
-  AFTER_GIVEN_DATE: {
-    type: REMOVE_TYPE.AFTER_GIVEN_DATE,
-    dateEpoch: null,
-  },
+export const INITIAL_TASK_STEP_3: TaskFormStep3 = {
+  schedule: getFormValues(SCHEDULE.NOT_TIMED),
+  scheduleStartTime: getFormValues(null),
+  scheduleEndTime: getFormValues(null),
+  autoRemove: getFormValues(AUTO_REMOVE.NEVER),
+  autoRemoveDate: getFormValues(null),
+};
+
+export const INITIAL_TASK_RECORD_FORM: TaskRecordFormState = {
+  score: getFormValues(null),
+  calisthenicsReps: getFormValues(null),
+  cardioMinutes: getFormValues(null),
+  cardioSeconds: getFormValues(null),
+};
+
+export const INITIAL_WEIGHT_TRAINIG_SETS: WeightTrainingSetForm = {
+  id: getFormValues(''),
+  weight: getFormValues(null),
+  reps: getFormValues(null),
 };

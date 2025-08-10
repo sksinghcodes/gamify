@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import styles from './year-selector.module.css';
-import { getBlockOf18 } from '~/utils/date';
+import { getBlockOf18 } from '~/utils/date-utils';
+import OptionGroup from '../form-elements/option-group';
 
 interface YearSelectorProps {
   value: number;
@@ -34,16 +35,16 @@ const YearSelectorModal: React.FC<YearSelectorModalProps> = ({
       >
         chevron_left
       </button>
-      <div className={styles.yearsWrap}>
-        {yearsBlock.map((y) => (
-          <div
-            key={y}
-            className={`${styles.year} ${value === y ? styles.active : ''}`}
-            onClick={() => onChange(y)}
-          >
-            {y}
-          </div>
-        ))}
+      <div>
+        <OptionGroup
+          onChange={(e) => onChange(e.target.value)}
+          name="year"
+          options={yearsBlock.map((y) => ({ id: y, label: String(y) }))}
+          value={value}
+          inputLabelProps={{
+            className: styles.year,
+          }}
+        />
       </div>
       <button
         className={`${styles.nav} material-symbols-outlined`}

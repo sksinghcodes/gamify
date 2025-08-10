@@ -1,12 +1,14 @@
+import type { MonthIndex } from '~/types/task-types';
+import { MONTHS, VIEW_BY_UNITS_MAP } from '~/constants';
 import type {
-  MonthIndex,
   MonthValue,
   PriodCarouselValue,
   UnitEnum,
   WeekValue,
   YearValue,
-} from '~/types/task-types';
-import { MONTHS, VIEW_BY_UNITS_MAP } from '~/constants';
+} from '~/types/common-types';
+import { DATE_OPTIONS } from '~/constants/options';
+import { isValidTime } from './time-utils';
 
 export const getRelativeDayLabel: (dateEpoch: number) => string = (
   dateEpoch
@@ -33,7 +35,7 @@ export const getDateString: (
   dateEpoch: number | null,
   includeWeekday?: boolean
 ) => string = (dateEpoch, includeWeekday) => {
-  if (dateEpoch === null) {
+  if (dateEpoch !== 0 && !dateEpoch) {
     return '';
   }
 
@@ -56,8 +58,14 @@ export const getTodayEpoch: () => number = () => {
   return today.getTime();
 };
 
-export const to12HourFormat: (time24: string) => string = (time24) => {
-  let [hourStr, minuteStr] = time24.split(':');
+export const to12HourFormat: (time24: number | null) => string = (time24) => {
+  if (time24 === null || !isValidTime(time24)) {
+    return '';
+  }
+  let [hourStr, minuteStr] = [
+    String(Math.floor(time24 / 100)),
+    String(time24 % 100),
+  ];
 
   if (minuteStr === undefined) {
     minuteStr = '';
@@ -199,12 +207,19 @@ export const getDuration: (epoch1: number, epoch2: number) => string = (
   return str;
 };
 
-export const getTimeDuration: (startTime: string, endTime: string) => string = (
-  startTime,
-  endTime
-) => {
-  const [startHours, startMinutes] = startTime.split(':').map(Number);
-  const [endHours, endMinutes] = endTime.split(':').map(Number);
+export const getTimeDuration: (
+  startTime: number | null,
+  endTime: number | null
+) => string = (startTime, endTime) => {
+  if (startTime === null || endTime === null) {
+    return '';
+  }
+
+  const [startHours, startMinutes] = [
+    Math.floor(startTime / 100),
+    startTime % 100,
+  ];
+  const [endHours, endMinutes] = [Math.floor(endTime / 100), endTime % 100];
 
   const startTotalMinutes = startHours * 60 + startMinutes;
   const endTotalMinutes = endHours * 60 + endMinutes;
@@ -215,10 +230,10 @@ export const getTimeDuration: (startTime: string, endTime: string) => string = (
   }
 
   const hours = Math.floor(diffMinutes / 60);
-
   const minutes = diffMinutes % 60;
 
   const hoursStr = hours ? `${hours} hour${hours === 1 ? '' : 's'}` : '';
+
   const minutesStr = minutes
     ? `${minutes} minute${minutes === 1 ? '' : 's'}`
     : '';
@@ -277,4 +292,60 @@ export const getMaxWeeks: (year: number) => number = (year) => {
   const jan1 = new Date(year, 0, 1).getDay(); // Sunday = 0
   const dec31 = new Date(year, 11, 31).getDay();
   return jan1 === 4 || dec31 === 4 ? 53 : 52;
+};
+
+export const getMonthIndexFromYearlyDate = (yearlyDate: number) => {
+  return Math.floor(yearlyDate / 100);
+};
+
+export const getDateFromYearlyDate = (yearlyDate: number) => {
+  return yearlyDate % 100;
+};
+
+export const extractMonthlyDates = (
+  monthIndex: number,
+  existingYearlyDates: number[]
+): number[] => {
+  const result = existingYearlyDates
+    .filter((date) => getMonthIndexFromYearlyDate(date) === monthIndex)
+    .map((date) => (date + 100) % ((monthIndex + 1) * 100));
+
+  return result;
+};
+
+export const getYearlyDatesStructure = (yearlyDates: number[]) => {
+  const map: any = {};
+
+  yearlyDates.forEach((yearlyDate) => {
+    const month = getMonthIndexFromYearlyDate(yearlyDate);
+    const date = getDateFromYearlyDate(yearlyDate);
+    if (map[month] === undefined) {
+      map[month] = [date];
+    } else {
+      map[month].push(date);
+    }
+  });
+
+  return Object.keys(map).map((key) => ({
+    month: Number(key) as MonthIndex,
+    dates: map[key] as number[],
+  }));
+};
+
+export const getDateOptions = (monthIndex: MonthIndex) => {
+  let last = 31;
+  if (monthIndex === 1) {
+    last = 29;
+  } else if ([3, 5, 8, 10].includes(monthIndex)) {
+    last = 30;
+  }
+  return [...DATE_OPTIONS].slice(0, last);
+};
+
+export const to_YYYY_MM_DD_Format = (epoch: number) => {
+  const date = new Date(epoch);
+  const year = String(date.getFullYear()).padStart(4, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}_${month}_${day}`;
 };

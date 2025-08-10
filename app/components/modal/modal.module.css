@@ -34,5 +34,4 @@
 .body {
   overflow: auto;
   height: 100%;
-  background-color: var(--secondary-background);
 }

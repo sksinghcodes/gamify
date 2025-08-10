@@ -1,0 +1,18 @@
+.infoWrap {
+  display: flex;
+  gap: 0.3rem;
+}
+
+.infoIcon {
+  flex-shrink: 0;
+  color: var(--blue-on-secondary-bg);
+  font-weight: 300;
+  font-size: 1.125rem;
+}
+
+.infoText {
+  flex-grow: 0;
+  font-size: 0.8rem;
+  color: var(--text-color-soft);
+  line-height: 1.5;
+}

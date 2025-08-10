@@ -1,3 +1,17 @@
+import type { FormFieldState } from './auth-types';
+
+export enum CategoryEnum {
+  REGULAR = 'REGULAR',
+  CALISTHENICS = 'CALISTHENICS',
+  CARDIO = 'CARDIO',
+  WEIGHT_TRAINING = 'WEIGHT_TRAINING',
+}
+
+export enum InvalidDateStrategyEnum {
+  SHIFT = 'SHIFT',
+  SKIP = 'SKIP',
+}
+
 export enum RecurrenceEnum {
   DAILY = 'DAILY',
   WEEKLY = 'WEEKLY',
@@ -5,37 +19,24 @@ export enum RecurrenceEnum {
   YEARLY = 'YEARLY',
 }
 
-export enum RemoveTypeEnum {
+export enum ScheduleEnum {
+  NOT_TIMED = 'NOT_TIMED',
+  TIMED = 'TIMED',
+}
+
+export enum AutoRemoveEnum {
   NEVER = 'NEVER',
   AFTER_GIVEN_DATE = 'AFTER_GIVEN_DATE',
 }
 
-export enum DurationEnum {
-  DAY = 'DAY',
-  WEEK = 'WEEK',
-  MONTH = 'MONTH',
-  YEAR = 'YEAR',
+export interface CategoryWithoutTarget {
+  type: CategoryEnum.REGULAR | CategoryEnum.CALISTHENICS | CategoryEnum.CARDIO;
 }
 
-export enum UnitEnum {
-  WEEK = 'WEEK',
-  MONTH = 'MONTH',
-  YEAR = 'YEAR',
-}
-
-export enum InvalidDateStrategy {
-  NONE = 'NONE',
-  LAST_VALID = 'LAST_VALID',
-  SKIP = 'SKIP',
-}
-
-export interface RemoveNever {
-  type: RemoveTypeEnum.NEVER;
-}
-
-export interface RemoveAfterGivenDate {
-  type: RemoveTypeEnum.AFTER_GIVEN_DATE;
-  dateEpoch: number | null;
+export interface CategoryWeightTraining {
+  type: CategoryEnum.WEIGHT_TRAINING;
+  targetReps: number | null;
+  targetSets: number | null;
 }
 
 export interface RecurrenceDaily {
@@ -54,14 +55,47 @@ export interface RecurrenceMonthly {
   /**
    * Strategy for handling 29, 30, or 31 when a month doesn’t include them
    */
-  invalidDateStrategy: InvalidDateStrategy;
+  invalidDateStrategy: InvalidDateStrategyEnum;
 }
+
+export interface ScheduleNotTimed {
+  type: ScheduleEnum.NOT_TIMED;
+}
+
+export interface ScheduleTimed {
+  type: ScheduleEnum.TIMED;
+  startTime: string;
+  endTime: string;
+}
+
+export interface RemoveNever {
+  type: AutoRemoveEnum.NEVER;
+}
+
+export interface RemoveAfterGivenDate {
+  type: AutoRemoveEnum.AFTER_GIVEN_DATE;
+  dateEpoch: number | null;
+}
+
+export type CategoryUnion = CategoryWithoutTarget | CategoryWeightTraining;
+
+export type RecurrenceUnion =
+  | RecurrenceDaily
+  | RecurrenceWeekly
+  | RecurrenceMonthly
+  | RecurrenceYearly;
+
+export type ScheduleUnion = ScheduleNotTimed | ScheduleTimed;
+
+export type AutoRemoveUnion = RemoveNever | RemoveAfterGivenDate;
 
 export type MonthIndex = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11;
 
 export type MonthAndDates = {
   [month in MonthIndex]?: number[];
 };
+
+export type InvalidDateStrategyUnion = InvalidDateStrategyEnum | null;
 
 export interface RecurrenceYearly {
   type: RecurrenceEnum.YEARLY;
@@ -73,106 +107,94 @@ export interface RecurrenceYearly {
    * Strategy for handling Feb 29 in non-leap years
    * Only relevant if Feb (1) contains 29
    */
-  feb29Strategy: InvalidDateStrategy;
+  feb29Strategy: InvalidDateStrategyEnum;
 }
 
-export interface TaskBase {
+export interface TaskState {
   name: string;
   description: string;
-  startTime: string;
-  endTime: string;
+  category: CategoryUnion;
+  recurrence: RecurrenceUnion;
+  schedule: ScheduleUnion;
+  autoRemove: AutoRemoveUnion;
 }
 
-export interface TaskRecord extends TaskBase {
-  id: string;
-  taskId: string;
-  createdAt: number;
-  recurrenceType: RecurrenceEnum;
-  score: null | number; // null when isScorable is false, null or number when its true
-  isScorable: boolean;
-}
+export type FormField<T> = {
+  value: T;
+  error: string;
+  touched: boolean;
+};
 
-export interface TaskReqBody extends TaskBase {
-  recurrence:
-    | RecurrenceDaily
-    | RecurrenceWeekly
-    | RecurrenceMonthly
-    | RecurrenceYearly;
-  removeIt: RemoveNever | RemoveAfterGivenDate;
-}
+export type TaskFormStep1 = {
+  name: FormFieldState;
+  description: FormFieldState;
+  category: FormFieldState<CategoryEnum>;
+};
 
-export interface TaskFormState {
-  name: {
-    value: string;
-    error: string;
-    touched: boolean;
-  };
-  description: {
-    value: string;
-    error: string;
-    touched: boolean;
-  };
-  startTime: {
-    value: string;
-    error: string;
-    touched: boolean;
-  };
-  endTime: {
-    value: string;
-    error: string;
-    touched: boolean;
-  };
-  recurrence: {
-    value:
-      | RecurrenceDaily
-      | RecurrenceWeekly
-      | RecurrenceMonthly
-      | RecurrenceYearly;
-    error: string;
-    touched: boolean;
-  };
-  removeIt: {
-    value: RemoveNever | RemoveAfterGivenDate;
-    error: string;
-    touched: boolean;
-  };
+export type TaskFormStep2 = {
+  recurrence: FormFieldState<RecurrenceEnum>;
+  recurrenceValues: FormFieldState<null | number[]>;
+  recurrenceInvalidDateStrategy: FormFieldState<InvalidDateStrategyEnum | null>;
+};
+
+export type TaskFormStep3 = {
+  schedule: FormField<ScheduleEnum>;
+  scheduleStartTime: FormField<null | number>;
+  scheduleEndTime: FormField<null | number>;
+  autoRemove: FormField<AutoRemoveEnum>;
+  autoRemoveDate: FormField<null | number>;
+};
+
+export interface TaskReqBody {
+  name: string;
+  description: string;
+  category: CategoryEnum;
+  recurrence: RecurrenceEnum;
+  recurrenceValues: null | number[];
+  recurrenceInvalidDateStrategy: InvalidDateStrategyEnum | null;
+  schedule: ScheduleEnum;
+  scheduleStartTime: null | number;
+  scheduleEndTime: null | number;
+  autoRemove: AutoRemoveEnum;
+  autoRemoveDate: null | number;
 }
 
 export interface Task extends TaskReqBody {
-  id: string;
-  createdAt: number;
+  _id: string;
+  createdAt: string;
 }
 
-export interface InitialRecurrenceIF {
-  DAILY: RecurrenceDaily;
-  WEEKLY: RecurrenceWeekly;
-  MONTHLY: RecurrenceMonthly;
-  YEARLY: RecurrenceYearly;
-  NEVER: RemoveNever;
-  AFTER_GIVEN_DATE: RemoveAfterGivenDate;
+export interface WeightTrainingSet {
+  weightInGrams: number;
+  reps: number;
+}
+export type WeightTrainingSetForm = {
+  id: FormField<string>;
+  weight: FormField<number | null>;
+  reps: FormField<number | null>;
+};
+export interface TaskRecordBase {
+  calisthenicsReps: number | null;
+  cardioSeconds: number | null;
+  weightTrainingSets: null | WeightTrainingSet[];
 }
 
-export interface WeekValue {
-  type: UnitEnum.WEEK;
-  year: number;
-  week: number;
+export interface TaskRecordReqBody extends TaskRecordBase {
+  score: number;
+}
+export interface TaskRecord extends TaskRecordBase {
+  score: number;
+}
+export type TaskRecordFormState = {
+  score: FormField<number | null>;
+  calisthenicsReps: FormField<number | null>;
+  cardioSeconds: FormField<number | null>;
+  cardioMinutes: FormField<number | null>;
+};
+export interface TaskWithRecord extends TaskReqBody {
+  _id: string;
+  createdAt: string;
+  taskRecord: null | TaskRecord;
 }
 
-export interface MonthValue {
-  type: UnitEnum.MONTH;
-  year: number;
-  month: MonthIndex;
-}
-
-export interface YearValue {
-  type: UnitEnum.YEAR;
-  year: number;
-}
-
-export type PriodCarouselValue = WeekValue | MonthValue | YearValue;
-
-export interface InitialUnitValues {
-  WEEK: WeekValue;
-  MONTH: MonthValue;
-  YEAR: YearValue;
-}
+export type TaskFormState = TaskFormStep1 & TaskFormStep2 & TaskFormStep3;

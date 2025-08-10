@@ -1,20 +1,56 @@
 import React, { createContext, useEffect, useState, type JSX } from 'react';
 import api from './api';
 import LoadingScreen from './components/loading-screen/loading-screen';
-import type { ContextInterface, UserIF } from './types/common-types';
+import type { UserIF } from './types/common-types';
 import { API_ENDPOINTS } from './constants';
+import { getTodayEpoch } from './utils/date-utils';
+import type { Task, TaskWithRecord } from './types/task-types';
+
+export interface ContextInterface {
+  isSignedIn: boolean | null;
+  checkSignedInStatus: () => void;
+  deviceHeight: string;
+  user: UserIF;
+  appLoading: boolean;
+  isDarkMode: boolean;
+  setIsDarkMode: (isDarkMode: boolean) => void;
+  isSigningOut: boolean;
+  signOut: () => void;
+  loading: boolean;
+  setLoading: (value: boolean) => void;
+  taskListDate: number;
+  setTaskListDate: (date: number) => void;
+  cacheById: Record<string, TaskWithRecord> | null;
+  cacheByDate: Record<string, TaskWithRecord[]> | null;
+  setCacheByDate: React.Dispatch<
+    React.SetStateAction<Record<string, TaskWithRecord[]> | null>
+  >;
+  setCacheById: React.Dispatch<
+    React.SetStateAction<Record<string, TaskWithRecord> | null>
+  >;
+}
 
 export const Context = createContext<ContextInterface>({} as ContextInterface);
 
 const ContextProvider: React.FC<{ children: JSX.Element }> = ({ children }) => {
   const [isSignedIn, setIsSignedIn] = useState<boolean | null>(null);
+  const [appLoading, setAppLoading] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [isSigningOut, setIsSigningOut] = useState<boolean>(false);
+  const [taskListDate, setTaskListDate] = useState<number>(getTodayEpoch());
   const [deviceHeight, setDeviceHeight] = useState<string>(
     `${window.visualViewport?.height}px`
   );
   const [user, setUser] = useState<UserIF>({} as UserIF);
   const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
+  const [cacheByDate, setCacheByDate] = useState<Record<
+    string,
+    TaskWithRecord[]
+  > | null>(null);
+  const [cacheById, setCacheById] = useState<Record<
+    string,
+    TaskWithRecord
+  > | null>(null);
 
   useEffect(() => {
     // Set initial device height
@@ -44,7 +80,7 @@ const ContextProvider: React.FC<{ children: JSX.Element }> = ({ children }) => {
   }, []);
 
   const checkSignedInStatus = () => {
-    setLoading(true);
+    setAppLoading(true);
     api
       .get(API_ENDPOINTS.CHECK_SIGNED_IN_STATUS)
       .then((response) => {
@@ -55,12 +91,12 @@ const ContextProvider: React.FC<{ children: JSX.Element }> = ({ children }) => {
           setUser({} as UserIF);
           setIsSignedIn(false);
         }
-        setLoading(false);
       })
       .catch((err) => {
         console.log(err);
-        setIsSignedIn(false);
-        setLoading(false);
+      })
+      .finally(() => {
+        setAppLoading(false);
       });
   };
 
@@ -87,14 +123,43 @@ const ContextProvider: React.FC<{ children: JSX.Element }> = ({ children }) => {
         checkSignedInStatus,
         deviceHeight,
         user,
-        loading,
+        appLoading,
         isDarkMode,
         setIsDarkMode,
         isSigningOut,
         signOut,
+        loading,
+        setLoading,
+        taskListDate,
+        setTaskListDate,
+        cacheByDate,
+        cacheById,
+        setCacheByDate,
+        setCacheById,
       }}
     >
-      {loading ? <LoadingScreen /> : children}
+      {appLoading ? (
+        <LoadingScreen />
+      ) : isSignedIn === null ? (
+        <div
+          style={{
+            padding: '60% 20px 0',
+            height: deviceHeight,
+          }}
+        >
+          <h1
+            style={{
+              fontSize: '1.5rem',
+              marginBottom: '0.5rem',
+            }}
+          >
+            Something went wrong!
+          </h1>
+          <p>The app can't be loaded right now</p>
+        </div>
+      ) : (
+        children
+      )}
     </Context.Provider>
   );
 };
