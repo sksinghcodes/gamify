@@ -1,12 +1,8 @@
 import ThemeSelector from '~/components/theme-selector/theme-selector';
 import styles from './header.module.css';
-import { useNavigate } from 'react-router';
-import { ROUTES_BY_PATH } from '~/constants';
-import {
-  getDateString,
-  getRelativeDayLabel,
-  getTodayEpoch,
-} from '~/utils/date-utils';
+import { useNavigate, useSearchParams } from 'react-router';
+import { ROUTES, ROUTES_BY_PATH } from '~/constants';
+import { getDateString, getRelativeDayLabel } from '~/utils/date-utils';
 import { useContext, useState } from 'react';
 
 import { HeaderType } from '~/types/common-types';
@@ -14,10 +10,13 @@ import DateSelector from '../date-selector/date-selector';
 import { Context } from '~/context-provider';
 
 const Header = () => {
-  const { loading, taskListDate, setTaskListDate } = useContext(Context);
+  const { loading, taskListDate, setTaskListDate, deleteTask } =
+    useContext(Context);
   const navigate = useNavigate();
   const pageData = ROUTES_BY_PATH[location.pathname];
   const [openDateSelector, setOpenDateSelector] = useState<boolean>(false);
+  const [searchParams] = useSearchParams();
+  const taskId = searchParams.get('taskId');
 
   const adjacentDay = getRelativeDayLabel(taskListDate);
   const dateString = getDateString(taskListDate, true);
@@ -43,6 +42,17 @@ const Header = () => {
       arrow_back
     </button>
   );
+
+  const handleDelete = () => {
+    if (taskId) {
+      deleteTask({
+        taskId,
+        onDelete: () => {
+          navigate(ROUTES.TASK_LIST.path);
+        },
+      });
+    }
+  };
 
   return pageData.headerType === HeaderType.DEFAULT ? (
     <header className={`${styles.header} ${styles.default}`}>
@@ -96,6 +106,7 @@ const Header = () => {
         <button
           disabled={loading}
           className={`${styles.headerButton} material-symbols-outlined`}
+          onClick={handleDelete}
         >
           delete
         </button>

@@ -4,7 +4,7 @@ import LoadingScreen from './components/loading-screen/loading-screen';
 import type { UserIF } from './types/common-types';
 import { API_ENDPOINTS } from './constants';
 import { getTodayEpoch } from './utils/date-utils';
-import type { Task, TaskWithRecord } from './types/task-types';
+import type { TaskWithRecord } from './types/task-types';
 
 export interface ContextInterface {
   isSignedIn: boolean | null;
@@ -28,6 +28,13 @@ export interface ContextInterface {
   setCacheById: React.Dispatch<
     React.SetStateAction<Record<string, TaskWithRecord> | null>
   >;
+  deleteTask: ({
+    taskId,
+    onDelete,
+  }: {
+    taskId: string;
+    onDelete: () => void;
+  }) => Promise<void>;
 }
 
 export const Context = createContext<ContextInterface>({} as ContextInterface);
@@ -116,6 +123,51 @@ const ContextProvider: React.FC<{ children: JSX.Element }> = ({ children }) => {
       });
   };
 
+  const deleteTask = async ({
+    taskId,
+    onDelete,
+  }: {
+    taskId: string;
+    onDelete: () => void;
+  }) => {
+    if (!taskId) {
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await api.delete(API_ENDPOINTS.DELETE_TASK, {
+        params: {
+          taskId,
+        },
+      });
+
+      if (response.data?.success) {
+        setCacheById((pre) => {
+          const copy = { ...pre };
+          delete copy[taskId];
+          return copy;
+        });
+        setCacheByDate((pre) => {
+          const keys = Object.keys(pre || {});
+          if (!keys.length || pre === null) {
+            return pre;
+          }
+          const obj: Record<string, TaskWithRecord[]> = {};
+          keys.forEach((key) => {
+            obj[key] = pre[key].filter((t) => t._id !== taskId);
+          });
+          return obj;
+        });
+        onDelete();
+      }
+    } catch (e) {
+      console.log(e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <Context.Provider
       value={{
@@ -136,6 +188,7 @@ const ContextProvider: React.FC<{ children: JSX.Element }> = ({ children }) => {
         cacheById,
         setCacheByDate,
         setCacheById,
+        deleteTask,
       }}
     >
       {appLoading ? (

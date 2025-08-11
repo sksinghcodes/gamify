@@ -15,16 +15,16 @@ import type {
   WeightTrainingSet,
   WeightTrainingSetForm,
 } from '~/types/task-types';
-import styles from './score-logger.module.css';
+import styles from './log-score.module.css';
 import { extractValues, validate } from '~/utils/validation';
-import type { CustomChangeEvent } from '../form-elements/option-group';
-import InputText from '../form-elements/input-text';
-import { capitalize, classes } from '~/utils/string';
-import Label from '../form-elements/label';
-import Slider from '../form-elements/slider';
-import Fab from '~/fab/fab';
+import type { CustomChangeEvent } from '../../components/form-elements/option-group';
+import InputText from '../../components/form-elements/input-text';
+import { classes } from '~/utils/string';
+import Label from '../../components/form-elements/label';
+import Slider from '../../components/form-elements/slider';
+import Fab, { FAB_POSITION, FAB_TYPE } from '~/fab/fab';
 import { v7 as uuid } from 'uuid';
-import ErrorText from '../error-text/error-text';
+import ErrorText from '../../components/error-text/error-text';
 import {
   isNotNull,
   scoreLoggerRules,
@@ -37,21 +37,20 @@ import {
 import api from '~/api';
 import { Context } from '~/context-provider';
 import type { AxiosResponse } from 'axios';
+import { useNavigate, useSearchParams } from 'react-router';
 
-const ScoreLogger: React.FC<{
-  task: TaskWithRecord | null;
-  date: string;
-  handleClose: () => void;
-  reload: () => void;
-}> = ({ task, date, handleClose, reload }) => {
-  const {
-    score = null,
-    calisthenicsReps = null,
-    cardioSeconds = null,
-    weightTrainingSets = null,
-  } = task?.taskRecord || {};
+export const meta = () => {
+  return [{ title: ROUTES.LOG_SCORE.title }];
+};
 
-  const { loading, setLoading, setCacheByDate } = useContext(Context);
+const LogScore: React.FC = () => {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const taskId = searchParams.get('taskId');
+  const taskDate = searchParams.get('taskDate');
+
+  const { loading, setLoading, cacheByDate, setCacheByDate, setCacheById } =
+    useContext(Context);
   const getInitialWeightTrainingSets = () => {
     return {
       ...INITIAL_WEIGHT_TRAINIG_SETS,
@@ -62,6 +61,8 @@ const ScoreLogger: React.FC<{
   const [taskRecord, setTaskRecord] = useState<TaskRecordFormState>(
     INITIAL_TASK_RECORD_FORM
   );
+
+  const [task, setTask] = useState<TaskWithRecord | null>(null);
 
   const [weightTrainingSetsArr, setWeightTrainingSetsArr] = useState<
     WeightTrainingSetForm[]
@@ -263,20 +264,20 @@ const ScoreLogger: React.FC<{
           {
             params: {
               taskId: task?._id,
-              taskDate: date,
+              taskDate,
             },
           }
         );
       }
 
-      if (response !== null && response.data.success) {
+      if (response !== null && response.data.success && taskDate !== null) {
         setCacheByDate((pre) => {
           if (pre === null) {
             return pre;
           }
           return {
             ...pre,
-            [date]: pre[date].map((t) => {
+            [taskDate]: pre[taskDate].map((t) => {
               if (t._id === task?._id) {
                 return {
                   ...t,
@@ -288,8 +289,6 @@ const ScoreLogger: React.FC<{
             }),
           };
         });
-        reload();
-        handleClose();
       }
     } catch (e) {
       console.log(e);
@@ -299,38 +298,100 @@ const ScoreLogger: React.FC<{
   };
 
   useEffect(() => {
-    setTaskRecord((pre) => {
-      let minutes: number | null = null;
-      let seconds: number | null = null;
+    if (!taskId || !taskDate) {
+      return;
+    }
+    const controller = new AbortController();
+    let task: TaskWithRecord | null = null;
 
-      if (typeof cardioSeconds === 'number' && !isNaN(cardioSeconds)) {
-        minutes = Math.floor(cardioSeconds / 60);
-        seconds = cardioSeconds % 60;
+    (async () => {
+      if (cacheByDate && cacheByDate[taskDate]) {
+        task = cacheByDate[taskDate].find((t) => t._id === taskId) || null;
+        setTask(task);
+      } else {
+        setLoading(true);
+        try {
+          const response = await api.get(API_ENDPOINTS.GET_ONE_TASK, {
+            signal: controller.signal,
+            params: {
+              recordDate: taskDate,
+              taskId,
+            },
+          });
+          if (response.data?.success) {
+            task = response.data?.task || null;
+            setTask(task);
+
+            if (task) {
+              const taskData = task;
+              setCacheById((pre) => {
+                return {
+                  ...(pre || {}),
+                  [taskData._id]: {
+                    ...taskData,
+                    taskRecord: null,
+                  },
+                };
+              });
+            }
+          }
+        } catch (error) {
+          console.error('Error saving data', error);
+        } finally {
+          setLoading(false);
+        }
       }
 
-      return {
-        ...pre,
-        score: getFormValues(score),
-        calisthenicsReps: getFormValues(calisthenicsReps),
-        cardioMinutes: getFormValues(minutes),
-        cardioSeconds: getFormValues(seconds),
-      };
-    });
+      if (!task) {
+        return;
+      }
 
-    const wts: WeightTrainingSetForm[] = [];
-    if (weightTrainingSets !== null && weightTrainingSets.length) {
-      weightTrainingSets.forEach((set) => {
-        wts.push({
-          id: getFormValues(uuid()),
-          weight: getFormValues(set.weightInGrams / 1000),
-          reps: getFormValues(set.reps),
-        });
+      const {
+        score = null,
+        calisthenicsReps = null,
+        cardioSeconds = null,
+        weightTrainingSets = null,
+      } = task.taskRecord || {};
+
+      setTaskRecord((pre) => {
+        let minutes: number | null = null;
+        let seconds: number | null = null;
+
+        if (typeof cardioSeconds === 'number' && !isNaN(cardioSeconds)) {
+          minutes = Math.floor(cardioSeconds / 60);
+          seconds = cardioSeconds % 60;
+        }
+
+        return {
+          ...pre,
+          score: getFormValues(score),
+          calisthenicsReps: getFormValues(calisthenicsReps),
+          cardioMinutes: getFormValues(minutes),
+          cardioSeconds: getFormValues(seconds),
+        };
       });
-    } else {
-      wts.push(getInitialWeightTrainingSets());
-    }
-    setWeightTrainingSetsArr(wts);
-  }, [score, calisthenicsReps, cardioSeconds, weightTrainingSets]);
+
+      const wts: WeightTrainingSetForm[] = [];
+
+      if (weightTrainingSets !== null && weightTrainingSets.length) {
+        weightTrainingSets.forEach((set) => {
+          wts.push({
+            id: getFormValues(uuid()),
+            weight: getFormValues(set.weightInGrams / 1000),
+            reps: getFormValues(set.reps),
+          });
+        });
+      } else {
+        wts.push(getInitialWeightTrainingSets());
+      }
+
+      setWeightTrainingSetsArr(wts);
+    })();
+
+    return () => {
+      controller.abort();
+    };
+  }, [taskId, taskDate]);
 
   const handleSets = (
     e: React.ChangeEvent<HTMLInputElement>,
@@ -402,12 +463,11 @@ const ScoreLogger: React.FC<{
       <div>
         {!!task && (
           <>
-            <div className={styles.category}>
-              {capitalize(task.category.replace('_', ' '))}
-            </div>
-            <div className={styles.title}>{task.name}</div>
-            <div className={styles.description} ref={ref} style={{}}>
-              {task.description}
+            <div className={styles.headingWrap}>
+              <h1 className={styles.name}>{task.name}</h1>
+              {task.description && (
+                <p className={styles.description}>{task.description}</p>
+              )}
             </div>
             <div className={styles.inputsWrap}>
               <>
@@ -599,14 +659,25 @@ const ScoreLogger: React.FC<{
                 error={taskRecord.score.error}
               />
             </div>
+            <Fab
+              position={FAB_POSITION.LEFT}
+              fabType={FAB_TYPE.SECONDARY}
+              disabled={loading}
+              className={styles.infoButton}
+              onClick={() =>
+                navigate(`${ROUTES.TASK_PREVIEW.path}?taskId=${task?._id}`)
+              }
+            >
+              priority_high
+            </Fab>
+            <Fab loading={loading} disabled={loading} onClick={handleSubmit}>
+              done
+            </Fab>
           </>
         )}
       </div>
-      <Fab loading={loading} disabled={loading} onClick={handleSubmit}>
-        done
-      </Fab>
     </div>
   );
 };
 
-export default ScoreLogger;
+export default LogScore;

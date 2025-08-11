@@ -33,7 +33,7 @@ const TaskPreview: React.FC = () => {
   const navigate = useNavigate();
   const { cacheById, setCacheById, loading, setLoading } = useContext(Context);
   const [params] = useSearchParams();
-  const taskId = params.get('id');
+  const taskId = params.get('taskId');
   const [task, setTask] = useState<TaskWithRecord | null>(null);
 
   useEffect(() => {
@@ -52,7 +52,7 @@ const TaskPreview: React.FC = () => {
         .get(API_ENDPOINTS.GET_ONE_TASK, {
           signal: controller.signal,
           params: {
-            id: taskId,
+            taskId,
           },
         })
         .then((response) => {

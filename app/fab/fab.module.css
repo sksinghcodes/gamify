@@ -21,8 +21,8 @@
 
 .secondary {
   background-color: var(--secondary-background);
-  color: var(--text-color-hard);
-  border: 1px solid var(--text-color-soft);
+  color: var(--blue-on-secondary-bg);
+  border: 1px solid var(--blue-on-secondary-bg);
 }
 
 .left {

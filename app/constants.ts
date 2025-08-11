@@ -1,5 +1,5 @@
 import type { FormFieldState } from './types/auth-types';
-import type { InitialValues, RoutesIF } from './types/common-types';
+import type { RoutesIF } from './types/common-types';
 import {
   DurationEnum,
   HeaderType,
@@ -10,7 +10,6 @@ import {
   InvalidDateStrategyEnum,
   RecurrenceEnum,
   AutoRemoveEnum,
-  type TaskFormState,
   ScheduleEnum,
   CategoryEnum,
   type TaskFormStep1,
@@ -92,6 +91,12 @@ export const ROUTES: RoutesIF = {
     path: RoutesEnum.EDIT_TASK,
     title: 'Edit Task',
   },
+  LOG_SCORE: {
+    headerType: HeaderType.DEFAULT,
+    showBottomNav: false,
+    path: RoutesEnum.LOG_SCORE,
+    title: 'Log Score',
+  },
   PROGRESS_OVERVIEW: {
     headerType: HeaderType.PROGRESS_PAGE,
     showBottomNav: true,
@@ -158,6 +163,7 @@ export const API_ENDPOINTS = {
   CHECK_UNIQUE: '/user/check-unique',
   VERIFY_PROFILE: '/user/verify-profile',
   CREATE_TASK: '/task/create',
+  DELETE_TASK: '/task/delete',
   GET_ONE_TASK: '/task/get-one',
   GET_ALL_TASKS: '/task/get-all',
   GET_TASKS_BY_DATE: '/task/get-by-date',
