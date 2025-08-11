@@ -36,7 +36,7 @@ import {
 } from '~/validation/score-logger-rules';
 import api from '~/api';
 import { Context } from '~/context-provider';
-import { useNavigate } from 'react-router';
+import type { AxiosResponse } from 'axios';
 
 const ScoreLogger: React.FC<{
   task: TaskWithRecord | null;
@@ -219,12 +219,13 @@ const ScoreLogger: React.FC<{
     }
 
     try {
-      const weightTrainingData: WeightTrainingSet[] = weightTrainingSetsArr
-        .map(extractValues)
-        .map((wts) => ({
-          weightInGrams: Number(wts.weight) * 1000,
-          reps: Number(wts.reps),
-        }));
+      const weightTrainingData: WeightTrainingSet[] | null =
+        task?.category === CATEGORY.WEIGHT_TRAINING
+          ? weightTrainingSetsArr.map(extractValues).map((wts) => ({
+              weightInGrams: Number(wts.weight) * 1000,
+              reps: Number(wts.reps),
+            }))
+          : null;
 
       const taskRecordData = extractValues(taskRecord);
       if (task?.category === CATEGORY.CARDIO) {
@@ -238,28 +239,54 @@ const ScoreLogger: React.FC<{
         score: Number(taskRecordData.score),
         calisthenicsReps: taskRecordData.calisthenicsReps,
         cardioSeconds: taskRecordData.cardioSeconds,
-        weightTrainingSets: weightTrainingData.length
-          ? weightTrainingData
-          : null,
+        weightTrainingSets: weightTrainingData,
       };
 
       setLoading(true);
-      const response = await api.post(
-        API_ENDPOINTS.CREATE_TASK_RECORD,
-        taskRecordReqBody,
-        {
-          params: {
-            taskId: task?._id,
-            taskDate: date,
-          },
-        }
-      );
 
-      if (response.data.success) {
+      let response: AxiosResponse<any, any> | null = null;
+
+      if (task?.taskRecord?._id) {
+        response = await api.patch(
+          API_ENDPOINTS.UPDATE_TASK_RECORD,
+          taskRecordReqBody,
+          {
+            params: {
+              recordId: task?.taskRecord?._id,
+            },
+          }
+        );
+      } else {
+        response = await api.post(
+          API_ENDPOINTS.CREATE_TASK_RECORD,
+          taskRecordReqBody,
+          {
+            params: {
+              taskId: task?._id,
+              taskDate: date,
+            },
+          }
+        );
+      }
+
+      if (response !== null && response.data.success) {
         setCacheByDate((pre) => {
-          const copy = { ...pre };
-          delete copy[date];
-          return copy;
+          if (pre === null) {
+            return pre;
+          }
+          return {
+            ...pre,
+            [date]: pre[date].map((t) => {
+              if (t._id === task?._id) {
+                return {
+                  ...t,
+                  taskRecord: response.data.taskRecord,
+                };
+              } else {
+                return t;
+              }
+            }),
+          };
         });
         reload();
         handleClose();
@@ -278,7 +305,7 @@ const ScoreLogger: React.FC<{
 
       if (typeof cardioSeconds === 'number' && !isNaN(cardioSeconds)) {
         minutes = Math.floor(cardioSeconds / 60);
-        minutes = cardioSeconds % 60;
+        seconds = cardioSeconds % 60;
       }
 
       return {

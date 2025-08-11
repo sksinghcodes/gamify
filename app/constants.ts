@@ -162,6 +162,7 @@ export const API_ENDPOINTS = {
   GET_ALL_TASKS: '/task/get-all',
   GET_TASKS_BY_DATE: '/task/get-by-date',
   CREATE_TASK_RECORD: '/task-record/create',
+  UPDATE_TASK_RECORD: '/task-record/update',
 };
 
 export const DURATION_UNIT = {

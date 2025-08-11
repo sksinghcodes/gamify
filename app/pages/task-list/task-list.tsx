@@ -102,7 +102,6 @@ const TaskList = () => {
                 <div
                   className={styles.details}
                   onClick={() => {
-                    // navigate(`${ROUTES.TASK_PREVIEW.path}?id=${task._id}`);
                     setActiveTask(task);
                     setOpenModal(true);
                   }}
@@ -110,15 +109,17 @@ const TaskList = () => {
                   <div className={styles.taskName}>{task.name}</div>
                   {task.schedule === SCHEDULE.TIMED ? (
                     <div className={styles.meta}>
-                      {to12HourFormat(task.scheduleStartTime)} –{' '}
-                      {to12HourFormat(task.scheduleEndTime)} •{' '}
-                      {getTimeDuration(
-                        task.scheduleStartTime,
-                        task.scheduleEndTime
-                      )}
+                      <div>
+                        {to12HourFormat(task.scheduleStartTime)} –{' '}
+                        {to12HourFormat(task.scheduleEndTime)}
+                      </div>
+                      <div>
+                        {getTimeDuration(
+                          task.scheduleStartTime,
+                          task.scheduleEndTime
+                        )}
+                      </div>
                     </div>
-                  ) : task.schedule === SCHEDULE.NOT_TIMED ? (
-                    <div className={styles.meta}>Any time</div>
                   ) : null}
                 </div>
                 <div className={styles.scoreWrap}>

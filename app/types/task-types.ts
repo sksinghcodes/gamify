@@ -184,6 +184,7 @@ export interface TaskRecordReqBody extends TaskRecordBase {
 }
 export interface TaskRecord extends TaskRecordBase {
   score: number;
+  _id: string;
 }
 export type TaskRecordFormState = {
   score: FormField<number | null>;

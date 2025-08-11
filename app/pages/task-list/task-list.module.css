@@ -24,10 +24,13 @@
 }
 
 .details {
+  padding: 1rem 0.5rem 1rem 1rem;
   flex: 1;
   background-color: var(--secondary-background);
   border-radius: 0.5rem 0 0 0.5rem;
-  padding: 1rem 0.5rem 1rem 1rem;
+  justify-content: center;
+  display: flex;
+  flex-direction: column;
 }
 
 .taskName {
@@ -42,6 +45,10 @@
   color: var(--text-color-soft);
   font-size: 0.8rem;
   margin-top: 0.3rem;
+  display: flex;
+  gap: 0.2rem 0.7rem;
+  flex-wrap: wrap;
+  line-height: 1.5;
 }
 
 .line {
