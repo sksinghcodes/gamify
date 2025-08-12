@@ -7,11 +7,11 @@ import YearSelector from '../year-selector/year-selector';
 import Fab from '~/fab/fab';
 
 interface DateSelectorModalProps {
-  value: number | null; // date epoch
+  value: number | null;
   onDone: (value: number | null) => void;
 }
 interface DateSelectorProps {
-  value: number | null; // date epoch
+  value: number | null;
   onChange: (value: number | null) => void;
   open: boolean;
   setOpen: (open: boolean) => void;
@@ -49,6 +49,14 @@ const DateSelectorModal: React.FC<DateSelectorModalProps> = ({
 
   useEffect(() => {
     setInnerValue(value);
+    if (value !== null) {
+      setSelectedMonth(new Date(value).getMonth() as MonthIndex);
+      setSelectedYear(new Date(value).getFullYear());
+    } else {
+      const date = new Date();
+      setSelectedMonth(date.getMonth() as MonthIndex);
+      setSelectedYear(date.getFullYear());
+    }
   }, [value]);
 
   const monthDates = useMemo(() => {

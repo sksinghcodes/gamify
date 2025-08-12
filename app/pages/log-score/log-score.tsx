@@ -289,6 +289,7 @@ const LogScore: React.FC = () => {
             }),
           };
         });
+        navigate(ROUTES.TASKS_TO_DO.path);
       }
     } catch (e) {
       console.log(e);
