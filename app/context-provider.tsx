@@ -35,8 +35,8 @@ export interface ContextInterface {
     taskId: string;
     onDelete: () => void;
   }) => Promise<void>;
-  allTasks: TaskWithRecord[];
-  setAllTasks: React.Dispatch<React.SetStateAction<TaskWithRecord[]>>;
+  allTasks: TaskWithRecord[] | null;
+  setAllTasks: React.Dispatch<React.SetStateAction<TaskWithRecord[] | null>>;
 }
 
 export const Context = createContext<ContextInterface>({} as ContextInterface);
@@ -47,7 +47,7 @@ const ContextProvider: React.FC<{ children: JSX.Element }> = ({ children }) => {
   const [loading, setLoading] = useState<boolean>(false);
   const [isSigningOut, setIsSigningOut] = useState<boolean>(false);
   const [taskListDate, setTaskListDate] = useState<number>(getTodayEpoch());
-  const [allTasks, setAllTasks] = useState<TaskWithRecord[]>([]);
+  const [allTasks, setAllTasks] = useState<TaskWithRecord[] | null>(null);
   const [deviceHeight, setDeviceHeight] = useState<string>(
     `${window.visualViewport?.height}px`
   );

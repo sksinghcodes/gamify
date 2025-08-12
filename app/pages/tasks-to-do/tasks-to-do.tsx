@@ -9,6 +9,7 @@ import type { TaskWithRecord } from '~/types/task-types';
 import { Context } from '~/context-provider';
 import api from '~/api';
 import TaskCard from '~/components/task-card/task-card';
+import Spinner from '~/components/spinner/spinner';
 
 export const meta = () => {
   return [{ title: ROUTES.TASKS_TO_DO.title }];
@@ -80,7 +81,11 @@ const TasksToDo = () => {
   return (
     <div className={styles.taskListContainer}>
       <div className={styles.taskList}>
-        {tasks.length === 0 && !loading ? (
+        {loading ? (
+          <div className={styles.spinnerWrap}>
+            <Spinner />
+          </div>
+        ) : tasks.length === 0 ? (
           <div className={styles.emptyState}>No tasks available</div>
         ) : (
           tasks.map((task, i) => (

@@ -156,8 +156,8 @@ export const ROUTES_BY_PATH = Object.values(ROUTES).reduce((acc, route) => {
 export const BOTTOM_NAV_TABS = [
   { icon: 'check', title: 'Task List', path: RoutesEnum.TASKS_TO_DO },
   { icon: 'dehaze', title: 'All Tasks', path: RoutesEnum.ALL_TASKS },
+  { icon: 'stairs_2', title: 'Settings', path: RoutesEnum.TASK_PROGRESS },
   { icon: 'person', title: 'Profile', path: RoutesEnum.PROFILE },
-  { icon: 'settings', title: 'Settings', path: RoutesEnum.SETTINGS },
 ];
 
 export const API_ENDPOINTS = {

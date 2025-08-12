@@ -47,3 +47,9 @@
   bottom: 3.5rem;
   right: 1rem;
 }
+
+.spinnerWrap {
+  display: flex;
+  justify-content: center;
+  padding: 2rem;
+}
