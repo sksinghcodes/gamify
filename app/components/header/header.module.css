@@ -51,3 +51,7 @@
 .headerButton:active {
   background-color: var(--button-active-color);
 }
+
+.hide {
+  visibility: hidden;
+}

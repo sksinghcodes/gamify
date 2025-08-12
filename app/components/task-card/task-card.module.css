@@ -1,0 +1,45 @@
+.taskCard {
+  display: flex;
+  justify-content: space-between;
+  gap: 2px;
+}
+
+.details {
+  padding: 1rem 0.5rem 1rem 1rem;
+  flex: 1;
+  background-color: var(--secondary-background);
+  border-radius: 0.5rem 0 0 0.5rem;
+  justify-content: center;
+  display: flex;
+  flex-direction: column;
+}
+
+.paddingRight {
+  padding-right: 1rem;
+}
+
+.taskName {
+  font-size: 0.9rem;
+  display: inline-block;
+  color: var(--text-color-hard);
+  letter-spacing: 1px;
+  line-height: 1.5;
+}
+
+.meta {
+  color: var(--text-color-soft);
+  font-size: 0.8rem;
+  margin-top: 0.3rem;
+  display: flex;
+  gap: 0.2rem 0.7rem;
+  flex-wrap: wrap;
+  line-height: 1.5;
+}
+
+.scoreWrap {
+  background-color: var(--secondary-background);
+  padding: 0.5rem;
+  border-radius: 0 0.5rem 0.5rem 0;
+  display: flex;
+  align-items: center;
+}

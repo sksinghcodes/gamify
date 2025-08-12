@@ -304,7 +304,7 @@ const TaskForm: React.FC<{ isEditMode: boolean }> = ({ isEditMode }) => {
       const response = await api.post(API_ENDPOINTS.CREATE_TASK, taskData);
       if (response.data.success) {
         setCacheByDate(null);
-        navigate(ROUTES.TASK_LIST.path);
+        navigate(ROUTES.TASKS_TO_DO.path);
       }
     } catch (e) {
       console.log(e);

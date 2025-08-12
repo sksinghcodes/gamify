@@ -17,7 +17,7 @@ import PriodCarousel from '~/components/period-carousel/period-carousel';
 
 const TaskProgress = () => {
   const [params] = useSearchParams();
-  const taskId = params.get('id');
+  const taskId = params.get('taskId');
   const [viewByUnit, setViewByUnit] = useState(VIEW_BY_UNITS[0]);
   const [unitValue, setUnitValue] = useState(
     getUnitValue(VIEW_BY_UNITS_MAP.WEEK)

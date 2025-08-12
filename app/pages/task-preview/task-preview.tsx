@@ -253,7 +253,11 @@ const TaskPreview: React.FC = () => {
             )}
           </div>
 
-          <Fab onClick={() => navigate(ROUTES.TASK_PROGRESS.path)}>
+          <Fab
+            onClick={() =>
+              navigate(`${ROUTES.TASK_PROGRESS.path}?taskId=${taskId}`)
+            }
+          >
             stairs_2
           </Fab>
         </>

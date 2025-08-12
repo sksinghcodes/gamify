@@ -20,7 +20,8 @@ export interface UserIF {
 }
 
 export enum RoutesEnum {
-  TASK_LIST = '/',
+  TASKS_TO_DO = '/',
+  ALL_TASKS = '/all-tasks',
   TASK_PREVIEW = '/task-preview',
   CREATE_TASK = '/create-task',
   EDIT_TASK = '/edit-task',
@@ -46,7 +47,7 @@ export type RoutesIF = Record<
 >;
 
 export enum HeaderType {
-  TASK_LIST = 'TASK_LIST',
+  TASKS_TO_DO = 'TASKS_TO_DO',
   TASK_PREVIEW = 'TASK_PREVIEW',
   TASK_PROGRESS = 'TASK_PROGRESS',
   PROGRESS_PAGE = 'PROGRESS_PAGE',

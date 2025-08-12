@@ -8,7 +8,7 @@ import { ROUTES } from '~/constants';
 const {
   SIGN_IN: { path: SIGN_IN },
   SIGN_UP: { path: SIGN_UP },
-  TASK_LIST: { path: TASK_LIST },
+  TASKS_TO_DO: { path: TASKS_TO_DO },
 } = ROUTES;
 
 const AuthLayout = () => {
@@ -16,7 +16,7 @@ const AuthLayout = () => {
   const { pathname } = useLocation();
 
   if (context.isSignedIn === true) {
-    return <Navigate to={TASK_LIST} replace />;
+    return <Navigate to={TASKS_TO_DO} replace />;
   }
 
   const isSignInOrSignUp = pathname === SIGN_IN || pathname === SIGN_UP;

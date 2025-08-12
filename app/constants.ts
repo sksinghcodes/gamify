@@ -61,11 +61,17 @@ export const MINUTES = Array.from({ length: 12 }, (_, i) =>
 );
 
 export const ROUTES: RoutesIF = {
-  TASK_LIST: {
-    headerType: HeaderType.TASK_LIST,
+  TASKS_TO_DO: {
+    headerType: HeaderType.TASKS_TO_DO,
     showBottomNav: true,
-    path: RoutesEnum.TASK_LIST,
+    path: RoutesEnum.TASKS_TO_DO,
     title: 'GAMIFY',
+  },
+  ALL_TASKS: {
+    headerType: HeaderType.DEFAULT,
+    showBottomNav: true,
+    path: RoutesEnum.ALL_TASKS,
+    title: 'All tasks',
   },
   TASK_PROGRESS: {
     headerType: HeaderType.DEFAULT,
@@ -148,8 +154,8 @@ export const ROUTES_BY_PATH = Object.values(ROUTES).reduce((acc, route) => {
 }, {} as Record<string, (typeof ROUTES)[keyof typeof ROUTES]>);
 
 export const BOTTOM_NAV_TABS = [
-  { icon: 'check', title: 'Task List', path: RoutesEnum.TASK_LIST },
-  { icon: 'stairs_2', title: 'Progress', path: RoutesEnum.PROGRESS_OVERVIEW },
+  { icon: 'check', title: 'Task List', path: RoutesEnum.TASKS_TO_DO },
+  { icon: 'dehaze', title: 'All Tasks', path: RoutesEnum.ALL_TASKS },
   { icon: 'person', title: 'Profile', path: RoutesEnum.PROFILE },
   { icon: 'settings', title: 'Settings', path: RoutesEnum.SETTINGS },
 ];

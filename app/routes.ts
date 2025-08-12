@@ -2,8 +2,9 @@ import { type RouteConfig, route, layout } from '@react-router/dev/routes';
 import { ROUTES } from './constants';
 
 const {
-  TASK_LIST: { path: TASK_LIST },
+  TASKS_TO_DO: { path: TASKS_TO_DO },
   TASK_PREVIEW: { path: TASK_PREVIEW },
+  ALL_TASKS: { path: ALL_TASKS },
   TASK_PROGRESS: { path: TASK_PROGRESS },
   CREATE_TASK: { path: CREATE_TASK },
   EDIT_TASK: { path: EDIT_TASK },
@@ -20,7 +21,8 @@ const {
 export default [
   // should be logged in to access these routes
   layout('layouts/main-app-layout/main-app-layout.tsx', [
-    route(TASK_LIST, 'pages/task-list/task-list.tsx'),
+    route(TASKS_TO_DO, 'pages/tasks-to-do/tasks-to-do.tsx'),
+    route(ALL_TASKS, 'pages/all-tasks/all-tasks.tsx'),
     route(TASK_PREVIEW, 'pages/task-preview/task-preview.tsx'),
     route(TASK_PROGRESS, 'pages/task-progress/task-progress.tsx'),
     route(LOG_SCORE, 'pages/log-score/log-score.tsx'),

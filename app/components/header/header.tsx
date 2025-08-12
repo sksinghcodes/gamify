@@ -1,13 +1,14 @@
 import ThemeSelector from '~/components/theme-selector/theme-selector';
 import styles from './header.module.css';
 import { useNavigate, useSearchParams } from 'react-router';
-import { ROUTES, ROUTES_BY_PATH } from '~/constants';
+import { BOTTOM_NAV_TABS, ROUTES, ROUTES_BY_PATH } from '~/constants';
 import { getDateString, getRelativeDayLabel } from '~/utils/date-utils';
 import { useContext, useState } from 'react';
 
 import { HeaderType } from '~/types/common-types';
 import DateSelector from '../date-selector/date-selector';
 import { Context } from '~/context-provider';
+import { classes } from '~/utils/string';
 
 const Header = () => {
   const { loading, taskListDate, setTaskListDate, deleteTask } =
@@ -20,6 +21,9 @@ const Header = () => {
 
   const adjacentDay = getRelativeDayLabel(taskListDate);
   const dateString = getDateString(taskListDate, true);
+  const hideBackButton = BOTTOM_NAV_TABS.some(
+    (bn) => bn.path === pageData.path
+  );
 
   const setNextDate = () => {
     const date = new Date(taskListDate);
@@ -35,7 +39,11 @@ const Header = () => {
 
   const backButton = () => (
     <button
-      className={`${styles.headerButton} material-symbols-outlined`}
+      className={classes(
+        styles.headerButton,
+        'material-symbols-outlined',
+        hideBackButton && styles.hide
+      )}
       onClick={() => navigate(-1)}
       disabled={loading}
     >
@@ -48,7 +56,7 @@ const Header = () => {
       deleteTask({
         taskId,
         onDelete: () => {
-          navigate(ROUTES.TASK_LIST.path);
+          navigate(ROUTES.TASKS_TO_DO.path);
         },
       });
     }
@@ -60,7 +68,7 @@ const Header = () => {
       <h1 className={styles.title}>{pageData.title}</h1>
       <ThemeSelector />
     </header>
-  ) : pageData.headerType === HeaderType.TASK_LIST ? (
+  ) : pageData.headerType === HeaderType.TASKS_TO_DO ? (
     <header className={`${styles.header} ${styles.taskList}`}>
       <button
         className={`${styles.headerButton} material-symbols-outlined`}

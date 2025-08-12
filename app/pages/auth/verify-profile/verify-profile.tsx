@@ -15,7 +15,7 @@ import {
 
 const {
   SIGN_IN: { path: SIGN_IN },
-  TASK_LIST: { path: TASK_LIST },
+  TASKS_TO_DO: { path: TASKS_TO_DO },
 } = ROUTES;
 
 export const meta = () => {
@@ -37,7 +37,7 @@ const VerifyProfile = () => {
   const location = useLocation();
 
   if (!location.state) {
-    return <Navigate to={TASK_LIST} replace />;
+    return <Navigate to={TASKS_TO_DO} replace />;
   }
 
   const handleSubmit = async (e: React.SyntheticEvent) => {

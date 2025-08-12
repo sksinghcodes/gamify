@@ -1,24 +1,20 @@
-import { Fragment, useContext, useEffect, useState } from 'react';
-import styles from './task-list.module.css';
-import { API_ENDPOINTS, ROUTES, SCHEDULE } from '~/constants';
+import { useContext, useEffect, useState } from 'react';
+import styles from './tasks-to-do.module.css';
+import { API_ENDPOINTS, ROUTES } from '~/constants';
 import { useNavigate } from 'react-router';
 import arrow from '~/assets/arrow.svg';
-import {
-  getTimeDuration,
-  to12HourFormat,
-  to_YYYY_MM_DD_Format,
-} from '~/utils/date-utils';
-import Score from '~/components/score/score';
+import { to_YYYY_MM_DD_Format } from '~/utils/date-utils';
 import Fab from '~/fab/fab';
 import type { TaskWithRecord } from '~/types/task-types';
 import { Context } from '~/context-provider';
 import api from '~/api';
+import TaskCard from '~/components/task-card/task-card';
 
 export const meta = () => {
-  return [{ title: ROUTES.TASK_LIST.title }];
+  return [{ title: ROUTES.TASKS_TO_DO.title }];
 };
 
-const TaskList = () => {
+const TasksToDo = () => {
   const navigate = useNavigate();
   const {
     loading,
@@ -88,42 +84,15 @@ const TaskList = () => {
           <div className={styles.emptyState}>No tasks available</div>
         ) : (
           tasks.map((task, i) => (
-            <Fragment key={task._id}>
-              <div
-                key={task._id}
-                className={styles.taskCard}
-                onClick={() => {
-                  navigate(
-                    `${ROUTES.LOG_SCORE.path}?taskId=${task._id}&taskDate=${dateStr}`
-                  );
-                }}
-              >
-                <div className={styles.details}>
-                  <div className={styles.taskName}>{task.name}</div>
-                  {task.schedule === SCHEDULE.TIMED ? (
-                    <div className={styles.meta}>
-                      <div>
-                        {to12HourFormat(task.scheduleStartTime)} –{' '}
-                        {to12HourFormat(task.scheduleEndTime)}
-                      </div>
-                      <div>
-                        {getTimeDuration(
-                          task.scheduleStartTime,
-                          task.scheduleEndTime
-                        )}
-                      </div>
-                    </div>
-                  ) : null}
-                </div>
-                <div className={styles.scoreWrap}>
-                  <Score
-                    score={
-                      task.taskRecord === null ? null : task.taskRecord.score
-                    }
-                  />
-                </div>
-              </div>
-            </Fragment>
+            <TaskCard
+              task={task}
+              onClick={() => {
+                navigate(
+                  `${ROUTES.LOG_SCORE.path}?taskId=${task._id}&taskDate=${dateStr}`
+                );
+              }}
+              key={task._id}
+            />
           ))
         )}
       </div>
@@ -145,4 +114,4 @@ const TaskList = () => {
   );
 };
 
-export default TaskList;
+export default TasksToDo;
