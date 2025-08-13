@@ -1,9 +1,9 @@
 import type { TaskWithRecord } from '~/types/task-types';
 import styles from './task-card.module.css';
-import { SCHEDULE } from '~/constants';
+import { CATEGORY, SCHEDULE } from '~/constants';
 import { getTimeDuration, to12HourFormat } from '~/utils/date-utils';
 import Score from '../score/score';
-import { classes } from '~/utils/string';
+import { capitalize, classes } from '~/utils/string';
 
 interface TaskCardProps {
   task: TaskWithRecord;
@@ -18,17 +18,25 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onClick, hideScore }) => {
         className={classes(styles.details, hideScore && styles.paddingRight)}
       >
         <div className={styles.taskName}>{task.name}</div>
-        {task.schedule === SCHEDULE.TIMED ? (
-          <div className={styles.meta}>
-            <div>
-              {to12HourFormat(task.scheduleStartTime)} –{' '}
-              {to12HourFormat(task.scheduleEndTime)}
-            </div>
-            <div>
-              {getTimeDuration(task.scheduleStartTime, task.scheduleEndTime)}
-            </div>
-          </div>
-        ) : null}
+
+        <div className={styles.meta}>
+          {task.category !== CATEGORY.REGULAR && (
+            <div>{capitalize(task.category.replace('_', ' '))}</div>
+          )}
+          {task.schedule === SCHEDULE.TIMED ? (
+            <>
+              {task.category !== CATEGORY.REGULAR && <>&bull;</>}
+              <div>
+                {getTimeDuration(task.scheduleStartTime, task.scheduleEndTime)}
+              </div>
+              &bull;
+              <div>
+                {to12HourFormat(task.scheduleStartTime)} –{' '}
+                {to12HourFormat(task.scheduleEndTime)}
+              </div>
+            </>
+          ) : null}
+        </div>
       </div>
       {!hideScore && (
         <div className={styles.scoreWrap}>

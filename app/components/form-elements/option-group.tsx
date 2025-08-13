@@ -109,7 +109,7 @@ const OptionGroup: React.FC<OptionGroupProps> = ({
                 value={option.id}
                 className={styles.radioGroupInput}
                 onChange={
-                  disabled ? undefined : allowMulti ? onChangeCustom : onChange
+                  disabled ? () => {} : allowMulti ? onChangeCustom : onChange
                 }
                 checked={checked}
               />
