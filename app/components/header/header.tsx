@@ -108,6 +108,11 @@ const Header = () => {
         <button
           disabled={loading}
           className={`${styles.headerButton} material-symbols-outlined`}
+          onClick={
+            taskId
+              ? () => navigate(`${ROUTES.EDIT_TASK.path}?taskId=${taskId}`)
+              : undefined
+          }
         >
           edit
         </button>

@@ -16,3 +16,7 @@
   color: var(--text-color-soft);
   line-height: 1.5;
 }
+
+.disabled {
+  opacity: 0.3;
+}

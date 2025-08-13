@@ -233,7 +233,6 @@ const LogScore: React.FC = () => {
         taskRecordData.cardioSeconds =
           Number(taskRecordData.cardioSeconds) +
           Number(taskRecordData.cardioMinutes) * 60;
-      } else if (task?.category === CATEGORY.WEIGHT_TRAINING) {
       }
 
       const taskRecordReqBody: TaskRecordReqBody = {
@@ -271,6 +270,7 @@ const LogScore: React.FC = () => {
       }
 
       if (response !== null && response.data.success && taskDate !== null) {
+        const taskRecord = response.data.taskRecord;
         setCacheByDate((pre) => {
           if (pre === null) {
             return pre;
@@ -281,12 +281,26 @@ const LogScore: React.FC = () => {
               if (t._id === task?._id) {
                 return {
                   ...t,
-                  taskRecord: response.data.taskRecord,
+                  taskRecord,
+                  allowEdit: false,
                 };
               } else {
                 return t;
               }
             }),
+          };
+        });
+        setCacheById((pre) => {
+          if (pre === null) {
+            return pre;
+          }
+          const task = pre[taskRecord.taskId];
+          if (!task) {
+            return pre;
+          }
+          return {
+            ...pre,
+            [taskRecord.taskId]: { ...task, allowEdit: false },
           };
         });
         navigate(ROUTES.TASKS_TO_DO.path);
@@ -328,10 +342,7 @@ const LogScore: React.FC = () => {
               setCacheById((pre) => {
                 return {
                   ...(pre || {}),
-                  [taskData._id]: {
-                    ...taskData,
-                    taskRecord: null,
-                  },
+                  [taskData._id]: taskData,
                 };
               });
             }

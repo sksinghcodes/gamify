@@ -24,6 +24,7 @@ interface CommonProps {
   inputLabelProps?: React.LabelHTMLAttributes<HTMLLabelElement>;
   error?: string;
   required?: boolean;
+  disabled?: boolean;
 }
 
 export interface SingleValueProps extends CommonProps {
@@ -48,6 +49,7 @@ const OptionGroup: React.FC<OptionGroupProps> = ({
   inputLabelProps,
   error,
   required,
+  disabled,
 }) => {
   const e = {
     target: {
@@ -84,7 +86,7 @@ const OptionGroup: React.FC<OptionGroupProps> = ({
   };
 
   return (
-    <div>
+    <div className={classes(disabled && styles.disabled)}>
       {label ? <Label required={required}>{label}</Label> : null}
       <div className={styles.radioGroupOptions}>
         {options.map((option) => {
@@ -106,7 +108,9 @@ const OptionGroup: React.FC<OptionGroupProps> = ({
                 name={name}
                 value={option.id}
                 className={styles.radioGroupInput}
-                onChange={allowMulti ? onChangeCustom : onChange}
+                onChange={
+                  disabled ? undefined : allowMulti ? onChangeCustom : onChange
+                }
                 checked={checked}
               />
               {option.label}

@@ -169,6 +169,7 @@ export const API_ENDPOINTS = {
   CHECK_UNIQUE: '/user/check-unique',
   VERIFY_PROFILE: '/user/verify-profile',
   CREATE_TASK: '/task/create',
+  UPDATE_TASK: '/task/update',
   DELETE_TASK: '/task/delete',
   GET_ONE_TASK: '/task/get-one',
   GET_ALL_TASKS: '/task/get-all',

@@ -21,6 +21,7 @@ import type {
   TaskFormStep1,
   TaskFormStep2,
   TaskFormStep3,
+  TaskWithRecord,
 } from '~/types/task-types';
 import styles from './task-form.module.css';
 import TimeSelector from '~/components/time-selector/time-selector';
@@ -69,19 +70,24 @@ import Modal from '../modal/modal';
 import StrategyInfo from '../stratefy-info/stratefy-info';
 import api from '~/api';
 import { Context } from '~/context-provider';
-import { useNavigate } from 'react-router';
+import { useNavigate, useSearchParams } from 'react-router';
+import Spinner from '../spinner/spinner';
+import type { AxiosResponse } from 'axios';
 
 const TaskForm: React.FC<{ isEditMode: boolean }> = ({ isEditMode }) => {
   const navigate = useNavigate();
   const [currentMonth, setCurrentMonth] = useState(0);
   const [showInvalidDateOption, setShowInvalidDateOption] = useState(false);
   const [showStrategyGuide, setShowStrategyGuide] = useState(false);
-  const { loading, setLoading, setCacheByDate } = useContext(Context);
-
-  useEffect(() => {
-    return () => setLoading(false);
-  }, []);
-
+  const [blockEditing, setBlockEditing] = useState(false);
+  const {
+    loading,
+    setLoading,
+    setCacheByDate,
+    cacheById,
+    setCacheById,
+    setAllTasks,
+  } = useContext(Context);
   const [taskStep1, setTaskStep1] =
     useState<TaskFormStep1>(INITIAL_TASK_STEP_1);
   const [taskStep2, setTaskStep2] =
@@ -91,6 +97,80 @@ const TaskForm: React.FC<{ isEditMode: boolean }> = ({ isEditMode }) => {
   const [openSelector, setOpenSelector] = useState(false);
   const [showDateSelector, setShowDateSelector] = useState(false);
   const [step, setStep] = useState(1);
+  const [searchParams] = useSearchParams();
+  const taskId = searchParams.get('taskId');
+
+  useEffect(() => {
+    if (!isEditMode || !taskId) {
+      return;
+    }
+
+    const setTaskFormData = (task: TaskWithRecord) => {
+      setBlockEditing(!task.allowEdit);
+
+      setTaskStep1({
+        name: getFormValues(task.name),
+        description: getFormValues(task.description || ''),
+        category: getFormValues(task.category),
+      });
+
+      setTaskStep2({
+        recurrence: getFormValues(task.recurrence),
+        recurrenceValues: getFormValues(task.recurrenceValues),
+        recurrenceInvalidDateStrategy: getFormValues(
+          task.recurrenceInvalidDateStrategy
+        ),
+      });
+
+      setTaskStep3({
+        schedule: getFormValues(task.schedule),
+        scheduleStartTime: getFormValues(task.scheduleStartTime),
+        scheduleEndTime: getFormValues(task.scheduleEndTime),
+        autoRemove: getFormValues(task.autoRemove),
+        autoRemoveDate: getFormValues(task.autoRemoveDate),
+      });
+    };
+
+    if (cacheById && cacheById[taskId]) {
+      const task = cacheById[taskId];
+      setTaskFormData(task);
+      return;
+    }
+
+    const controller = new AbortController();
+    setLoading(true);
+
+    api
+      .get(API_ENDPOINTS.GET_ONE_TASK, {
+        signal: controller.signal,
+        params: {
+          taskId,
+        },
+      })
+      .then((response) => {
+        if (response.data?.success) {
+          const task = response.data.task;
+          setCacheById((pre) => {
+            const obj = { ...(pre || {}) };
+            obj[task._id] = task;
+            return obj;
+          });
+          setTaskFormData(task);
+        }
+      })
+      .catch((error) => {
+        console.error('Error fetching task', error);
+      })
+      .finally(() => setLoading(false));
+
+    return () => {
+      controller.abort();
+    };
+  }, []);
+
+  useEffect(() => {
+    return () => setLoading(false);
+  }, []);
 
   const handleStep1Change = (e: CustomChangeEvent) => {
     const { name, value } = e.target;
@@ -181,7 +261,7 @@ const TaskForm: React.FC<{ isEditMode: boolean }> = ({ isEditMode }) => {
     }
   };
 
-  // TDOD: SKIP is removed on values change
+  // TODO: SKIP is removed on values change
 
   const handleStep2Submit = () => {
     const { isValid } = validate({
@@ -295,15 +375,31 @@ const TaskForm: React.FC<{ isEditMode: boolean }> = ({ isEditMode }) => {
     }
     setLoading(true);
     try {
+      if (isEditMode && !taskId) {
+        return;
+      }
+
       const taskForm: TaskFormState = {
         ...taskStep1,
         ...taskStep2,
         ...taskStep3,
       };
       const taskData = extractValues(taskForm);
-      const response = await api.post(API_ENDPOINTS.CREATE_TASK, taskData);
-      if (response.data.success) {
+      let response: AxiosResponse<any, any> | null = null;
+
+      if (isEditMode) {
+        response = await api.patch(API_ENDPOINTS.UPDATE_TASK, taskData, {
+          params: {
+            taskId,
+          },
+        });
+      } else {
+        response = await api.post(API_ENDPOINTS.CREATE_TASK, taskData);
+      }
+
+      if (response?.data?.success) {
         setCacheByDate(null);
+        setAllTasks(null);
         navigate(ROUTES.TASKS_TO_DO.path);
       }
     } catch (e) {
@@ -315,266 +411,307 @@ const TaskForm: React.FC<{ isEditMode: boolean }> = ({ isEditMode }) => {
 
   return (
     <div className={styles.taskFormWrapper}>
-      {step === 1 && (
-        <div className={styles.stepOneWrap}>
-          <InputText
-            type="text"
-            value={taskStep1.name.value}
-            onChange={handleStep1Change}
-            placeholder="eg: Read a book"
-            label="Name"
-            id="name"
-            name="name"
-            error={taskStep1.name.error}
-            required={true}
-          />
-
-          <InputText
-            type="textarea"
-            value={taskStep1.description.value}
-            onChange={handleStep1Change}
-            placeholder="Describe the task... (Optional)"
-            label="Description"
-            id="description"
-            name="description"
-            error={taskStep1.description.error}
-          />
-
-          <OptionGroup
-            label="What type of task is this?"
-            value={taskStep1.category.value}
-            onChange={handleStep1Change}
-            name="category"
-            options={CATEGORY_OPTIONS}
-          />
-          {<InfoText info={CATEGORY_INFO[taskStep1.category.value]} />}
+      {isEditMode && loading ? (
+        <div className={styles.spinnerWrap}>
+          <Spinner />
         </div>
-      )}
-
-      {step === 2 && (
+      ) : isEditMode && !taskId ? (
+        'Task id not found'
+      ) : (
         <>
-          <div className={styles.stepOneWrap}>
-            <OptionGroup
-              label="How often are you going to do it?"
-              name="recurrence"
-              value={taskStep2.recurrence.value}
-              onChange={(e) => handleStep2Change(e)}
-              options={RECURRENCE_OPTIONS}
-            />
+          {step === 1 && (
+            <div className={styles.stepOneWrap}>
+              <InputText
+                type="text"
+                value={taskStep1.name.value}
+                onChange={handleStep1Change}
+                placeholder="eg: Read a book"
+                label="Name"
+                id="name"
+                name="name"
+                error={taskStep1.name.error}
+                required={true}
+              />
 
-            {taskStep2.recurrence.value === RECURRENCE.WEEKLY ? (
-              <OptionGroup
-                label="On what days?"
-                name="recurrenceValues"
-                value={taskStep2.recurrenceValues.value || []}
-                onChange={(e) => handleStep2Change(e)}
-                options={WEEK_OPTIONS}
-                allowMulti={true}
-                error={taskStep2.recurrenceValues.error}
-                required={true}
+              <InputText
+                type="textarea"
+                value={taskStep1.description.value}
+                onChange={handleStep1Change}
+                placeholder="Describe the task... (Optional)"
+                label="Description"
+                id="description"
+                name="description"
+                error={taskStep1.description.error}
               />
-            ) : taskStep2.recurrence.value === RECURRENCE.MONTHLY ? (
+
+              {blockEditing && (
+                <InfoText info="Below field can't be changed since the task already has a recorded score now" />
+              )}
               <OptionGroup
-                label="On what dates every month?"
-                name="recurrenceValues"
-                value={taskStep2.recurrenceValues.value || []}
-                onChange={(e) => handleStep2Change(e)}
-                options={DATE_OPTIONS}
-                allowMulti={true}
-                inputLabelProps={{
-                  className: styles.dateOption,
-                }}
-                error={taskStep2.recurrenceValues.error}
-                required={true}
+                label="What type of task is this?"
+                value={taskStep1.category.value}
+                onChange={handleStep1Change}
+                name="category"
+                options={CATEGORY_OPTIONS}
+                disabled={blockEditing}
               />
-            ) : taskStep2.recurrence.value === RECURRENCE.YEARLY ? (
-              <>
-                <div>
-                  <Label required={true}>On what dates every year?</Label>
-                  <div
-                    className={styles.monthWrap}
-                    onClick={() => setOpenSelector(true)}
-                  >
-                    {MONTHS[currentMonth as MonthIndex]}
-                    <span
-                      className={classes(
-                        styles.monthText,
-                        'material-symbols-outlined'
-                      )}
-                    >
-                      expand_all
-                    </span>
-                  </div>
-                  <MonthSelectorModal
-                    open={openSelector}
-                    setOpen={setOpenSelector}
-                    value={currentMonth as MonthIndex}
-                    onChange={(e) => setCurrentMonth(e.target.value)}
-                    name="currentMonth"
-                  />
+              <InfoText
+                info={CATEGORY_INFO[taskStep1.category.value]}
+                disabled={blockEditing}
+              />
+            </div>
+          )}
+
+          {step === 2 && (
+            <>
+              <div className={styles.stepOneWrap}>
+                {blockEditing && (
+                  <InfoText info="Below field can't be changed since the task already has a recorded score now" />
+                )}
+
+                <OptionGroup
+                  label="How often are you going to do it?"
+                  name="recurrence"
+                  value={taskStep2.recurrence.value}
+                  onChange={(e) => handleStep2Change(e)}
+                  options={RECURRENCE_OPTIONS}
+                  disabled={blockEditing}
+                />
+
+                {taskStep2.recurrence.value === RECURRENCE.WEEKLY ? (
                   <OptionGroup
+                    label="On what days?"
                     name="recurrenceValues"
-                    value={extractMonthlyDates(
-                      currentMonth,
-                      taskStep2.recurrenceValues.value || []
-                    )}
-                    onChange={(e) =>
-                      toYearlyDatesValues(
-                        currentMonth as MonthIndex,
-                        e.target.value,
-                        taskStep2.recurrenceValues.value || []
-                      )
-                    }
-                    options={getDateOptions(currentMonth as MonthIndex)}
+                    value={taskStep2.recurrenceValues.value || []}
+                    onChange={(e) => handleStep2Change(e)}
+                    options={WEEK_OPTIONS}
+                    allowMulti={true}
+                    error={taskStep2.recurrenceValues.error}
+                    required={true}
+                    disabled={blockEditing}
+                  />
+                ) : taskStep2.recurrence.value === RECURRENCE.MONTHLY ? (
+                  <OptionGroup
+                    label="On what dates every month?"
+                    name="recurrenceValues"
+                    value={taskStep2.recurrenceValues.value || []}
+                    onChange={(e) => handleStep2Change(e)}
+                    options={DATE_OPTIONS}
                     allowMulti={true}
                     inputLabelProps={{
                       className: styles.dateOption,
                     }}
                     error={taskStep2.recurrenceValues.error}
+                    required={true}
+                    disabled={blockEditing}
+                  />
+                ) : taskStep2.recurrence.value === RECURRENCE.YEARLY ? (
+                  <>
+                    <div>
+                      <Label required={true} disabled={blockEditing}>
+                        On what dates every year?
+                      </Label>
+                      <div
+                        className={classes(
+                          styles.monthWrap,
+                          blockEditing && styles.disabled
+                        )}
+                        onClick={
+                          blockEditing ? undefined : () => setOpenSelector(true)
+                        }
+                      >
+                        {MONTHS[currentMonth as MonthIndex]}
+                        <span
+                          className={classes(
+                            styles.monthText,
+                            'material-symbols-outlined'
+                          )}
+                        >
+                          expand_all
+                        </span>
+                      </div>
+                      <MonthSelectorModal
+                        open={openSelector}
+                        setOpen={setOpenSelector}
+                        value={currentMonth as MonthIndex}
+                        onChange={(e) => setCurrentMonth(e.target.value)}
+                        name="currentMonth"
+                      />
+                      <OptionGroup
+                        name="recurrenceValues"
+                        value={extractMonthlyDates(
+                          currentMonth,
+                          taskStep2.recurrenceValues.value || []
+                        )}
+                        onChange={(e) =>
+                          toYearlyDatesValues(
+                            currentMonth as MonthIndex,
+                            e.target.value,
+                            taskStep2.recurrenceValues.value || []
+                          )
+                        }
+                        options={getDateOptions(currentMonth as MonthIndex)}
+                        allowMulti={true}
+                        inputLabelProps={{
+                          className: styles.dateOption,
+                        }}
+                        error={taskStep2.recurrenceValues.error}
+                        disabled={blockEditing}
+                      />
+                    </div>
+                    {!!(taskStep2.recurrenceValues.value || []).length && (
+                      <div>
+                        <Label>Selected Dates:</Label>
+                        <div className={styles.dateValues}>
+                          {(taskStep2.recurrenceValues.value || []).map(
+                            (date) => {
+                              const monthIndex =
+                                getMonthIndexFromYearlyDate(date);
+                              const monthlyDate = getDateFromYearlyDate(date);
+                              return (
+                                <span key={date} className={styles.dateValue}>
+                                  {MONTHS_3_LETTER[monthIndex]} {monthlyDate}
+                                </span>
+                              );
+                            }
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </>
+                ) : null}
+
+                {taskStep2.recurrenceInvalidDateStrategy.value !== null &&
+                  showInvalidDateOption && (
+                    <>
+                      <OptionGroup
+                        label="Choose missing date strategy"
+                        name="recurrenceInvalidDateStrategy"
+                        value={taskStep2.recurrenceInvalidDateStrategy.value}
+                        onChange={(e) => handleStep2Change(e)}
+                        options={INVALID_DATE_STRATEFY_OPTIONS}
+                        required={true}
+                        disabled={blockEditing}
+                      />
+                      <InfoText
+                        info={
+                          INVALID_DATE_STRATEGY_INFO[
+                            taskStep2.recurrenceInvalidDateStrategy
+                              .value as InvalidDateStrategyEnum
+                          ]
+                        }
+                        onClick={
+                          blockEditing
+                            ? undefined
+                            : () => setShowStrategyGuide(true)
+                        }
+                        disabled={blockEditing}
+                      />
+                      <Modal
+                        title="Missing date strategy guide"
+                        open={showStrategyGuide}
+                        onClose={() => setShowStrategyGuide(false)}
+                      >
+                        <StrategyInfo />
+                      </Modal>
+                    </>
+                  )}
+              </div>
+            </>
+          )}
+
+          {step === 3 && (
+            <div className={styles.stepOneWrap}>
+              <OptionGroup
+                label="When are you going to do it?"
+                name="schedule"
+                value={taskStep3.schedule.value}
+                onChange={handleStep3Change}
+                options={SCHEDULE_OPTIONS}
+              />
+
+              {taskStep3.schedule.value === SCHEDULE.TIMED && (
+                <div className={styles.timeRow}>
+                  <TimeSelector
+                    value={taskStep3.scheduleStartTime.value}
+                    onChange={handleStep3Change}
+                    name="scheduleStartTime"
+                    error={taskStep3.scheduleStartTime.error}
+                    label="From time"
+                    required={true}
+                  />
+
+                  <TimeSelector
+                    value={taskStep3.scheduleEndTime.value}
+                    onChange={handleStep3Change}
+                    name="scheduleEndTime"
+                    error={taskStep3.scheduleEndTime.error}
+                    label="To time"
+                    required={true}
                   />
                 </div>
-                {!!(taskStep2.recurrenceValues.value || []).length && (
-                  <div>
-                    <Label>Selected Dates:</Label>
-                    <div className={styles.dateValues}>
-                      {(taskStep2.recurrenceValues.value || []).map((date) => {
-                        const monthIndex = getMonthIndexFromYearlyDate(date);
-                        const monthlyDate = getDateFromYearlyDate(date);
-                        return (
-                          <span key={date} className={styles.dateValue}>
-                            {MONTHS_3_LETTER[monthIndex]} {monthlyDate}
-                          </span>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
-              </>
-            ) : null}
+              )}
 
-            {taskStep2.recurrenceInvalidDateStrategy.value !== null &&
-              showInvalidDateOption && (
+              <OptionGroup
+                label="Automatically remove this task later?"
+                name="autoRemove"
+                value={taskStep3.autoRemove.value}
+                onChange={handleStep3Change}
+                options={[
+                  { id: AUTO_REMOVE.NEVER, label: 'No' },
+                  {
+                    id: AUTO_REMOVE.AFTER_GIVEN_DATE,
+                    label: 'Yes',
+                  },
+                ]}
+              />
+
+              {taskStep3.autoRemove.value === AUTO_REMOVE.AFTER_GIVEN_DATE && (
                 <>
-                  <OptionGroup
-                    label="Choose missing date strategy"
-                    name="recurrenceInvalidDateStrategy"
-                    value={taskStep2.recurrenceInvalidDateStrategy.value}
-                    onChange={(e) => handleStep2Change(e)}
-                    options={INVALID_DATE_STRATEFY_OPTIONS}
-                    required
+                  <InputText
+                    label="When?"
+                    type="text"
+                    placeholder="Select Date"
+                    name="select-date"
+                    readOnly={true}
+                    required={true}
+                    value={getDateString(taskStep3.autoRemoveDate.value)}
+                    error={taskStep3.autoRemoveDate.error}
+                    onClick={() => setShowDateSelector(true)}
                   />
-                  <InfoText
-                    info={
-                      INVALID_DATE_STRATEGY_INFO[
-                        taskStep2.recurrenceInvalidDateStrategy
-                          .value as InvalidDateStrategyEnum
-                      ]
+                  <DateSelector
+                    value={taskStep3.autoRemoveDate.value}
+                    onChange={(date) =>
+                      handleStep3Change({
+                        target: { name: 'autoRemoveDate', value: date },
+                      })
                     }
-                    onClick={() => setShowStrategyGuide(true)}
+                    open={showDateSelector}
+                    setOpen={setShowDateSelector}
                   />
-                  <Modal
-                    title="Missing date strategy guide"
-                    open={showStrategyGuide}
-                    onClose={() => setShowStrategyGuide(false)}
-                  >
-                    <StrategyInfo />
-                  </Modal>
                 </>
               )}
-          </div>
-        </>
-      )}
-
-      {step === 3 && (
-        <div className={styles.stepOneWrap}>
-          <OptionGroup
-            label="When are you going to do it?"
-            name="schedule"
-            value={taskStep3.schedule.value}
-            onChange={handleStep3Change}
-            options={SCHEDULE_OPTIONS}
-          />
-
-          {taskStep3.schedule.value === SCHEDULE.TIMED && (
-            <div className={styles.timeRow}>
-              <TimeSelector
-                value={taskStep3.scheduleStartTime.value}
-                onChange={handleStep3Change}
-                name="scheduleStartTime"
-                error={taskStep3.scheduleStartTime.error}
-                label="From time"
-                required={true}
-              />
-
-              <TimeSelector
-                value={taskStep3.scheduleEndTime.value}
-                onChange={handleStep3Change}
-                name="scheduleEndTime"
-                error={taskStep3.scheduleEndTime.error}
-                label="To time"
-                required={true}
-              />
             </div>
           )}
 
-          <OptionGroup
-            label="Automatically remove this task later?"
-            name="autoRemove"
-            value={taskStep3.autoRemove.value}
-            onChange={handleStep3Change}
-            options={[
-              { id: AUTO_REMOVE.NEVER, label: 'No' },
-              {
-                id: AUTO_REMOVE.AFTER_GIVEN_DATE,
-                label: 'Yes',
-              },
-            ]}
-          />
+          <div className={styles.fade}></div>
 
-          {taskStep3.autoRemove.value === AUTO_REMOVE.AFTER_GIVEN_DATE && (
-            <>
-              <InputText
-                label="When?"
-                type="text"
-                placeholder="Select Date"
-                name="select-date"
-                readOnly={true}
-                required={true}
-                value={getDateString(taskStep3.autoRemoveDate.value)}
-                error={taskStep3.autoRemoveDate.error}
-                onClick={() => setShowDateSelector(true)}
-              />
-              <DateSelector
-                value={taskStep3.autoRemoveDate.value}
-                onChange={(date) =>
-                  handleStep3Change({
-                    target: { name: 'autoRemoveDate', value: date },
-                  })
-                }
-                open={showDateSelector}
-                setOpen={setShowDateSelector}
-              />
-            </>
+          {step !== 1 && (
+            <Fab
+              disabled={loading}
+              position={FAB_POSITION.LEFT}
+              fabType={FAB_TYPE.SECONDARY}
+              onClick={() => setStep(step - 1)}
+            >
+              west
+            </Fab>
           )}
-        </div>
+
+          <Fab loading={loading} disabled={loading} onClick={handleNextButton}>
+            {step === 3 ? 'done' : 'east'}
+          </Fab>
+        </>
       )}
-
-      <div className={styles.fade}></div>
-
-      {step !== 1 && (
-        <Fab
-          disabled={loading}
-          position={FAB_POSITION.LEFT}
-          fabType={FAB_TYPE.SECONDARY}
-          onClick={() => setStep(step - 1)}
-        >
-          west
-        </Fab>
-      )}
-
-      <Fab loading={loading} disabled={loading} onClick={handleNextButton}>
-        {step === 3 ? 'done' : 'east'}
-      </Fab>
     </div>
   );
 };

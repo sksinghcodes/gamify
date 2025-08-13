@@ -196,6 +196,7 @@ export interface TaskWithRecord extends TaskReqBody {
   _id: string;
   createdAt: string;
   taskRecord: null | TaskRecord;
+  allowEdit: boolean;
 }
 
 export type TaskFormState = TaskFormStep1 & TaskFormStep2 & TaskFormStep3;

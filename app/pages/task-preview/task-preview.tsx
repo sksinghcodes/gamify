@@ -60,10 +60,7 @@ const TaskPreview: React.FC = () => {
             setTask(response.data.task);
             setCacheById((pre) => {
               const obj = { ...(pre || {}) };
-              obj[response.data.task._id] = {
-                ...response.data.task,
-                taskRecord: null,
-              };
+              obj[response.data.task._id] = response.data.task;
               return obj;
             });
           }

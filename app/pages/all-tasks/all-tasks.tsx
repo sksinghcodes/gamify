@@ -36,12 +36,7 @@ const AllTasks = () => {
       .then((response) => {
         if (response.data?.success && Array.isArray(response.data?.tasks)) {
           setLoading(false);
-          const tasks: TaskWithRecord[] = response.data.tasks.map(
-            (t: TaskWithRecord) => ({
-              ...t,
-              taskRecord: null,
-            })
-          );
+          const tasks: TaskWithRecord[] = response.data.tasks;
           setAllTasks(tasks);
           setHideAll(false);
           setCacheById((pre) => {
@@ -75,28 +70,26 @@ const AllTasks = () => {
       ) : allTasks === null || !allTasks?.length ? (
         <div className={styles.emptyState}>No tasks available</div>
       ) : (
-        <>
-          <div className={styles.taskList}>
-            {allTasks.map((task, i) => (
-              <TaskCard
-                task={task}
-                onClick={() => {
-                  navigate(`${ROUTES.TASK_PREVIEW.path}?taskId=${task._id}`);
-                }}
-                key={task._id}
-                hideScore={true}
-              />
-            ))}
-          </div>
-          <Fab
-            disabled={loading}
-            className={styles.fab}
-            onClick={() => navigate(ROUTES.CREATE_TASK.path)}
-          >
-            add
-          </Fab>
-        </>
+        <div className={styles.taskList}>
+          {allTasks.map((task, i) => (
+            <TaskCard
+              task={task}
+              onClick={() => {
+                navigate(`${ROUTES.TASK_PREVIEW.path}?taskId=${task._id}`);
+              }}
+              key={task._id}
+              hideScore={true}
+            />
+          ))}
+        </div>
       )}
+      <Fab
+        disabled={loading}
+        className={styles.fab}
+        onClick={() => navigate(ROUTES.CREATE_TASK.path)}
+      >
+        add
+      </Fab>
     </div>
   );
 };
