@@ -20,33 +20,31 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onClick, hideScore }) => {
         <div className={styles.taskName}>{task.name}</div>
 
         {task.category !== CATEGORY.REGULAR ||
-          (task.schedule === SCHEDULE.TIMED && (
-            <div className={styles.meta}>
-              {task.category !== CATEGORY.REGULAR && (
+        task.schedule === SCHEDULE.TIMED ? (
+          <div className={styles.meta}>
+            {task.category !== CATEGORY.REGULAR && (
+              <div>
+                {capitalize((task.category as CategoryEnum).replace('_', ' '))}
+              </div>
+            )}
+            {task.schedule === SCHEDULE.TIMED ? (
+              <>
+                {task.category !== CATEGORY.REGULAR && <>&bull;</>}
                 <div>
-                  {capitalize(
-                    (task.category as CategoryEnum).replace('_', ' ')
+                  {getTimeDuration(
+                    task.scheduleStartTime,
+                    task.scheduleEndTime
                   )}
                 </div>
-              )}
-              {task.schedule === SCHEDULE.TIMED ? (
-                <>
-                  {task.category !== CATEGORY.REGULAR && <>&bull;</>}
-                  <div>
-                    {getTimeDuration(
-                      task.scheduleStartTime,
-                      task.scheduleEndTime
-                    )}
-                  </div>
-                  &bull;
-                  <div>
-                    {to12HourFormat(task.scheduleStartTime)} –{' '}
-                    {to12HourFormat(task.scheduleEndTime)}
-                  </div>
-                </>
-              ) : null}
-            </div>
-          ))}
+                &bull;
+                <div>
+                  {to12HourFormat(task.scheduleStartTime)} –{' '}
+                  {to12HourFormat(task.scheduleEndTime)}
+                </div>
+              </>
+            ) : null}
+          </div>
+        ) : null}
       </div>
       {!hideScore && (
         <div className={styles.scoreWrap}>
