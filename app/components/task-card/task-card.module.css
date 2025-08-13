@@ -16,6 +16,7 @@
 
 .paddingRight {
   padding-right: 1rem;
+  border-radius: 0.5rem;
 }
 
 .taskName {
