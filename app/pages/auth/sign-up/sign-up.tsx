@@ -212,7 +212,7 @@ const SignUp = () => {
       if (!data.success && data.validation) {
         const updatedValidation = { ...signUpData };
 
-        updatedValidation.email.error = data.validation.username?.isUnique
+        updatedValidation.email.error = data.validation.email?.isUnique
           ? ''
           : 'Email is taken';
         updatedValidation.username.error = data.validation.username?.isUnique
@@ -223,7 +223,7 @@ const SignUp = () => {
           const keyTyped = key as keyof SignUpFormState;
           updatedValidation[keyTyped] = {
             ...updatedValidation[keyTyped],
-            error: value.errorMessage,
+            error: value.errorMessage || updatedValidation[keyTyped].error,
           };
         });
 
